@@ -1,121 +1,140 @@
 import 'package:flutter/material.dart';
 
+// TODO: Nanti kalau folder anak-anak udah di-merge, tinggal import ke sini:
+// import 'ida/screens/splash_screen.dart';
+// import 'ida/screens/login_screen.dart';
+// import 'bagus/screens/dashboard_feed_screen.dart';
+
 void main() {
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(const BantuInApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class BantuInApp extends StatelessWidget {
+  const BantuInApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Bantu.In',
+      debugShowCheckedModeBanner: false,
+
+      // 1. Konfigurasi Tema Aplikasi (Sesuai Panduan UI & Psikologi Warna Biru di Proposal)
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF1E3A8A), // Biru Utama (Corporate/Trust)
+          primary: const Color(0xFF1E3A8A),
+          secondary: const Color(0xFF3B82F6), // Biru Terang untuk Aksen/Tombol
+          background: const Color(
+            0xFFF8FAFC,
+          ), // Background abu-abu sangat muda/bersih
+        ),
+        // Standarisasi font dan komponen UI global lainnya bisa ditaruh di sini
+        scaffoldBackgroundColor: const Color(0xFFF8FAFC),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+
+      // 2. Alur Awal Aplikasi (Awal dibuka lari ke Splash Screen milik Ida)
+      initialRoute: '/',
+
+      // 3. Manajemen Main Routing Aplikasi (Tempat Gabungin Kerja Kelompok)
+      routes: {
+        '/': (context) =>
+            const DummySplashScreen(), // Nating diganti: const SplashScreen()
+        '/login': (context) =>
+            const DummyLoginScreen(), // Nanti diganti: const LoginScreen()
+        // Route Fitur Kamu (Bagus)
+        '/dashboard-feed': (context) => const DummyDashboardFeed(),
+
+        // Route Fitur Dava, Danela, Danelas, Yuliana bisa didaftarin di bawah ini nanti:
+        // '/task-tracking': (context) => const TaskTrackingScreen(),
+        // '/chat-room': (context) => const ChatRoomScreen(),
+        // '/profile-settings': (context) => const ProfileScreen(),
+        // '/admin-panel': (context) => const AdminPanelScreen(),
+      },
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+// =========================================================================
+// WIDGET DUMMY TEMPORARY (Biar Project Gak Error Saat Pertama Kali Di-run)
+// Nanti kalau file asli dari tiap anggota kelompok udah jadi, widget di bawah ini tinggal dihapus.
+// =========================================================================
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-
+class DummySplashScreen extends StatelessWidget {
+  const DummySplashScreen({super.key});
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: .center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+            // Visual filosofis jabat tangan (dummy icon)
+            const Icon(
+              Icons.handshake_rounded,
+              size: 100,
+              color: Color(0xFF1E3A8A),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Bantu.In',
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1E3A8A),
+              ),
+            ),
+            const Text(
+              'On-Demand Service Platform',
+              style: TextStyle(color: Colors.grey),
+            ),
+            const SizedBox(height: 40),
+            ElevatedButton(
+              onPressed: () =>
+                  Navigator.pushReplacementNamed(context, '/login'),
+              child: const Text('Simulasi Masuk ke Login Gateway'),
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+    );
+  }
+}
+
+class DummyLoginScreen extends StatelessWidget {
+  const DummyLoginScreen({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Single Login Gateway')),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () =>
+              Navigator.pushReplacementNamed(context, '/dashboard-feed'),
+          child: const Text(
+            'Simulasi Login Berhasil -> Masuk Dashboard (Feed Tugas)',
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class DummyDashboardFeed extends StatelessWidget {
+  const DummyDashboardFeed({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Bantu.In - Feed Lowongan Tugas'),
+        backgroundColor: const Color(0xFF1E3A8A),
+        foregroundColor: Colors.white,
+      ),
+      body: const Center(
+        child: Text(
+          'Tempat Tugas Utama Kamu (Bagus): CRUD Postingan & Feed Lowongan',
+        ),
       ),
     );
   }
