@@ -22,7 +22,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
         toolbarHeight: 80,
         actions: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15),
+            padding: EdgeInsets.symmetric(horizontal: 15),
             child: Container(
               height: 40,
               width: 40,
@@ -37,7 +37,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
         leading: IconButton(onPressed: () {}, icon: Icon(Icons.menu)),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(18.0),
+        padding: EdgeInsets.all(18.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -59,7 +59,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
+              padding: EdgeInsets.symmetric(vertical: 10),
               child: Container(
                 height: 150,
                 width: double.infinity,
@@ -91,7 +91,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
+              padding: EdgeInsets.symmetric(vertical: 10),
               child: Container(
                 width: double.infinity,
                 padding: EdgeInsets.all(16),
@@ -106,20 +106,15 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                     Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(14.0),
+                          padding: EdgeInsets.all(14.0),
                           decoration: BoxDecoration(
-                            color: const Color(
-                              0xFFE0E7FF,
-                            ), // Warna ungu/biru muda soft
+                            color: Color(0xFFE0E7FF),
                             borderRadius: BorderRadius.circular(16.0),
                           ),
                           child: Icon(
-                            Icons
-                                .cleaning_services_rounded, // Ganti ikon sesuai kebutuhan
+                            Icons.cleaning_services_rounded,
                             size: 32.0,
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.primary, // Biru utama
+                            color: Theme.of(context).colorScheme.primary,
                           ),
                         ),
                         SizedBox(width: 16.0),
@@ -142,12 +137,10 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                                   vertical: 6,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: const Color(
-                                    0xFF1D4ED8,
-                                  ), // Biru status tegas
+                                  color: Color(0xFF1D4ED8),
                                   borderRadius: BorderRadius.circular(20.0),
                                 ),
-                                child: const Row(
+                                child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Icon(
@@ -172,25 +165,23 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16.0),
+                    SizedBox(height: 16.0),
 
-                    const Divider(color: Color(0xFFE2E8F0), thickness: 1.5),
+                    Divider(color: Color(0xFFE2E8F0), thickness: 1.5),
 
-                    const SizedBox(height: 12.0),
+                    SizedBox(height: 12.0),
 
                     Row(
                       children: [
-                        // 1. Foto Profil Bulat
-                        const CircleAvatar(
+                        CircleAvatar(
                           radius: 20.0,
                           backgroundImage: NetworkImage(
-                            'https://placekitty.com/100/100', // Gantilah dengan path/asset gambar aslimu
+                            'https://placekitty.com/100/100',
                           ),
                         ),
-                        const SizedBox(width: 12.0),
+                        SizedBox(width: 12.0),
 
-                        // 2. Nama Helper
-                        const Expanded(
+                        Expanded(
                           child: Text(
                             'Nama Helper',
                             style: TextStyle(
@@ -201,17 +192,13 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                           ),
                         ),
 
-                        // 3. Tombol Chat (Ikon Pesan Kanan)
                         IconButton(
                           icon: Icon(
                             Icons.chat_bubble_outline_rounded,
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.primary, // Otomatis Biru Utama
+                            color: Theme.of(context).colorScheme.primary,
                             size: 26.0,
                           ),
                           onPressed: () {
-                            // Aksi ketika diklik langsung menerbangkan ke fitur Chat milik Danela
                             Navigator.pushNamed(context, '/chat-room');
                           },
                         ),
@@ -233,7 +220,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
               top: BorderSide(color: Colors.grey.withAlpha(50), width: 1.5),
             ),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -271,15 +258,14 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
     return GestureDetector(
       onTap: () {
         setState(() {
-          _currentIndex = index; // Ganti halaman aktif saat diklik
+          _currentIndex = index;
         });
       },
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        duration: Duration(milliseconds: 200),
+        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         decoration: BoxDecoration(
-          // Jika aktif, kasih warna background biru utama kelompok kita
-          color: isActive ? const Color(0xFF1E3A8A) : Colors.transparent,
+          color: isActive ? Color(0xFF1E3A8A) : Colors.transparent,
           borderRadius: BorderRadius.circular(16.0),
         ),
         child: Column(
@@ -287,11 +273,10 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
           children: [
             Icon(
               icon,
-              // Jika aktif warna ikon putih, jika tidak aktif warna hitam/abu
               color: isActive ? Colors.white : Colors.black87,
               size: 26.0,
             ),
-            const SizedBox(height: 4.0),
+            SizedBox(height: 4.0),
             Text(
               label,
               style: TextStyle(
@@ -308,27 +293,20 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
 
   Widget _buildPostButton() {
     return GestureDetector(
-      onTap: () {
-        // Aksi ketika klik tombol tambah tugas baru
-      },
+      onTap: () {},
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            padding: const EdgeInsets.all(8.0),
+            padding: EdgeInsets.all(8.0),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(
-                color: const Color(
-                  0xFF3B82F6,
-                ), // Biru terang sesuai secondary theme kita
-                width: 2.0,
-              ),
+              border: Border.all(color: Color(0xFF3B82F6), width: 2.0),
             ),
-            child: const Icon(Icons.add, color: Color(0xFF3B82F6), size: 26.0),
+            child: Icon(Icons.add, color: Color(0xFF3B82F6), size: 26.0),
           ),
-          const SizedBox(height: 4.0),
-          const Text(
+          SizedBox(height: 4.0),
+          Text(
             'Post',
             style: TextStyle(
               fontSize: 12.0,

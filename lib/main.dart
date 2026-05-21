@@ -1,3 +1,4 @@
+import 'package:bantuin/bagus/screens/dashboard_helper_screen.dart';
 import 'package:flutter/material.dart';
 import 'bagus/screens/dashboard_user_screen.dart';
 
@@ -26,7 +27,7 @@ class BantuInApp extends StatelessWidget {
       ),
       initialRoute: '/',
 
-      routes: {'/': (context) => const DashboardUserScreen()},
+      routes: {'/': (context) => const DashboardHelperScreen()},
     );
   }
 }
