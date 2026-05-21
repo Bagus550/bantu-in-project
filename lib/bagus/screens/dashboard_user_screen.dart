@@ -8,6 +8,8 @@ class DashboardUserScreen extends StatefulWidget {
 }
 
 class _DashboardUserScreenState extends State<DashboardUserScreen> {
+  int _currentIndex = 0;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -75,15 +77,11 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                     decoration: BoxDecoration(
                       border: Border.all(
                         color: Colors.black.withAlpha(50),
-                        width: 2,
+                        width: 1.5,
                       ),
                       borderRadius: BorderRadius.circular(50),
                     ),
-                    child: IconButton(
-                      onPressed: () {},
-                      icon: Icon(Icons.add),
-                      color: Colors.black.withAlpha(50),
-                    ),
+                    child: IconButton(onPressed: () {}, icon: Icon(Icons.add)),
                   ),
                 ),
               ),
@@ -110,11 +108,14 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                         Container(
                           padding: const EdgeInsets.all(14.0),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFE0E7FF),
+                            color: const Color(
+                              0xFFE0E7FF,
+                            ), // Warna ungu/biru muda soft
                             borderRadius: BorderRadius.circular(16.0),
                           ),
                           child: Icon(
-                            Icons.cleaning_services_rounded,
+                            Icons
+                                .cleaning_services_rounded, // Ganti ikon sesuai kebutuhan
                             size: 32.0,
                             color: Theme.of(
                               context,
@@ -200,10 +201,13 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                           ),
                         ),
 
+                        // 3. Tombol Chat (Ikon Pesan Kanan)
                         IconButton(
                           icon: Icon(
                             Icons.chat_bubble_outline_rounded,
-                            color: Theme.of(context).colorScheme.primary,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.primary, // Otomatis Biru Utama
                             size: 26.0,
                           ),
                           onPressed: () {
@@ -220,14 +224,119 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: Container(
-        height: 85,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border(
-            top: BorderSide(color: Colors.grey.withAlpha(50), width: 1.5),
+      bottomNavigationBar: SafeArea(
+        child: Container(
+          height: 88,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border(
+              top: BorderSide(color: Colors.grey.withAlpha(50), width: 1.5),
+            ),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildNavItem(index: 0, icon: Icons.home_filled, label: 'Home'),
+              _buildNavItem(
+                index: 1,
+                icon: Icons.assignment_outlined,
+                label: 'My Task',
+              ),
+              _buildPostButton(),
+              _buildNavItem(
+                index: 2,
+                icon: Icons.chat_bubble_outline_rounded,
+                label: 'Message',
+              ),
+              _buildNavItem(
+                index: 3,
+                icon: Icons.person_outline_rounded,
+                label: 'Profil',
+              ),
+            ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem({
+    required int index,
+    required IconData icon,
+    required String label,
+  }) {
+    final bool isActive = _currentIndex == index;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _currentIndex = index; // Ganti halaman aktif saat diklik
+        });
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        decoration: BoxDecoration(
+          // Jika aktif, kasih warna background biru utama kelompok kita
+          color: isActive ? const Color(0xFF1E3A8A) : Colors.transparent,
+          borderRadius: BorderRadius.circular(16.0),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              // Jika aktif warna ikon putih, jika tidak aktif warna hitam/abu
+              color: isActive ? Colors.white : Colors.black87,
+              size: 26.0,
+            ),
+            const SizedBox(height: 4.0),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12.0,
+                fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
+                color: isActive ? Colors.white : Colors.black87,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPostButton() {
+    return GestureDetector(
+      onTap: () {
+        // Aksi ketika klik tombol tambah tugas baru
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8.0),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: const Color(
+                  0xFF3B82F6,
+                ), // Biru terang sesuai secondary theme kita
+                width: 2.0,
+              ),
+            ),
+            child: const Icon(Icons.add, color: Color(0xFF3B82F6), size: 26.0),
+          ),
+          const SizedBox(height: 4.0),
+          const Text(
+            'Post',
+            style: TextStyle(
+              fontSize: 12.0,
+              fontWeight: FontWeight.w500,
+              color: Colors.black87,
+            ),
+          ),
+        ],
       ),
     );
   }

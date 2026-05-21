@@ -24,9 +24,9 @@ class BantuInApp extends StatelessWidget {
         ),
         scaffoldBackgroundColor: Color(0xFFF8FAFC),
       ),
-      initialRoute: '/screens',
+      initialRoute: '/',
 
-      routes: {'/screens': (context) => const DashboardUserScreen()},
+      routes: {'/': (context) => const DashboardUserScreen()},
     );
   }
 }
