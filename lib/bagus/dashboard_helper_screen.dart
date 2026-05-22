@@ -116,11 +116,28 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
 
                 final listTugas = snapshot.data!;
 
+                final listTugasTerfilter = _kategoriAktif == "Semua"
+                    ? listTugas
+                    : listTugas
+                          .where(
+                            (task) => task.kategoriLayanan == _kategoriAktif,
+                          )
+                          .toList();
+
+                if (listTugasTerfilter.isEmpty) {
+                  return Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(20),
+                      child: Text("Tidak ada tugas di kategori ini"),
+                    ),
+                  );
+                }
+
                 return Expanded(
                   child: ListView.builder(
-                    itemCount: listTugas.length,
+                    itemCount: listTugasTerfilter.length,
                     itemBuilder: (context, index) {
-                      final task = listTugas[index];
+                      final task = listTugasTerfilter[index];
 
                       return Container(
                         width: double.infinity,
