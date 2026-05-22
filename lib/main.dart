@@ -28,7 +28,7 @@ class BantuInApp extends StatelessWidget {
       ),
       initialRoute: '/',
 
-      routes: {'/': (context) => const DashboardHelperScreen()},
+      routes: {'/': (context) => const DashboardUserScreen()},
     );
   }
 }
