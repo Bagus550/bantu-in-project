@@ -1,6 +1,7 @@
-import 'package:bantuin/bagus/dashboard_helper_screen.dart';
 import 'package:flutter/material.dart';
+// ignore: unused_import
 import 'bagus/dashboard_user_screen.dart';
+import 'bagus/dashboard_helper_screen.dart';
 
 void main(List<String> args) {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,7 +28,7 @@ class BantuInApp extends StatelessWidget {
       ),
       initialRoute: '/',
 
-      routes: {'/': (context) => const DashboardUserScreen()},
+      routes: {'/': (context) => const DashboardHelperScreen()},
     );
   }
 }
