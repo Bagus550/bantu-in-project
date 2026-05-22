@@ -13,4 +13,5 @@ $routes->get('api/tasks/feed', 'TaskController::feed');
 
 $routes->group('api', function ($routes) {
     $routes->get('tasks/feed', 'TaskController::feed');
+    $routes->get('tasks/requester', 'TaskController::getTasksByRequester');
 });
