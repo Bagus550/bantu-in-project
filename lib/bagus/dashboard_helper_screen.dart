@@ -106,165 +106,165 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                     ),
                   );
                 }
-
                 //suksus ketika tabel kosong
-                if (snapshot.hasData || snapshot.data!.isEmpty) {
+                else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  print("Snapshot Data: ${snapshot.data}"); // Debug di terminal
                   return const Center(
-                    child: Text(
-                      "Tidak ada bantuan tersedia",
-                      style: TextStyle(fontSize: 16, color: Colors.grey),
-                    ),
+                    child: Text('Data kosong, cek database!'),
                   );
                 }
 
                 final listTugas = snapshot.data!;
 
-                return ListView.builder(
-                  padding: EdgeInsets.all(12),
-                  itemCount: listTugas.length,
-                  itemBuilder: (context, index) {
-                    final task = listTugas[index];
+                return Expanded(
+                  child: ListView.builder(
+                    itemCount: listTugas.length,
+                    itemBuilder: (context, index) {
+                      final task = listTugas[index];
 
-                    return Container(
-                      width: double.infinity,
-                      margin: EdgeInsets.only(bottom: 12),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surface,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: Colors.grey.withAlpha(100),
-                          width: 1.5,
+                      return Container(
+                        width: double.infinity,
+                        margin: EdgeInsets.only(bottom: 12),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surface,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: Colors.grey.withAlpha(100),
+                            width: 1.5,
+                          ),
                         ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 10),
-                              child: Container(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.secondary,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Text(
-                                  task.kategoriLayanan,
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
+                        child: Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 10),
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.secondary,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Text(
+                                    task.kategoriLayanan ?? '',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                            Column(
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        task.judulTugas,
-                                        style: const TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      "Rp ${task.nominalPembayaran}",
-                                      style: TextStyle(
-                                        fontSize: 20,
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.primary,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 10,
-                                  ),
-                                  child: Row(
-                                    children: const [
-                                      Icon(Icons.pin_drop_outlined),
-                                      SizedBox(width: 5),
-                                      Text("Klik untuk info selanjutnya"),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Divider(
-                              color: Colors.grey.withAlpha(100),
-                              thickness: 2,
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                              Column(
                                 children: [
                                   Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Container(
-                                        width: 40,
-                                        height: 40,
-                                        decoration: BoxDecoration(
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.primary.withAlpha(80),
-                                          borderRadius: BorderRadius.circular(
-                                            50,
+                                      Expanded(
+                                        child: Text(
+                                          task.judulTugas ?? 'Tanpa Judul',
+                                          style: const TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
                                           ),
-                                        ),
-                                        child: const Center(
-                                          child: Text(
-                                            "RQ",
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                         ),
                                       ),
-                                      const Padding(
-                                        padding: EdgeInsets.only(left: 8),
-                                        child: Text("Requester"),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        "Rp ${task.nominalPembayaran}",
+                                        style: TextStyle(
+                                          fontSize: 20,
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.primary,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
                                     ],
                                   ),
-                                  ElevatedButton(
-                                    onPressed: () {},
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Theme.of(
-                                        context,
-                                      ).colorScheme.primary,
-                                      foregroundColor: Colors.white,
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 10,
                                     ),
-                                    child: const Text("Ambil Tugas"),
+                                    child: Row(
+                                      children: const [
+                                        Icon(Icons.pin_drop_outlined),
+                                        SizedBox(width: 5),
+                                        Text("Klik untuk info selanjutnya"),
+                                      ],
+                                    ),
                                   ),
                                 ],
                               ),
-                            ),
-                          ],
+                              Divider(
+                                color: Colors.grey.withAlpha(100),
+                                thickness: 2,
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 10,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Container(
+                                          width: 40,
+                                          height: 40,
+                                          decoration: BoxDecoration(
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.primary.withAlpha(80),
+                                            borderRadius: BorderRadius.circular(
+                                              50,
+                                            ),
+                                          ),
+                                          child: const Center(
+                                            child: Text(
+                                              "RQ",
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        const Padding(
+                                          padding: EdgeInsets.only(left: 8),
+                                          child: Text("Requester"),
+                                        ),
+                                      ],
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () {},
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Theme.of(
+                                          context,
+                                        ).colorScheme.primary,
+                                        foregroundColor: Colors.white,
+                                      ),
+                                      child: const Text("Ambil Tugas"),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 );
               },
             ),

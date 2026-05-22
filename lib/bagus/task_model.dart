@@ -1,38 +1,37 @@
 class TaskModel {
-  final int? idTask;
-  final int idRequester;
-  final String kategoriLayanan;
-  final String judulTugas;
-  final String deskripsi;
-  final String lokasiTugas;
-  final int? nominalPembayaran;
+  final String? idTask;
+  final String? idRequester;
+  final String? idHelper;
+  final String? judulTugas;
+  final String? deskripsi;
+  final String? lokasiTugas;
+  final String? nominalPembayaran;
   final String? statusTask;
+  final String? kategoriLayanan;
 
   TaskModel({
     this.idTask,
-    required this.idRequester,
-    required this.kategoriLayanan,
-    required this.judulTugas,
-    required this.deskripsi,
-    required this.lokasiTugas,
+    this.idRequester,
+    this.idHelper,
+    this.judulTugas,
+    this.deskripsi,
+    this.lokasiTugas,
     this.nominalPembayaran,
     this.statusTask,
+    this.kategoriLayanan,
   });
 
   factory TaskModel.fromJson(Map<String, dynamic> json) {
     return TaskModel(
-      idTask: json['id_task'] != null
-          ? int.parse(json['id_task'].toString())
-          : null,
-      idRequester: int.parse(json['id_requester'].toString()),
-      kategoriLayanan: json['kategori_layanan'] ?? 'Lainnya',
-      judulTugas: json['judul_tugas'] ?? '',
-      deskripsi: json['deskripsi'] ?? '',
-      lokasiTugas: json['lokasi_tugas'] ?? '',
-      nominalPembayaran: json['nominal_pembayaran'] != null
-          ? int.parse(json['nominal_pembayaran'].toString())
-          : null,
-      statusTask: json['status_task'] ?? '',
+      idTask: json['id_task']?.toString(),
+      idRequester: json['id_requester']?.toString(),
+      idHelper: json['id_helper']?.toString(),
+      judulTugas: json['judul_tugas'],
+      deskripsi: json['deskripsi'],
+      lokasiTugas: json['lokasi_tugas'],
+      nominalPembayaran: json['nominal_pembayaran']?.toString(),
+      statusTask: json['status_task'],
+      kategoriLayanan: json['kategori_layanan'],
     );
   }
 

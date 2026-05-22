@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controllers;
 
 use App\Models\TaskModel;
@@ -19,7 +20,7 @@ class TaskController extends ResourceController
         }
 
         $nominalHarga = 0;
-        switch ($kategori){
+        switch ($kategori) {
             case "Perbaikan":
                 $nominalHarga = 50000;
                 break;
@@ -59,27 +60,34 @@ class TaskController extends ResourceController
 
     public function feed()
     {
-        $model = new TaskModel();
-        
-        // Mengambil tugas yang statusnya masih 'mencari_helper'
-        // diurutkan dari yang paling baru dimasukkan (id DESC)
-        $tasks = $model->where('status_task', 'mencari_helper')
-                       ->orderBy('id', 'DESC') // Sesuaikan nama primary key jika bukan 'id'
-                       ->findAll();
+        try {
+            $model = new TaskModel();
 
-        if (!empty($tasks)) {
+            $primaryKey = $model->primaryKey;
+
+            $tasks = $model->where('status_task', 'mencari_helper')
+                ->orderBy($primaryKey, 'DESC')
+                ->findAll();
+
+            if (!empty($tasks)) {
+                return $this->respond([
+                    'status'  => true,
+                    'message' => 'Daftar tugas berhasil diambil.',
+                    'data'    => $tasks
+                ], 200);
+            } else {
+                return $this->respond([
+                    'status'  => true,
+                    'message' => 'Belum ada tugas tersedia saat ini.',
+                    'data'    => []
+                ], 200);
+            }
+        } catch (\Exception $e) {
             return $this->respond([
-                'status'  => true,
-                'message' => 'Daftar tugas berhasil diambil.',
-                'data'    => $tasks
-            ], 200);
-        } else {
-            // Kalau di database masih kosong melompong
-            return $this->respond([
-                'status'  => true,
-                'message' => 'Belum ada tugas tersedia saat ini.',
+                'status'  => false,
+                'message' => 'Terjadi kesalahan pada server: ' . $e->getMessage(),
                 'data'    => []
-            ], 200);
+            ], 500);
         }
     }
 }
