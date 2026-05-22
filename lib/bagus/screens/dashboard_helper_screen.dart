@@ -191,7 +191,7 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                               ),
                               Padding(
                                 padding: const EdgeInsets.only(left: 8),
-                                child: Text("Di Pesan Bagus S."),
+                                child: Text("Bagus S."),
                               ),
                             ],
                           ),

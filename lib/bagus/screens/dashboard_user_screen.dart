@@ -46,7 +46,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Halo, Nama!",
+                    "Halo, Bagus!",
                     style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                   ),
                   Text("Apa yang bisa kami bantu hari ini?"),
@@ -183,7 +183,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
 
                         Expanded(
                           child: Text(
-                            'Nama Helper',
+                            'Dava H.',
                             style: TextStyle(
                               fontSize: 16.0,
                               fontWeight: FontWeight.bold,
