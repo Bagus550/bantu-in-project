@@ -13,28 +13,42 @@ class _IdaSplashScreenState extends State<IdaSplashScreen> {
   void initState() {
     super.initState();
 
-    Timer(const Duration(seconds: 3), (){
-      // Nanti klo halaman login atau home sudah jadi, 
-      // ganti '/login' sesuai nama route nya
+    Timer(const Duration(seconds: 3), () {
+      // Navigasi ke halaman login yang sudah kita perbaiki tadi
       Navigator.pushReplacementNamed(context, '/login');
     });
   }
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context).colorScheme;
+
     return Scaffold(
+      backgroundColor: theme.background, 
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
-              'assets/logo/logo_splash.png',
+              'assets/logo/logo_splash.png', 
               width: 150,
             ),
-            const SizedBox(
-              height: 20,
+            const SizedBox(height: 24),
+
+            Text(
+              'Bantu.In',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: theme.primary, 
+                letterSpacing: 1.2,
+              ),
             ),
-            const CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF1E3A8A)),
+            const SizedBox(height: 40),
+            
+            CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(theme.secondary), // Otomatis pakai Biru Terang (#3B82F6)
+              strokeWidth: 3,
             )
           ],
         ),
