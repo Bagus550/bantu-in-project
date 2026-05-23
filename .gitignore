@@ -124,3 +124,38 @@ _modules/*
 
 /results/
 /phpunit*.xml
+
+#-------------------------
+# Flutter & Dart Specific
+#-------------------------
+# Mengabaikan folder build lokal dan konfigurasi SDK internal
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+pubspec.lock
+
+# Mengabaikan hasil kompilasi aplikasi Flutter
+build/
+
+# Mengabaikan file konfigurasi platform Android & iOS yang digenerate otomatis
+/android/local.properties
+/android/.gradle/
+/android/app/Visual Studio Code.lnk
+*.apk
+*.ap_
+*.aab
+
+#-------------------------
+# Git Conflict & Temporary Backups
+#-------------------------
+# Mengabaikan berkas sisa hasil pembongkaran merge conflict Git
+*.orig
+*.rej
+
+#-------------------------
+# Additional OS & Local Server Junk
+#-------------------------
+# Cache dari ekstensi editor kompilasi lokal
+.history/
+*.log
