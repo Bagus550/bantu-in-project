@@ -9,14 +9,17 @@ class TaskController extends ResourceController
 {
     public function createTask()
     {
-        $idRequester = $this->request->getVar("id_requester");
-        $kategori = $this->request->getVar("kategori_layanan");
-        $judul = $this->request->getVar("judul_tugas");
-        $deskripsi = $this->request->getVar("deskripsi");
-        $lokasi = $this->request->getVar("lokasi_tugas");
+        $idRequester    = $this->request->getVar("id_requester");
+        $kategori       = $this->request->getVar("kategori_layanan");
+        $judul          = $this->request->getVar("judul_tugas");
+        $deskripsi      = $this->request->getVar("deskripsi");
+        $lokasi         = $this->request->getVar("lokasi_tugas");
 
         if (empty($idRequester) || empty($kategori) || empty($judul) || empty($deskripsi) || empty($lokasi)) {
-            return $this->fail("Data wajin diisi", 400);
+            return $this->respond([
+                'status'  => false,
+                'message' => 'Data wajib diisi!'
+            ], 400);
         }
 
         $nominalHarga = 0;
@@ -36,15 +39,17 @@ class TaskController extends ResourceController
         }
 
         $dataBaru = [
-            'Id_requester' => $idRequester,
-            'kategori_layanan' => $kategori,
-            'judul_tugas' => $judul,
-            'deskripsi' => $deskripsi,
-            'lokasi_tugas' => $lokasi,
-            'status_task' => 'mencari_helper'
+            'id_requester'      => $idRequester,
+            'kategori_layanan'  => $kategori,
+            'judul_tugas'       => $judul,
+            'deskripsi'         => $deskripsi,
+            'lokasi_tugas'      => $lokasi,
+            'nominal_pembayaran' => $nominalHarga,
+            'status_task'       => 'mencari_helper'
         ];
 
         $model = new TaskModel();
+
         if ($model->insert($dataBaru)) {
             return $this->respondCreated([
                 'status'  => true,
@@ -54,7 +59,10 @@ class TaskController extends ResourceController
                 ]
             ]);
         } else {
-            return $this->fail('Gagal tersimpan!', 500);
+            return $this->respond([
+                'status'  => false,
+                'message' => 'Gagal menyimpan data ke database.'
+            ], 500);
         }
     }
 
@@ -89,5 +97,29 @@ class TaskController extends ResourceController
                 'data'    => []
             ], 500);
         }
+    }
+
+    public function getTasksByRequester()
+    {
+        $idRequester = $this->request->getGet('id_requester');
+
+        if (!$idRequester) {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Parameter id_requester tidak ditemukan.'
+            ])->setStatusCode(400);
+        }
+        $taskModel = new \App\Models\TaskModel();
+
+        $data = $taskModel->select('tasks.*, helpers.nama as nama_helper')
+            ->join('helpers', 'helpers.id_helper = tasks.id_helper', 'left')
+            ->where('tasks.id_requester', $idRequester)
+            ->findAll();
+
+        return $this->response->setJSON([
+            'status'  => true,
+            'message' => 'Daftar tugas requester berhasil diambil.',
+            'data'    => $data
+        ])->setStatusCode(200);
     }
 }
