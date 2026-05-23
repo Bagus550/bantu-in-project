@@ -525,6 +525,9 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                         kategoriLayanan: kategoriDipilih!,
                         nominalPembayaran: int.parse(nominalController.text),
                       );
+
+                      if (!context.mounted) return;
+
                       if (success) {
                         Navigator.pop(context);
                         ScaffoldMessenger.of(context).showSnackBar(

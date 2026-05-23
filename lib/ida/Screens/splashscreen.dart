@@ -24,15 +24,12 @@ class _IdaSplashScreenState extends State<IdaSplashScreen> {
     final theme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: theme.background, 
+      backgroundColor: theme.surface,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(
-              'assets/logo/logo_splash.png', 
-              width: 150,
-            ),
+            Image.asset('assets/logo/logo_splash.png', width: 150),
             const SizedBox(height: 24),
 
             Text(
@@ -40,16 +37,18 @@ class _IdaSplashScreenState extends State<IdaSplashScreen> {
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
-                color: theme.primary, 
+                color: theme.primary,
                 letterSpacing: 1.2,
               ),
             ),
             const SizedBox(height: 40),
-            
+
             CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(theme.secondary), // Otomatis pakai Biru Terang (#3B82F6)
+              valueColor: AlwaysStoppedAnimation<Color>(
+                theme.secondary,
+              ), // Otomatis pakai Biru Terang (#3B82F6)
               strokeWidth: 3,
-            )
+            ),
           ],
         ),
       ),

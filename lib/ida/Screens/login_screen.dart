@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:bantuin/main.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -24,9 +23,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _handleLogin() {
     if (_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Memproses Login Anda')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Memproses Login Anda')));
     }
   }
 
@@ -56,10 +55,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  Image.asset(
-                    'assets/logo/logo_splash.png',
-                    height: 120,
-                  ),
+                  Image.asset('assets/logo/logo_splash.png', height: 120),
                   const SizedBox(height: 40),
 
                   const Text(
@@ -78,15 +74,27 @@ class _LoginScreenState extends State<LoginScreen> {
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
                       hintText: 'Email',
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                      suffixIcon: const Icon(Icons.visibility_off_outlined, color: Colors.grey),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 16,
+                      ),
+                      suffixIcon: const Icon(
+                        Icons.visibility_off_outlined,
+                        color: Colors.grey,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: theme.onSurface.withOpacity(0.3), width: 1.5),
+                        borderSide: BorderSide(
+                          color: theme.onSurface.withAlpha(60),
+                          width: 1.5,
+                        ),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: theme.onSurface.withOpacity(0.3), width: 1.5),
+                        borderSide: BorderSide(
+                          color: theme.onSurface.withAlpha(60),
+                          width: 1.5,
+                        ),
                       ),
                     ),
                     validator: (value) {
@@ -103,24 +111,31 @@ class _LoginScreenState extends State<LoginScreen> {
                     obscureText: !_isPasswordVisible,
                     decoration: InputDecoration(
                       hintText: 'Kata Sandi',
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 16,
+                      ),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _isPasswordVisible ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                          _isPasswordVisible
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
                           color: Colors.grey,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _isPasswordVisible = !_isPasswordVisible;
-                            });
-                          },
-                          ),
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _isPasswordVisible = !_isPasswordVisible;
+                          });
+                        },
+                      ),
                     ),
-                  )
+                  ),
                 ],
-              ))
+              ),
+            ),
           ),
-        )),
+        ),
+      ),
     );
   }
 }
