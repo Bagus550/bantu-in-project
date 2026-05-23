@@ -1,7 +1,8 @@
-import 'package:bantuin/bagus/screens/dashboard_helper_screen.dart';
-import 'package:bantuin/ida/Screens/login_screen.dart';
 import 'package:flutter/material.dart';
-import 'bagus/screens/dashboard_user_screen.dart';
+// ignore: unused_import
+import 'bagus/dashboard_user_screen.dart';
+import 'bagus/dashboard_helper_screen.dart';
+import 'ida/Screens/login_screen.dart';
 
 void main(List<String> args) {
   WidgetsFlutterBinding.ensureInitialized();
