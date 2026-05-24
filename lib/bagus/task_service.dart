@@ -4,7 +4,7 @@ import 'package:bantuin/bagus/task_model.dart';
 
 class TaskService {
   static const String baseUrl =
-      'http://192.168.0.104/bantu-in-project/public/index.php/api';
+      'http://192.168.100.205/bantu-in-project/public/index.php/api';
 
   Future<List<TaskModel>> getTasksForHelper() async {
     final response = await http.get(Uri.parse('$baseUrl/tasks/feed'));
