@@ -29,7 +29,7 @@ class _IdaSplashScreenState extends State<IdaSplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset('assets/logo/logo_splash.png', width: 150),
+            Image.asset('assets/logo/logo.png', width: 150),
             const SizedBox(height: 24),
 
             Text(

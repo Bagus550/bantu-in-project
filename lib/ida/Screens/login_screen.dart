@@ -55,11 +55,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  Image.asset('assets/logo/logo_splash.png', height: 120),
+                  Image.asset('assets/logo/logo.png', height: 120),
                   const SizedBox(height: 40),
 
                   const Text(
-                    'Selamat Datangg Kembali',
+                    'Selamat Datang Kembali',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 26,
@@ -77,10 +77,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 20,
                         vertical: 16,
-                      ),
-                      suffixIcon: const Icon(
-                        Icons.visibility_off_outlined,
-                        color: Colors.grey,
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -114,6 +110,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 20,
                         vertical: 16,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: theme.onSurface.withAlpha(60),
+                          width: 1.5,
+                        ),
                       ),
                       suffixIcon: IconButton(
                         icon: Icon(

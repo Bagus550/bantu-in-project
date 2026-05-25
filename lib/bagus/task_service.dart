@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:bantuin/bagus/task_model.dart';
 
 class TaskService {
-  static const String baseUrl = 'http://api.bagusdevstudio.xyz/index.php/api';
+  static const String baseUrl = 'http://pma.bagusdevstudio.xyz/index.php/api';
 
   Future<List<TaskModel>> getTasksForHelper() async {
     final response = await http.get(Uri.parse('$baseUrl/tasks/feed'));
