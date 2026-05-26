@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 // ignore: unused_import
-import 'bagus/dashboard_user_screen.dart';
+import 'bagus/screens/dashboard_user_screen.dart';
 // ignore: unused_import
-import 'bagus/dashboard_helper_screen.dart';
+import 'bagus/screens/dashboard_helper_screen.dart';
 // ignore: unused_import
 import 'ida/Screens/login_screen.dart';
 

@@ -1,6 +1,6 @@
 import 'package:bantuin/bagus/task_service.dart';
 import 'package:flutter/material.dart';
-import 'package:bantuin/bagus/data_tugas.dart';
+import 'package:bantuin/bagus/json/data_tugas.dart';
 
 class DashboardUserScreen extends StatefulWidget {
   const DashboardUserScreen({super.key});
