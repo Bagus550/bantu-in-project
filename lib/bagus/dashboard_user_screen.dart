@@ -493,6 +493,18 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
 
                 TextField(
                   controller: nominalController,
+                  maxLines: 2,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'Lokasi (atau tempel link Gmaps)',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+
+                const SizedBox(height: 15),
+
+                TextField(
+                  controller: nominalController,
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
                     labelText: 'Nominal Pembayaran (Rp)',
