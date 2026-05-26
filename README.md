@@ -1,9 +1,9 @@
-# 🤝 Proyek Bantu.In — Platform On-Demand Service Berbasis Mobile
+# Proyek Bantu.In — Platform On-Demand Service Berbasis Mobile
 > **Tugas Akhir UAS Mata Kuliah Pemrograman Mobile (PMO)** > *Fakultas Ilmu Komputer, Universitas Amikom Purwokerto (2026)*
 
 ---
 
-## 📌 1. Gambaran Umum & Filosofi Repositori (Berdasarkan Proposal)
+## 📌 1. Gambaran Umum & Filosofi Repositori
 Aplikasi **Bantu.In** adalah platform *on-demand service* berbasis mobile yang dirancang taktis untuk mempermudah proses penyediaan dan pemenuhan kebutuhan jasa atau tenaga bantuan harian secara langsung antara pencari bantuan (**Requester**) dan penyedia jasa (**Helper**). 
 
 Mengadopsi model **Ekosistem Tertutup**, platform ini berfokus pada pemenuhan kebutuhan jasa di lingkup internal yang terkontrol (khususnya untuk tugas-tugas fisik langsung di lapangan / *on-site job*), tanpa melibatkan kompleksitas logistik pengantaran barang (*delivery*).

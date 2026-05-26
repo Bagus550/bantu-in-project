@@ -1,5 +1,6 @@
 import 'package:bantuin/bagus/task_service.dart';
 import 'package:flutter/material.dart';
+import 'package:bantuin/bagus/data_tugas.dart';
 
 class DashboardUserScreen extends StatefulWidget {
   const DashboardUserScreen({super.key});
@@ -12,47 +13,6 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
   int _currentIndex = 0;
 
   String idUserLogin = "1";
-
-  Map<String, dynamic> _getStatusConfig(String? statusTask) {
-    switch (statusTask) {
-      case 'mencari_helper':
-        return {
-          'text': 'Mencari Helper',
-          'color': const Color(0xFFF59E0B),
-          'icon': Icons.hourglass_empty_rounded,
-        };
-      case 'berjalan':
-        return {
-          'text': 'Sedang Dikerjakan',
-          'color': const Color(0xFF1D4ED8),
-          'icon': Icons.autorenew_rounded,
-        };
-      case 'menunggu_validasi':
-        return {
-          'text': 'Sedang Verifikasi',
-          'color': const Color.fromARGB(255, 16, 185, 185),
-          'icon': Icons.check_circle_outline_rounded,
-        };
-      case 'selesai':
-        return {
-          'text': 'Selesai',
-          'color': const Color(0xFF10B981),
-          'icon': Icons.check_circle_outline_rounded,
-        };
-      case 'dibatalkan':
-        return {
-          'text': 'Dibatalkan',
-          'color': const Color.fromARGB(255, 185, 22, 16),
-          'icon': Icons.clear_outlined,
-        };
-      default:
-        return {
-          'text': 'Unknown',
-          'color': Colors.grey,
-          'icon': Icons.help_outline_rounded,
-        };
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -138,175 +98,130 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),
-            FutureBuilder(
-              future: TaskService().getTasksByRequester(idUserLogin),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+            Expanded(
+              child: ListView.builder(
+                itemCount: tasks.length,
+                itemBuilder: (context, index) {
+                  final bantuan = tasks[index];
 
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Text(
-                      "Error: ${snapshot.error}",
-                      style: const TextStyle(color: Colors.red),
+                  return Card(
+                    shape: RoundedRectangleBorder(
+                      side: BorderSide(color: Colors.grey, width: 1),
+                      borderRadius: BorderRadius.circular(16),
                     ),
-                  );
-                }
-
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(
-                    child: Text("Kamu belum pernah mengupload bantuan."),
-                  );
-                }
-
-                final listTugasRequester = snapshot.data!;
-
-                return Expanded(
-                  child: ListView.builder(
-                    itemCount: listTugasRequester.length,
-                    itemBuilder: (context, index) {
-                      final task = listTugasRequester[index];
-
-                      final statusConfig = _getStatusConfig(task.statusTask);
-
-                      return Padding(
-                        padding: EdgeInsets.symmetric(vertical: 10),
-                        child: Container(
-                          width: double.infinity,
-                          padding: EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            border: Border.all(
-                              color: Colors.black.withAlpha(50),
-                            ),
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    padding: EdgeInsets.all(14.0),
-                                    decoration: BoxDecoration(
-                                      color: Color(0xFFE0E7FF),
-                                      borderRadius: BorderRadius.circular(16.0),
-                                    ),
-                                    child: Icon(
-                                      task.kategoriLayanan == 'Pembersihan'
-                                          ? Icons.cleaning_services_rounded
-                                          : Icons.handyman_rounded,
-                                      size: 32.0,
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.primary,
-                                    ),
-                                  ),
-                                  SizedBox(width: 16.0),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          task.judulTugas ?? 'Tanpa Judul',
-                                          style: TextStyle(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.black,
-                                          ),
-                                        ),
-                                        SizedBox(height: 6),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 12,
-                                            vertical: 6,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: statusConfig['color'],
-                                            borderRadius: BorderRadius.circular(
-                                              20.0,
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Icon(
-                                                statusConfig['icon'],
-                                                size: 14.0,
-                                                color: Colors.white,
-                                              ),
-                                              const SizedBox(width: 4.0),
-                                              Text(
-                                                statusConfig['text'],
-                                                style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 12.0,
-                                                  fontWeight: FontWeight.w500,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
+                    margin: EdgeInsets.only(bottom: 16),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ListTile(
+                            leading: Container(
+                              padding: EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Color(0xFFDFDDF5),
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                              SizedBox(height: 16.0),
-
-                              Divider(color: Color(0xFFE2E8F0), thickness: 1.5),
-
-                              SizedBox(height: 12.0),
-
-                              Row(
-                                children: [
-                                  CircleAvatar(
-                                    radius: 20.0,
-                                    backgroundImage: NetworkImage(
-                                      'https://placekitty.com/100/100',
+                              child: Icon(Icons.cleaning_services_outlined),
+                            ),
+                            title: Text(
+                              bantuan['judul_tugas'],
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            subtitle: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Container(
+                                margin: EdgeInsets.only(top: 6),
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: bantuan['status'] == 'Mencari helper'
+                                      ? Colors.orange.shade800
+                                      : Color(0xFF283593),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.refresh,
+                                      size: 14,
+                                      color: Colors.white,
                                     ),
-                                  ),
-                                  SizedBox(width: 12.0),
-
-                                  Expanded(
-                                    child: Text(
-                                      task.namaHelper ?? 'Belum Ada helper',
+                                    SizedBox(width: 4),
+                                    Text(
+                                      bantuan['status'] ?? '',
                                       style: TextStyle(
-                                        fontSize: 16.0,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black,
+                                        color: Colors.white,
+                                        fontSize: 12,
                                       ),
                                     ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            child: Divider(
+                              color: Colors.grey.shade300,
+                              thickness: 1,
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 16),
+                            key: ValueKey(index),
+                            child: Row(
+                              children: [
+                                CircleAvatar(
+                                  radius: 18,
+                                  backgroundColor: Colors.grey.shade300,
+                                  // Ganti dengan NetworkImage jika ambil dari URL JSON
+                                  child: Icon(Icons.person, color: Colors.grey),
+                                ),
+                                SizedBox(width: 12),
+                                Text(
+                                  bantuan['status'] == 'Mencari helper'
+                                      ? 'Belum ada helper'
+                                      : (bantuan['nama_helper'] ?? '-'),
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                    color: bantuan['status'] == 'Mencari helper'
+                                        ? Colors.grey
+                                        : Colors.black,
                                   ),
-
-                                  IconButton(
+                                ),
+                                Spacer(),
+                                Visibility(
+                                  visible:
+                                      bantuan['status'] != 'Mencari helper',
+                                  child: IconButton(
                                     icon: Icon(
-                                      Icons.chat_bubble_outline_rounded,
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.primary,
-                                      size: 26.0,
+                                      Icons.chat_bubble_outline,
+                                      color: Color(0xFF3F51B5),
                                     ),
                                     onPressed: () {
-                                      Navigator.pushNamed(
-                                        context,
-                                        '/chat-room',
-                                        arguments: task.idHelper,
-                                      );
+                                      // Aksi ketika tombol chat ditekan
                                     },
                                   ),
-                                ],
-                              ),
-                            ],
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                  ),
-                );
-              },
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
             ),
           ],
         ),

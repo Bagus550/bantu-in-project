@@ -1,0 +1,32 @@
+List<Map<String, dynamic>> tasks = [
+  {
+    "id": 1,
+    "judul_tugas": "Bersihkan Rumah Depan",
+    "nama_helper": "",
+    "deskripsi": "Bersihkan beberapa ruangan yang terlihat kotor",
+    "lokasi_tugas": "kampung jaya rt 1 rw2, samping rumah ibu lili",
+    "nominal_pembayaran": "125.000",
+    "status": "Mencari helper",
+    "kategori_layanan": "Pembersihan",
+  },
+  {
+    "id": 2,
+    "judul_tugas": "Belikan Makan",
+    "nama_helper": "Lian",
+    "deskripsi": "Belikan saya mie ayam depan SMP kampung jaya 2 porsi",
+    "lokasi_tugas": "link google maps",
+    "nominal_pembayaran": "24.000",
+    "status": "Berjalan",
+    "kategori_layanan": "Belanja",
+  },
+  {
+    "id": 2,
+    "judul_tugas": "Benerin genteng rumah",
+    "nama_helper": "Nela",
+    "deskripsi": "Benerin genteng di rumah saya",
+    "lokasi_tugas": "kampung jaya rt 3 rw8, belakang warung soto",
+    "nominal_pembayaran": "75.000",
+    "status": "Menunggu validasi",
+    "kategori_layanan": "Perbaikan",
+  },
+];
