@@ -14,8 +14,62 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
 
   String idUserLogin = "1";
 
+  Color ambilWarnaStatus(String status) {
+    switch (status) {
+      case 'Mencari helper':
+        return Colors.orange.shade800;
+      case 'Berjalan':
+        return Color(0xFF283593);
+      case 'Menunggu validasi':
+        return Colors.teal.shade800;
+      case 'Selesai':
+        return Colors.green.shade800;
+      case 'Dibatalkan':
+        return Color(0xFFCD2528);
+      default:
+        return Color(0xFF283593);
+    }
+  }
+
+  IconData ambilIconStatus(String status) {
+    switch (status) {
+      case 'Mencari helper':
+        return Icons.search;
+      case 'Berjalan':
+        return Icons.refresh;
+      case 'Menunggu validasi':
+        return Icons.warning_amber_rounded;
+      case 'Dibatalkan':
+        return Icons.clear;
+      case 'Selesai':
+        return Icons.check;
+      default:
+        return Icons.help_outline_rounded;
+    }
+  }
+
+  // ignore: non_constant_identifier_names
+  IconData ambilIconBantuan(String kategori_layanan) {
+    switch (kategori_layanan) {
+      case 'Perbaikan':
+        return Icons.home_repair_service_outlined;
+      case 'Pembersihan':
+        return Icons.cleaning_services_outlined;
+      case 'Belanja':
+        return Icons.shopping_cart_outlined;
+      case 'Pendidikan':
+        return Icons.school;
+      default:
+        return Icons.grid_view_rounded;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final listMencariHelper = tasks.where((item) {
+      return item['status'] == 'Mencari helper';
+    }).toList();
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Bantu.In", style: TextStyle(fontWeight: FontWeight.bold)),
@@ -100,9 +154,9 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
             SizedBox(height: 10),
             Expanded(
               child: ListView.builder(
-                itemCount: tasks.length,
+                itemCount: listMencariHelper.length,
                 itemBuilder: (context, index) {
-                  final bantuan = tasks[index];
+                  final bantuan = listMencariHelper[index];
 
                   return Card(
                     shape: RoundedRectangleBorder(
@@ -114,6 +168,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           ListTile(
                             leading: Container(
@@ -122,7 +177,9 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                                 color: Color(0xFFDFDDF5),
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: Icon(Icons.cleaning_services_outlined),
+                              child: Icon(
+                                ambilIconBantuan(bantuan['kategori_layanan']),
+                              ),
                             ),
                             title: Text(
                               bantuan['judul_tugas'],
@@ -140,16 +197,14 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                                   vertical: 6,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: bantuan['status'] == 'Mencari helper'
-                                      ? Colors.orange.shade800
-                                      : Color(0xFF283593),
+                                  color: ambilWarnaStatus(bantuan['status']),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Icon(
-                                      Icons.refresh,
+                                      ambilIconStatus(bantuan['status']),
                                       size: 14,
                                       color: Colors.white,
                                     ),
@@ -163,6 +218,16 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                                     ),
                                   ],
                                 ),
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Text(
+                              bantuan['nominal_pembayaran'] ?? 'Rp 0',
+                              style: TextStyle(
+                                fontSize: 23,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
@@ -200,18 +265,20 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                                   ),
                                 ),
                                 Spacer(),
-                                Visibility(
-                                  visible:
-                                      bantuan['status'] != 'Mencari helper',
-                                  child: IconButton(
-                                    icon: Icon(
-                                      Icons.chat_bubble_outline,
-                                      color: Color(0xFF3F51B5),
-                                    ),
-                                    onPressed: () {
-                                      // Aksi ketika tombol chat ditekan
-                                    },
+                                IconButton(
+                                  icon: Icon(
+                                    Icons.chat,
+                                    color:
+                                        (bantuan['status'] == 'Mencari helper')
+                                        ? Colors.grey.shade400
+                                        : const Color(0xFF3F51B5),
                                   ),
+                                  onPressed:
+                                      (bantuan['status'] == 'Mencari helper')
+                                      ? null
+                                      : () {
+                                          // Aksi ketika tombol chat ditekan
+                                        },
                                 ),
                               ],
                             ),
@@ -394,7 +461,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                     labelText: 'Kategori Layanan',
                     border: OutlineInputBorder(),
                   ),
-                  items: ['Perbaikan', 'Pembersihan', 'Belanja']
+                  items: ['Perbaikan', 'Pembersihan', 'Belanja', 'Pendidikan']
                       .map(
                         (kat) => DropdownMenuItem(value: kat, child: Text(kat)),
                       )

@@ -1,4 +1,4 @@
-import 'package:bantuin/bagus/task_service.dart';
+import 'package:bantuin/bagus/json/data_tugas.dart';
 import 'package:flutter/material.dart';
 
 class DashboardHelperScreen extends StatefulWidget {
@@ -14,6 +14,27 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final listJobHelper = tasks.where((item) {
+      return item['status'] == 'Mencari helper';
+    }).toList();
+
+    final listTerfilter = _kategoriAktif == 'Semua'
+        ? tasks.where((item) {
+            final status =
+                item['status']?.toString().toLowerCase().trim() ?? '';
+            return status == 'mencari helper';
+          }).toList()
+        : tasks.where((item) {
+            final status =
+                item['status']?.toString().toLowerCase().trim() ?? '';
+            final kategori =
+                item['kategori_layanan']?.toString().toLowerCase().trim() ?? '';
+            final kategoriTombol = _kategoriAktif.toLowerCase().trim();
+
+            // Harus memenuhi kedua syarat secara mutlak
+            return status == 'mencari helper' && kategori == kategoriTombol;
+          }).toList();
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -77,6 +98,10 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                       nama: 'Belanja',
                       icon: Icons.shopping_bag_rounded,
                     ),
+                    _buildTombolKategori(
+                      nama: 'Pendidikan',
+                      icon: Icons.school,
+                    ),
                   ],
                 ),
               ),
@@ -89,201 +114,170 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
-            FutureBuilder(
-              future: TaskService().getTasksForHelper(),
-              builder: (context, snapshot) {
-                //ketika loading
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+            Expanded(
+              child: listTerfilter.isEmpty
+                  ? Center(child: Text("Tidak ada tugas untuk kategori ini"))
+                  : ListView.builder(
+                      itemCount: listTerfilter.length,
+                      itemBuilder: (context, index) {
+                        final tugas = listTerfilter[index];
 
-                //terjadi error
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Text(
-                      "Gagal memuat Task Feed: ${snapshot.error}",
-                      style: TextStyle(color: Colors.red),
-                    ),
-                  );
-                }
-                //suksus ketika tabel kosong
-                else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  print("Snapshot Data: ${snapshot.data}"); // Debug di terminal
-                  return const Center(
-                    child: Text('Data kosong, cek database!'),
-                  );
-                }
-
-                final listTugas = snapshot.data!;
-
-                final listTugasTerfilter = _kategoriAktif == "Semua"
-                    ? listTugas
-                    : listTugas
-                          .where(
-                            (task) => task.kategoriLayanan == _kategoriAktif,
-                          )
-                          .toList();
-
-                if (listTugasTerfilter.isEmpty) {
-                  return Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(20),
-                      child: Text("Tidak ada tugas di kategori ini"),
-                    ),
-                  );
-                }
-
-                return Expanded(
-                  child: ListView.builder(
-                    itemCount: listTugasTerfilter.length,
-                    itemBuilder: (context, index) {
-                      final task = listTugasTerfilter[index];
-
-                      return Container(
-                        width: double.infinity,
-                        margin: EdgeInsets.only(bottom: 12),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surface,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: Colors.grey.withAlpha(100),
-                            width: 1.5,
+                        return Card(
+                          shape: RoundedRectangleBorder(
+                            side: BorderSide(color: Colors.grey, width: 1),
+                            borderRadius: BorderRadius.circular(16),
                           ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(10),
+                          margin: EdgeInsets.only(bottom: 16),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Padding(
-                                padding: const EdgeInsets.only(bottom: 10),
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 6,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.secondary,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Text(
-                                    task.kategoriLayanan ?? '',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Column(
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          task.judulTugas ?? 'Tanpa Judul',
-                                          style: const TextStyle(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        "Rp ${task.nominalPembayaran}",
-                                        style: TextStyle(
-                                          fontSize: 20,
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.primary,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 10,
-                                    ),
-                                    child: Row(
-                                      children: const [
-                                        Icon(Icons.pin_drop_outlined),
-                                        SizedBox(width: 5),
-                                        Text("Klik untuk info selanjutnya"),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Divider(
-                                color: Colors.grey.withAlpha(100),
-                                thickness: 2,
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 10,
+                                padding: const EdgeInsets.only(
+                                  top: 16,
+                                  left: 16,
+                                  right: 16,
                                 ),
                                 child: Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Row(
-                                      children: [
-                                        Container(
-                                          width: 40,
-                                          height: 40,
-                                          decoration: BoxDecoration(
-                                            color: Theme.of(
-                                              context,
-                                            ).colorScheme.primary.withAlpha(80),
-                                            borderRadius: BorderRadius.circular(
-                                              50,
-                                            ),
-                                          ),
-                                          child: const Center(
-                                            child: Text(
-                                              "RQ",
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ),
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        color: Color(0XFF5FA0D8),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 2,
+                                          horizontal: 8,
                                         ),
-                                        const Padding(
-                                          padding: EdgeInsets.only(left: 8),
-                                          child: Text("Requester"),
+                                        child: Text(
+                                          tugas['kategori_layanan'],
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ),
+                                    ),
+                                    Text(
+                                      tugas['nominal_pembayaran'],
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF3525CD),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  top: 12,
+                                  left: 16,
+                                  right: 16,
+                                  bottom: 8,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      tugas['judul_tugas'],
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    SizedBox(height: 4),
+                                    Flexible(
+                                      child: Text(
+                                        tugas['deskripsi'],
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          color: Colors.grey.shade700,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(height: 4),
+                                    Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.location_on, size: 12),
+                                        Text(
+                                          tugas['lokasi_tugas'],
+                                          style: TextStyle(fontSize: 12),
                                         ),
                                       ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                ),
+                                child: Divider(
+                                  color: Colors.grey.shade400,
+                                  thickness: 2,
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  top: 8,
+                                  bottom: 12,
+                                  left: 16,
+                                  right: 16,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.all(0),
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          CircleAvatar(
+                                            radius: 18,
+                                            backgroundColor:
+                                                Colors.grey.shade300,
+                                            child: Icon(
+                                              Icons.person,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                          SizedBox(width: 8),
+                                          Text(tugas['nama_requester']),
+                                        ],
+                                      ),
                                     ),
                                     ElevatedButton(
                                       onPressed: () {},
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor: Theme.of(
-                                          context,
-                                        ).colorScheme.primary,
+                                        backgroundColor: Color(0XFF3525CD),
                                         foregroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
+                                        padding: EdgeInsets.symmetric(
+                                          vertical: 8,
+                                          horizontal: 25,
+                                        ),
                                       ),
-                                      child: const Text("Ambil Tugas"),
+                                      child: Text("Ambil Tugas"),
                                     ),
                                   ],
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                      );
-                    },
-                  ),
-                );
-              },
+                        );
+                      },
+                    ),
             ),
           ],
         ),
