@@ -1,6 +1,7 @@
 import 'package:bantuin/bagus/backend/task_service.dart';
 import 'package:flutter/material.dart';
 import 'package:bantuin/data_tugas.dart';
+import 'package:bantuin/pilihan.dart';
 
 class DashboardUserScreen extends StatefulWidget {
   const DashboardUserScreen({super.key});
@@ -64,6 +65,38 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
     }
   }
 
+  // ignore: non_constant_identifier_names
+  Color ambilWarnaBantuan(String kategori_layanan) {
+    switch (kategori_layanan) {
+      case 'Perbaikan':
+        return Color(0xFFDDF5DF);
+      case 'Pembersihan':
+        return Color(0xFFDFDDF5);
+      case 'Belanja':
+        return Color(0XFFF3F5DD);
+      case 'Pendidikan':
+        return Color(0XFFF5DEDD);
+      default:
+        return Color(0XFFEEEEEE);
+    }
+  }
+
+  // ignore: non_constant_identifier_names
+  Color ambilWarnaIkonBantuan(String kategori_layanan) {
+    switch (kategori_layanan) {
+      case 'Perbaikan':
+        return Color(0xFF25CD25);
+      case 'Pembersihan':
+        return Color(0xFF3525CD);
+      case 'Belanja':
+        return Color(0XFFCACD25);
+      case 'Pendidikan':
+        return Color(0XFFCD2525);
+      default:
+        return Color(0XFFC7C7C7);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final listMencariHelper = tasks.where((item) {
@@ -116,37 +149,77 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
               "MINTA BANTUAN",
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 10),
-              child: Container(
-                height: 80,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Colors.black.withAlpha(50),
-                    width: 1.5,
-                  ),
-                  borderRadius: BorderRadius.circular(25),
-                ),
-                child: Center(
-                  child: Container(
-                    width: 50,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Colors.black.withAlpha(50),
-                        width: 1.5,
+            SizedBox(height: 10),
+            SizedBox(
+              height: 180,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: opsi['kategori_layanan'].length,
+                itemBuilder: (context, index) {
+                  final cardPost = opsi['kategori_layanan'][index];
+                  final deskripsi = opsi['deskripsi'][index];
+
+                  return SizedBox(
+                    width: 180,
+                    height: 180,
+                    child: Card(
+                      shape: RoundedRectangleBorder(
+                        side: BorderSide(color: Colors.grey, width: 1),
+                        borderRadius: BorderRadius.circular(16),
                       ),
-                      borderRadius: BorderRadius.circular(50),
+                      margin: EdgeInsets.only(right: 16),
+                      clipBehavior: Clip.antiAlias,
+                      child: InkWell(
+                        onTap: () {},
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Container(
+                                width: 50,
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  color: ambilWarnaBantuan(cardPost),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Icon(
+                                  ambilIconBantuan(cardPost),
+                                  color: ambilWarnaIkonBantuan(cardPost),
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 5,
+                                horizontal: 16,
+                              ),
+                              child: Text(
+                                cardPost,
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
+                              child: Text(
+                                deskripsi,
+                                style: TextStyle(fontSize: 12),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                    child: IconButton(
-                      onPressed: () => _showAddTaskModal(context),
-                      icon: Icon(Icons.add),
-                    ),
-                  ),
-                ),
+                  );
+                },
               ),
             ),
+            SizedBox(height: 10),
             Text(
               "TUGAS BERLANGSUNG",
               style: TextStyle(fontWeight: FontWeight.bold),
