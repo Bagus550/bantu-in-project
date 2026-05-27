@@ -1,4 +1,4 @@
-import 'package:bantuin/bagus/json/data_tugas.dart';
+import 'package:bantuin/data_tugas.dart';
 import 'package:flutter/material.dart';
 
 class DashboardHelperScreen extends StatefulWidget {
