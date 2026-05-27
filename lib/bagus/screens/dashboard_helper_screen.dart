@@ -14,10 +14,6 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final listJobHelper = tasks.where((item) {
-      return item['status'] == 'Mencari helper';
-    }).toList();
-
     final listTerfilter = _kategoriAktif == 'Semua'
         ? tasks.where((item) {
             final status =
