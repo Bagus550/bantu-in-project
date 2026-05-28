@@ -410,12 +410,25 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                             ),
                             Padding(
                               padding: const EdgeInsets.only(top: 10),
-                              child: Text(
-                                bantuan['nominal_pembayaran'],
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    bantuan['nominal_pembayaran'],
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  IconButton(
+                                    onPressed: () {},
+                                    icon: Icon(
+                                      Icons.chat_outlined,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                             Divider(color: Colors.grey.shade300, thickness: 2),
@@ -436,11 +449,21 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                                     Text(bantuan['nama_helper']),
                                   ],
                                 ),
-                                IconButton(
-                                  onPressed: () {},
-                                  icon: Icon(
-                                    Icons.chat_outlined,
-                                    color: Colors.grey,
+                                SizedBox(
+                                  height: 30,
+                                  child: ElevatedButton.icon(
+                                    onPressed: () {},
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: ambilWarnaStatus(
+                                        'Dibatalkan',
+                                      ),
+                                      foregroundColor: Colors.white,
+                                    ),
+                                    icon: Icon(Icons.clear),
+                                    label: Text(
+                                      "Batalkan",
+                                      style: TextStyle(fontSize: 10),
+                                    ),
                                   ),
                                 ),
                               ],
