@@ -18,7 +18,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
   Color ambilWarnaStatus(String status) {
     switch (status) {
       case 'Mencari helper':
-        return Colors.orange.shade800;
+        return const Color.fromARGB(255, 255, 158, 79);
       case 'Berjalan':
         return Color(0xFF283593);
       case 'Menunggu validasi':
@@ -29,6 +29,19 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
         return Color(0xFFCD2528);
       default:
         return Color(0xFF283593);
+    }
+  }
+
+  Color ambilBgStatus(String status) {
+    switch (status) {
+      case 'Berjalan':
+        return Color(0XFFDFDDF5);
+      case 'Selesai':
+        return Color(0XFFDDF5E2);
+      case 'Dibatalkan':
+        return Color(0XFFF5DDDD);
+      default:
+        return Color(0XFFEEEEEE);
     }
   }
 
@@ -100,7 +113,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
   @override
   Widget build(BuildContext context) {
     final listMencariHelper = tasks.where((item) {
-      return item['status'] == 'Mencari helper';
+      return item['status'] == 'Berjalan';
     }).toList();
 
     return Scaffold(
@@ -125,108 +138,166 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
             ),
           ),
         ],
-        leading: IconButton(onPressed: () {}, icon: Icon(Icons.menu)),
       ),
-      body: Padding(
-        padding: EdgeInsets.all(18.0),
+      drawer: Drawer(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SizedBox(
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Text(
-                    "Halo, Bagus!",
-                    style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                  CircleAvatar(
+                    radius: 30,
+                    backgroundColor: Colors.white,
+                    child: Icon(Icons.person, size: 35, color: Colors.grey),
                   ),
-                  Text("Apa yang bisa kami bantu hari ini?"),
+                  SizedBox(height: 10),
+                  Text(
+                    "Halo, ${tasks.isNotEmpty ? tasks[0]['nama_requester'] : 'User'}",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
                 ],
               ),
             ),
-            SizedBox(height: 20),
-            Text(
-              "MINTA BANTUAN",
-              style: TextStyle(fontWeight: FontWeight.bold),
+            ListTile(
+              leading: Icon(Icons.history, color: Colors.black87),
+              title: Text("History Tugas"),
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Pindah ke halaman history")),
+                );
+              },
             ),
-            SizedBox(height: 10),
-            SizedBox(
-              height: 180,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: opsi['kategori_layanan'].length,
-                itemBuilder: (context, index) {
-                  final cardPost = opsi['kategori_layanan'][index];
-                  final deskripsi = opsi['deskripsi'][index];
-
-                  return SizedBox(
-                    width: 180,
-                    height: 180,
-                    child: Card(
-                      shape: RoundedRectangleBorder(
-                        side: BorderSide(color: Colors.grey, width: 1),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      margin: EdgeInsets.only(right: 16),
-                      clipBehavior: Clip.antiAlias,
-                      child: InkWell(
-                        onTap: () {},
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Container(
-                                width: 50,
-                                height: 50,
-                                decoration: BoxDecoration(
-                                  color: ambilWarnaBantuan(cardPost),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Icon(
-                                  ambilIconBantuan(cardPost),
-                                  color: ambilWarnaIkonBantuan(cardPost),
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 5,
-                                horizontal: 16,
-                              ),
-                              child: Text(
-                                cardPost,
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                              ),
-                              child: Text(
-                                deskripsi,
-                                style: TextStyle(fontSize: 12),
-                              ),
-                            ),
-                          ],
-                        ),
+            ListTile(
+              leading: Icon(Icons.settings, color: Colors.black87),
+              title: Text("Pengaturan"),
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Pindah ke halaman pengaturan")),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Halo, Bagus!",
+                      style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  );
-                },
+                    Text("Apa yang bisa kami bantu hari ini?"),
+                  ],
+                ),
               ),
-            ),
-            SizedBox(height: 10),
-            Text(
-              "TUGAS BERLANGSUNG",
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 10),
-            Expanded(
-              child: ListView.builder(
+              SizedBox(height: 20),
+              Text(
+                "MINTA BANTUAN",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 10),
+              SizedBox(
+                height: 180,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: opsi['kategori_layanan'].length,
+                  itemBuilder: (context, index) {
+                    final cardPost = opsi['kategori_layanan'][index];
+                    final deskripsi = opsi['deskripsi'][index];
+
+                    return SizedBox(
+                      width: 180,
+                      height: 180,
+                      child: Card(
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(color: Colors.grey, width: 1),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        margin: EdgeInsets.only(right: 16),
+                        clipBehavior: Clip.antiAlias,
+                        child: InkWell(
+                          onTap: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text("Ke halaman buat tugas")),
+                            );
+                          },
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Container(
+                                  width: 50,
+                                  height: 50,
+                                  decoration: BoxDecoration(
+                                    color: ambilWarnaBantuan(cardPost),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Icon(
+                                    ambilIconBantuan(cardPost),
+                                    color: ambilWarnaIkonBantuan(cardPost),
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 5,
+                                  horizontal: 16,
+                                ),
+                                child: Text(
+                                  cardPost,
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                ),
+                                child: Text(
+                                  deskripsi,
+                                  style: TextStyle(fontSize: 12),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              SizedBox(height: 20),
+              Text(
+                "TUGAS BERLANGSUNG",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 10),
+              ListView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
                 itemCount: listMencariHelper.length,
                 itemBuilder: (context, index) {
                   final bantuan = listMencariHelper[index];
@@ -237,133 +308,152 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     margin: EdgeInsets.only(bottom: 16),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ListTile(
-                            leading: Container(
-                              padding: EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Color(0xFFDFDDF5),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Icon(
-                                ambilIconBantuan(bantuan['kategori_layanan']),
-                              ),
-                            ),
-                            title: Text(
-                              bantuan['judul_tugas'],
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
-                            subtitle: Align(
-                              alignment: Alignment.centerLeft,
-                              child: Container(
-                                margin: EdgeInsets.only(top: 6),
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 6,
+                    clipBehavior: Clip.antiAlias,
+                    child: InkWell(
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text("Ke halaman tugas selengkapnya"),
+                          ),
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 12,
+                          horizontal: 16,
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        width: 50,
+                                        height: 50,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(
+                                            20,
+                                          ),
+                                          color: ambilWarnaBantuan(
+                                            bantuan['kategori_layanan'],
+                                          ),
+                                        ),
+                                        child: Icon(
+                                          ambilIconBantuan(
+                                            bantuan['kategori_layanan'],
+                                          ),
+                                          color: ambilWarnaIkonBantuan(
+                                            bantuan['kategori_layanan'],
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              bantuan['judul_tugas'],
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 14,
+                                              ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            SizedBox(height: 4),
+                                            Text(
+                                              'ID : ${bantuan['id']}',
+                                              style: const TextStyle(
+                                                fontSize: 12,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                decoration: BoxDecoration(
-                                  color: ambilWarnaStatus(bantuan['status']),
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      ambilIconStatus(bantuan['status']),
-                                      size: 14,
-                                      color: Colors.white,
+                                SizedBox(width: 16),
+                                Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(20),
+                                    color: ambilBgStatus(bantuan['status']),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 2,
+                                      horizontal: 8,
                                     ),
-                                    SizedBox(width: 4),
-                                    Text(
-                                      bantuan['status'] ?? '',
+                                    child: Text(
+                                      bantuan['status'],
                                       style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 12,
+                                        color: ambilWarnaStatus(
+                                          bantuan['status'],
+                                        ),
+                                        fontSize: 10,
                                       ),
                                     ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: Text(
-                              bantuan['nominal_pembayaran'] ?? 'Rp 0',
-                              style: TextStyle(
-                                fontSize: 23,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
-                            ),
-                            child: Divider(
-                              color: Colors.grey.shade300,
-                              thickness: 1,
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 16),
-                            key: ValueKey(index),
-                            child: Row(
-                              children: [
-                                CircleAvatar(
-                                  radius: 18,
-                                  backgroundColor: Colors.grey.shade300,
-                                  // Ganti dengan NetworkImage jika ambil dari URL JSON
-                                  child: Icon(Icons.person, color: Colors.grey),
-                                ),
-                                SizedBox(width: 12),
-                                Text(
-                                  bantuan['status'] == 'Mencari helper'
-                                      ? 'Belum ada helper'
-                                      : (bantuan['nama_helper'] ?? '-'),
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                    color: bantuan['status'] == 'Mencari helper'
-                                        ? Colors.grey
-                                        : Colors.black,
                                   ),
-                                ),
-                                Spacer(),
-                                IconButton(
-                                  icon: Icon(
-                                    Icons.chat,
-                                    color:
-                                        (bantuan['status'] == 'Mencari helper')
-                                        ? Colors.grey.shade400
-                                        : const Color(0xFF3F51B5),
-                                  ),
-                                  onPressed:
-                                      (bantuan['status'] == 'Mencari helper')
-                                      ? null
-                                      : () {
-                                          // Aksi ketika tombol chat ditekan
-                                        },
                                 ),
                               ],
                             ),
-                          ),
-                        ],
+                            Padding(
+                              padding: const EdgeInsets.only(top: 10),
+                              child: Text(
+                                bantuan['nominal_pembayaran'],
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            Divider(color: Colors.grey.shade300, thickness: 2),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 18,
+                                      backgroundColor: Colors.grey.shade300,
+                                      child: Icon(
+                                        Icons.person,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                    SizedBox(width: 10),
+                                    Text(bantuan['nama_helper']),
+                                  ],
+                                ),
+                                IconButton(
+                                  onPressed: () {},
+                                  icon: Icon(
+                                    Icons.chat_outlined,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   );
                 },
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: SafeArea(
