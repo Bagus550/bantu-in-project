@@ -5,6 +5,7 @@ import 'bagus/screens/dashboard_user_screen.dart';
 import 'bagus/screens/dashboard_helper_screen.dart';
 // ignore: unused_import
 import 'ida/Screens/login_screen.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main(List<String> args) {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,6 +22,9 @@ class BantuInApp extends StatelessWidget {
       title: 'Bantu.In',
       theme: ThemeData(
         useMaterial3: true,
+        textTheme: GoogleFonts.plusJakartaSansTextTheme(
+          Theme.of(context).textTheme,
+        ),
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF1E3A8A),
           primary: const Color(0xFF1E3A8A),
