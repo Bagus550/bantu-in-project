@@ -9,7 +9,7 @@ List<Map<String, dynamic>> tasks = [
     "lokasi_tugas": "Perumahan Indah Asri Blok C No. 4",
     "nominal_pembayaran": "Rp 60.000",
     "status": "Mencari helper",
-    "kategori_layanan": "Pembersihan",
+    "kategori_layanan": "BantuClean",
   },
   {
     "id": 2,
@@ -21,7 +21,7 @@ List<Map<String, dynamic>> tasks = [
     "lokasi_tugas": "Jl. Pemuda No. 12, sebelah fotokopi",
     "nominal_pembayaran": "Rp 45.000",
     "status": "Berjalan",
-    "kategori_layanan": "Perbaikan",
+    "kategori_layanan": "BantuFix",
   },
   {
     "id": 3,
@@ -33,7 +33,7 @@ List<Map<String, dynamic>> tasks = [
     "lokasi_tugas": "Pasar Wage, Los Blok A",
     "nominal_pembayaran": "Rp 30.000",
     "status": "Mencari helper",
-    "kategori_layanan": "Belanja",
+    "kategori_layanan": "BantuShop",
   },
   {
     "id": 4,
@@ -45,7 +45,7 @@ List<Map<String, dynamic>> tasks = [
     "lokasi_tugas": "Mekarsari RT 02 RW 05",
     "nominal_pembayaran": "Rp 35.000",
     "status": "Mencari helper",
-    "kategori_layanan": "Perbaikan",
+    "kategori_layanan": "BantuFix",
   },
   {
     "id": 5,
@@ -57,7 +57,7 @@ List<Map<String, dynamic>> tasks = [
     "lokasi_tugas": "Jl. Gatot Subroto Gang 3 No. 45",
     "nominal_pembayaran": "Rp 90.000",
     "status": "Menunggu validasi",
-    "kategori_layanan": "Perbaikan",
+    "kategori_layanan": "BantuFix",
   },
   {
     "id": 6,
@@ -69,7 +69,7 @@ List<Map<String, dynamic>> tasks = [
     "lokasi_tugas": "Kost Amanah, Kamar No. 7",
     "nominal_pembayaran": "Rp 15.000",
     "status": "Mencari helper",
-    "kategori_layanan": "Belanja",
+    "kategori_layanan": "BantuShop",
   },
   {
     "id": 7,
@@ -81,7 +81,7 @@ List<Map<String, dynamic>> tasks = [
     "lokasi_tugas": "Ruko Kaliwiro Jaya No. 3B",
     "nominal_pembayaran": "Rp 150.000",
     "status": "Mencari helper",
-    "kategori_layanan": "Pembersihan",
+    "kategori_layanan": "BantuClean",
   },
   {
     "id": 8,
@@ -93,7 +93,7 @@ List<Map<String, dynamic>> tasks = [
     "lokasi_tugas": "Jl. Cendrawasih No. 14, Purwokerto",
     "nominal_pembayaran": "Rp 50.000",
     "status": "Berjalan",
-    "kategori_layanan": "Pendidikan",
+    "kategori_layanan": "BantuStudy",
   },
   {
     "id": 9,
@@ -105,7 +105,7 @@ List<Map<String, dynamic>> tasks = [
     "lokasi_tugas": "Gang Serayu 2, belakang kampus",
     "nominal_pembayaran": "Rp 80.000",
     "status": "Mencari helper",
-    "kategori_layanan": "Pembersihan",
+    "kategori_layanan": "BantuStudy",
   },
   {
     "id": 10,
@@ -117,6 +117,6 @@ List<Map<String, dynamic>> tasks = [
     "lokasi_tugas": "Depan Gerbang Utama Kampus",
     "nominal_pembayaran": "Rp 20.000",
     "status": "Mencari helper",
-    "kategori_layanan": "Pendidikan",
+    "kategori_layanan": "BantuStudy",
   },
 ];

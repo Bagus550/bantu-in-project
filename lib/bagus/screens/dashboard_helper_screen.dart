@@ -56,10 +56,59 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
             ),
           ),
         ],
-        leading: IconButton(onPressed: () {}, icon: Icon(Icons.menu)),
+      ),
+      drawer: Drawer(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  CircleAvatar(
+                    radius: 30,
+                    backgroundColor: Colors.white,
+                    child: Icon(Icons.person, size: 35, color: Colors.grey),
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    "Halo, ${tasks.isNotEmpty ? tasks[1]['nama_helper'] : 'User'}",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            ListTile(
+              leading: Icon(Icons.history, color: Colors.black87),
+              title: Text("History Tugas"),
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Pindah ke halaman history")),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.settings, color: Colors.black87),
+              title: Text("Pengaturan"),
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Pindah ke halaman pengaturan")),
+                );
+              },
+            ),
+          ],
+        ),
       ),
       body: Padding(
-        padding: EdgeInsets.all(18),
+        padding: EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -70,7 +119,7 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                 TextButton(onPressed: () {}, child: Text("View All")),
               ],
             ),
-            SizedBox(height: 20),
+            // SizedBox(height: 10),
             SizedBox(
               height: 100,
               width: double.infinity,
@@ -83,26 +132,26 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                       icon: Icons.grid_view_rounded,
                     ),
                     _buildTombolKategori(
-                      nama: 'Perbaikan',
+                      nama: 'BantuFix',
                       icon: Icons.business_center_rounded,
                     ),
                     _buildTombolKategori(
-                      nama: 'Pembersihan',
+                      nama: 'BantuClean',
                       icon: Icons.cleaning_services_rounded,
                     ),
                     _buildTombolKategori(
-                      nama: 'Belanja',
+                      nama: 'BantuShop',
                       icon: Icons.shopping_bag_rounded,
                     ),
                     _buildTombolKategori(
-                      nama: 'Pendidikan',
+                      nama: 'BantuStudy',
                       icon: Icons.school,
                     ),
                   ],
                 ),
               ),
             ),
-            SizedBox(height: 20),
+            // SizedBox(height: 10),
             Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: Text(
@@ -124,152 +173,180 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                             borderRadius: BorderRadius.circular(16),
                           ),
                           margin: EdgeInsets.only(bottom: 16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                  top: 16,
-                                  left: 16,
-                                  right: 16,
+                          clipBehavior: Clip.antiAlias,
+                          child: InkWell(
+                            onTap: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    "Ke halaman tugas selengkapnya",
+                                  ),
                                 ),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        color: Color(0XFF5FA0D8),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 2,
-                                          horizontal: 8,
+                              );
+                            },
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    top: 16,
+                                    left: 16,
+                                    right: 16,
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.secondary,
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
                                         ),
-                                        child: Text(
-                                          tugas['kategori_layanan'],
-                                          style: TextStyle(color: Colors.white),
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            vertical: 2,
+                                            horizontal: 8,
+                                          ),
+                                          child: Text(
+                                            tugas['kategori_layanan'],
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                            ),
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    Text(
-                                      tugas['nominal_pembayaran'],
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(0xFF3525CD),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                  top: 12,
-                                  left: 16,
-                                  right: 16,
-                                  bottom: 8,
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      tugas['judul_tugas'],
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    SizedBox(height: 4),
-                                    Flexible(
-                                      child: Text(
-                                        tugas['deskripsi'],
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
+                                      Text(
+                                        tugas['nominal_pembayaran'],
                                         style: TextStyle(
-                                          color: Colors.grey.shade700,
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.secondary,
                                         ),
                                       ),
-                                    ),
-                                    SizedBox(height: 4),
-                                    Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        Icon(Icons.location_on, size: 12),
-                                        Text(
-                                          tugas['lokasi_tugas'],
-                                          style: TextStyle(fontSize: 12),
+                                    ],
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    top: 12,
+                                    left: 16,
+                                    right: 16,
+                                    bottom: 8,
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        tugas['judul_tugas'],
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
                                         ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                ),
-                                child: Divider(
-                                  color: Colors.grey.shade400,
-                                  thickness: 2,
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                  top: 8,
-                                  bottom: 12,
-                                  left: 16,
-                                  right: 16,
-                                ),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.all(0),
-                                      child: Row(
+                                      ),
+                                      SizedBox(height: 4),
+                                      Flexible(
+                                        child: Text(
+                                          tugas['deskripsi'],
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            color: Colors.grey.shade700,
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(height: 4),
+                                      Row(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.center,
                                         children: [
-                                          CircleAvatar(
-                                            radius: 18,
-                                            backgroundColor:
-                                                Colors.grey.shade300,
-                                            child: Icon(
-                                              Icons.person,
-                                              color: Colors.grey,
-                                            ),
+                                          Icon(Icons.location_on, size: 12),
+                                          Text(
+                                            tugas['lokasi_tugas'],
+                                            style: TextStyle(fontSize: 12),
                                           ),
-                                          SizedBox(width: 8),
-                                          Text(tugas['nama_requester']),
                                         ],
                                       ),
-                                    ),
-                                    ElevatedButton(
-                                      onPressed: () {},
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Color(0XFF3525CD),
-                                        foregroundColor: Colors.white,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                        ),
-                                        padding: EdgeInsets.symmetric(
-                                          vertical: 8,
-                                          horizontal: 25,
+                                    ],
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                  ),
+                                  child: Divider(
+                                    color: Colors.grey.shade400,
+                                    thickness: 2,
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    top: 8,
+                                    bottom: 12,
+                                    left: 16,
+                                    right: 16,
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.all(0),
+                                        child: Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            CircleAvatar(
+                                              radius: 18,
+                                              backgroundColor:
+                                                  Colors.grey.shade300,
+                                              child: Icon(
+                                                Icons.person,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                            SizedBox(width: 8),
+                                            Text(tugas['nama_requester']),
+                                          ],
                                         ),
                                       ),
-                                      child: Text("Ambil Tugas"),
-                                    ),
-                                  ],
+                                      ElevatedButton(
+                                        onPressed: () {},
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Theme.of(
+                                            context,
+                                          ).colorScheme.secondary,
+                                          foregroundColor: Colors.white,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                          ),
+                                          padding: EdgeInsets.symmetric(
+                                            vertical: 8,
+                                            horizontal: 25,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          "Ambil Tugas",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w800,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         );
                       },
@@ -331,13 +408,17 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
             Container(
               padding: EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: isAktif ? Color(0xFF3B26D9) : Colors.white,
+                color: isAktif
+                    ? Theme.of(context).colorScheme.secondary
+                    : Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.black, width: 1.5),
+                border: !isAktif
+                    ? Border.all(color: Colors.grey, width: 1.5)
+                    : null,
               ),
               child: Icon(
                 icon,
-                color: isAktif ? Colors.white : Colors.black,
+                color: isAktif ? Colors.white : Colors.grey,
                 size: 28,
               ),
             ),

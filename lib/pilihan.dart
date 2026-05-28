@@ -6,11 +6,11 @@ Map<String, dynamic> opsi = {
     "Di batalkan",
     "Selesai",
   ],
-  "kategori_layanan": ["Pembersihan", "Perbaikan", "Belanja", "Pendidikan"],
+  "kategori_layanan": ["BantuClean", "BantuFix", "BantuShop", "BantuStudy"],
   "deskripsi": [
-    "Jasa cleaning service",
-    "Jasa reparasi keperluan anda",
-    "Jasa beli barang kebutuhan anda",
+    "Layanan pembersihan rumah dan kosan",
+    "Perbaikan alat elektronik dan pertukangan",
+    "Jasa belanja dan titip barang harian",
     "Jasa di bidang pendidikan",
   ],
 };

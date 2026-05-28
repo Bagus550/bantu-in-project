@@ -65,13 +65,13 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
   // ignore: non_constant_identifier_names
   IconData ambilIconBantuan(String kategori_layanan) {
     switch (kategori_layanan) {
-      case 'Perbaikan':
+      case 'BantuFix':
         return Icons.home_repair_service_outlined;
-      case 'Pembersihan':
+      case 'BantuClean':
         return Icons.cleaning_services_outlined;
-      case 'Belanja':
+      case 'BantuShop':
         return Icons.shopping_cart_outlined;
-      case 'Pendidikan':
+      case 'BantuStudy':
         return Icons.school;
       default:
         return Icons.grid_view_rounded;
@@ -81,13 +81,13 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
   // ignore: non_constant_identifier_names
   Color ambilWarnaBantuan(String kategori_layanan) {
     switch (kategori_layanan) {
-      case 'Perbaikan':
+      case 'BantuFix':
         return Color(0xFFDDF5DF);
-      case 'Pembersihan':
+      case 'BantuClean':
         return Color(0xFFDFDDF5);
-      case 'Belanja':
+      case 'BantuShop':
         return Color(0XFFF3F5DD);
-      case 'Pendidikan':
+      case 'BantuStudy':
         return Color(0XFFF5DEDD);
       default:
         return Color(0XFFEEEEEE);
@@ -97,13 +97,13 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
   // ignore: non_constant_identifier_names
   Color ambilWarnaIkonBantuan(String kategori_layanan) {
     switch (kategori_layanan) {
-      case 'Perbaikan':
+      case 'BantuFix':
         return Color(0xFF25CD25);
-      case 'Pembersihan':
+      case 'BantuClean':
         return Color(0xFF3525CD);
-      case 'Belanja':
+      case 'BantuShop':
         return Color(0XFFCACD25);
-      case 'Pendidikan':
+      case 'BantuStudy':
         return Color(0XFFCD2525);
       default:
         return Color(0XFFC7C7C7);
@@ -364,8 +364,8 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                                             Text(
                                               bantuan['judul_tugas'],
                                               style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 14,
+                                                fontWeight: FontWeight.w800,
+                                                fontSize: 15,
                                               ),
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
