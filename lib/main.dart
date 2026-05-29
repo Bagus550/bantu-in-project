@@ -1,4 +1,5 @@
 import 'package:bantuin/ida/register.dart';
+// ignore: unused_import
 import 'package:bantuin/ida/splashscreen.dart';
 import 'package:flutter/material.dart';
 // ignore: unused_import
