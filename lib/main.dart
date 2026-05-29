@@ -1,3 +1,4 @@
+import 'package:bantuin/ida/register.dart';
 import 'package:bantuin/ida/splashscreen.dart';
 import 'package:flutter/material.dart';
 // ignore: unused_import
@@ -37,7 +38,7 @@ class BantuInApp extends StatelessWidget {
       initialRoute: '/',
 
       routes: {
-        '/': (context) => const IdaSplashScreen(),
+        '/': (context) => const Register(),
         '/login': (context) => const LoginScreen(),
       },
     );

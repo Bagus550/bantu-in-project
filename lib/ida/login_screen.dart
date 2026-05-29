@@ -1,3 +1,4 @@
+import 'package:bantuin/ida/register.dart';
 import 'package:flutter/material.dart';
 import 'package:bantuin/data_akun.dart';
 import 'package:bantuin/bagus/screens/dashboard_helper_screen.dart';
@@ -219,7 +220,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         children: [
                           Text("Belum Punya Akun?"),
                           TextButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => Register(),
+                                ),
+                              );
+                            },
                             child: Text(
                               "Daftar di sini",
                               style: TextStyle(
