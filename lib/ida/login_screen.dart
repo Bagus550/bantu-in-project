@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:bantuin/data_akun.dart';
+import 'package:bantuin/bagus/screens/dashboard_helper_screen.dart';
+import 'package:bantuin/bagus/screens/dashboard_user_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -23,9 +26,51 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _handleLogin() {
     if (_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Memproses Login Anda')));
+      final inputEmail = _emailController.text.trim();
+      final inputPassword = _passwordController.text;
+
+      try {
+        final matchingAccount = akun.firstWhere(
+          (user) =>
+              user['email'] == inputEmail && user['password'] == inputPassword,
+        );
+
+        final String? role = matchingAccount['role'];
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Login Berhasil sebagai $role!'),
+            backgroundColor: Theme.of(context).colorScheme.secondary,
+          ),
+        );
+
+        _navigateBasedOnRole(role);
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Email atau Kata Sandi Salah'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  void _navigateBasedOnRole(String? role) {
+    switch (role) {
+      case 'helper1':
+      case 'helper2':
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => DashboardHelperScreen()),
+        );
+        break;
+      case 'requester1':
+      case 'requester2':
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => DashboardUserScreen()),
+        );
     }
   }
 
@@ -132,6 +177,59 @@ class _LoginScreenState extends State<LoginScreen> {
                         },
                       ),
                     ),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () {},
+                        child: Text(
+                          'Lupa Kata Sandi?',
+                          style: TextStyle(
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 20),
+                  Column(
+                    children: [
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(
+                            context,
+                          ).colorScheme.primary,
+                          foregroundColor: Colors.white,
+                          minimumSize: Size(double.infinity, 50),
+                        ),
+                        onPressed: () {
+                          _handleLogin();
+                        },
+                        child: Text(
+                          "Login",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text("Belum Punya Akun?"),
+                          TextButton(
+                            onPressed: () {},
+                            child: Text(
+                              "Daftar di sini",
+                              style: TextStyle(
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ],
               ),
