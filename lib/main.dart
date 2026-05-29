@@ -1,4 +1,5 @@
 import 'package:bantuin/ida/lupa_katasandi.dart';
+// ignore: unused_import
 import 'package:bantuin/ida/register.dart';
 // ignore: unused_import
 import 'package:bantuin/ida/splashscreen.dart';
