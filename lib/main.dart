@@ -25,9 +25,7 @@ class BantuInApp extends StatelessWidget {
       title: 'Bantu.In',
       theme: ThemeData(
         useMaterial3: true,
-        textTheme: GoogleFonts.plusJakartaSansTextTheme(
-          Theme.of(context).textTheme,
-        ),
+        textTheme: GoogleFonts.openSansTextTheme(Theme.of(context).textTheme),
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF1E3A8A),
           primary: const Color(0xFF1E3A8A),
