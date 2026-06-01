@@ -12,11 +12,37 @@ class _MyAdminState extends State<MyAdmin> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Admin'),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Colors.white,
+        elevation: 4,
+        shadowColor: Colors.black.withAlpha(10),
+        toolbarHeight: 80,
+
+        leading: IconButton(
+          icon: Icon(Icons.menu,
+            color: Colors.black,
+            size: 30,
+          ),
+          onPressed: () {
+          },
+        ),
+
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text("Bantu.in",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+            Icon(Icons.account_circle_outlined,
+              color: Colors.black,
+              size: 30,
+            ),
+          ],
+        ),
       ),
-      body: const Center(
-        child: Text('Admin Page'),
-      ),
-    ) ;
+    );
   }
 }
