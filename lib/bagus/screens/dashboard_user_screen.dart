@@ -1,4 +1,3 @@
-import 'package:bantuin/bagus/backend/task_service.dart';
 import 'package:flutter/material.dart';
 import 'package:bantuin/data_tugas.dart';
 import 'package:bantuin/pilihan.dart';
@@ -294,9 +293,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                       clipBehavior: Clip.antiAlias,
                       child: InkWell(
                         onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text("Ke halaman buat tugas")),
-                          );
+                          _showAddTaskModal(context, initialKategori: cardPost);
                         },
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -606,11 +603,13 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
     );
   }
 
-  void _showAddTaskModal(BuildContext context) {
+  void _showAddTaskModal(BuildContext context, {String? initialKategori}) {
     final TextEditingController judulController = TextEditingController();
     final TextEditingController deskripsiController = TextEditingController();
     final TextEditingController nominalController = TextEditingController();
-    String? kategoriDipilih;
+    final TextEditingController lokasiController = TextEditingController();
+
+    String? kategoriDipilih = initialKategori;
 
     showModalBottomSheet(
       context: context,
@@ -661,25 +660,36 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
 
                 const SizedBox(height: 15),
 
-                DropdownButtonFormField<String>(
-                  decoration: const InputDecoration(
-                    labelText: 'Kategori Layanan',
-                    border: OutlineInputBorder(),
-                  ),
-                  items: ['Perbaikan', 'Pembersihan', 'Belanja', 'Pendidikan']
-                      .map(
-                        (kat) => DropdownMenuItem(value: kat, child: Text(kat)),
-                      )
-                      .toList(),
-                  onChanged: (value) {
-                    kategoriDipilih = value;
+                StatefulBuilder(
+                  builder: (BuildContext context, StateSetter setModalState) {
+                    return DropdownButtonFormField(
+                      initialValue: kategoriDipilih,
+                      decoration: const InputDecoration(
+                        labelText: 'Kategori Layanan',
+                        border: OutlineInputBorder(),
+                      ),
+                      items:
+                          ['BantuFix', 'BantuClean', 'BantuShop', 'BantuStudy']
+                              .map(
+                                (kat) => DropdownMenuItem(
+                                  value: kat,
+                                  child: Text(kat),
+                                ),
+                              )
+                              .toList(),
+                      onChanged: (value) {
+                        setModalState(() {
+                          kategoriDipilih = value;
+                        });
+                      },
+                    );
                   },
                 ),
 
                 const SizedBox(height: 15),
 
                 TextField(
-                  controller: nominalController,
+                  controller: lokasiController,
                   maxLines: 2,
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
@@ -712,36 +722,10 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                           nominalController.text.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: Text("Semua kolom harus diisi, Gus!"),
+                            content: Text("Semua kolom harus diisi!"),
                           ),
                         );
                         return;
-                      }
-                      bool success = await TaskService().createTask(
-                        idRequester: idUserLogin,
-                        judulTugas: judulController.text,
-                        deskripsi: deskripsiController.text,
-                        kategoriLayanan: kategoriDipilih!,
-                        nominalPembayaran: int.parse(nominalController.text),
-                      );
-
-                      if (!context.mounted) return;
-
-                      if (success) {
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Bantuan Berhasil Diposting!"),
-                          ),
-                        );
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              "Gagal memposting bantuan. Cek server backend!",
-                            ),
-                          ),
-                        );
                       }
                     },
                     style: ElevatedButton.styleFrom(
