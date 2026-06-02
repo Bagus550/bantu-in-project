@@ -93,9 +93,99 @@ class _UserSettingState extends State<UserSetting> {
               'Akun & Keamanan',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
             ),
+            const SizedBox(height: 8),
+            _buildMenuItem(Icons.location_on_outlined, 'Kelola Alamat', true),
+            _buildMenuItem(Icons.lock_outline, 'Ubah Kata Sandi', true),
+            const Divider(height: 24, thickness: 1),
+
+            const Text(
+              'Preferensi Aplikasi',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+            ),
+            const SizedBox(height: 8),
+            _buildMenuItem(
+              Icons.notifications_none,
+              'Notifikasi Pesanan',
+              false,
+            ),
+            _buildMenuItem(Icons.volume_up_outlined, 'Suara & Getar', false),
+            _buildMenuItem(Icons.language, 'Bahasa', true),
+            const Divider(height: 24, thickness: 1),
+
+            const Text(
+              'Bantuan & Legalitas',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+            ),
+            const SizedBox(height: 8),
+            _buildMenuItem(Icons.info_outline, 'Tentang Kami', true),
+            _buildMenuItem(Icons.headset_mic_outlined, 'Hubungi Kami', true),
+            _buildMenuItem(Icons.help_outline, 'Pusat Bantuan (FAQ)', true),
+            const SizedBox(height: 36),
+
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFB71C1C),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text(
+                  'Keluar Akun',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.grey.shade300,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text(
+                  'Hapus Akun',
+                  style: TextStyle(
+                    color: Colors.black87,
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildMenuItem(IconData icon, String title, bool hasTrailingAction) {
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      visualDensity: const VisualDensity(vertical: -2),
+      leading: Icon(icon, color: Colors.black87, size: 26),
+      title: Text(
+        title,
+        style: const TextStyle(fontSize: 14, color: Colors.black87),
+      ),
+      trailing: hasTrailingAction
+          ? const Icon(Icons.chevron_right, color: Colors.grey)
+          : null,
+      onTap: () {},
     );
   }
 }
