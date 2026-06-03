@@ -229,7 +229,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           Text("Belum Punya Akun?"),
                           TextButton(
                             onPressed: () {
-                              Navigator.pushReplacement(
+                              Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => Register(),
