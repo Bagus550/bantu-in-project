@@ -1,3 +1,5 @@
+import 'package:bantuin/bagus/screens/detail_task_user.dart';
+import 'package:bantuin/danela/roomchat.dart';
 import 'package:flutter/material.dart';
 import 'package:bantuin/data_tugas.dart';
 import 'package:bantuin/pilihan.dart';
@@ -244,8 +246,10 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
   }
 
   Widget _buildDashboardHome() {
-    final listMencariHelper = tasks.where((item) {
-      return item['status'] == 'Berjalan';
+    final listTugasAktif = tasks.where((item) {
+      return item['status'] == 'Berjalan' ||
+          item['nama_requester'] == 'Bagus' ||
+          item['status'] == 'Menunggu validasi';
     }).toList();
 
     return SingleChildScrollView(
@@ -352,9 +356,16 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
             ListView.builder(
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
-              itemCount: listMencariHelper.length,
+              itemCount: listTugasAktif.length,
               itemBuilder: (context, index) {
-                final bantuan = listMencariHelper[index];
+                final bantuan = listTugasAktif[index];
+
+                String statusTugas = (bantuan['status'] ?? '')
+                    .toString()
+                    .trim()
+                    .toLowerCase();
+                bool isButtonActive =
+                    statusTugas != 'mencari tugas' && statusTugas != 'selesai';
 
                 return Card(
                   shape: RoundedRectangleBorder(
@@ -365,9 +376,10 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                   clipBehavior: Clip.antiAlias,
                   child: InkWell(
                     onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text("Ke halaman tugas selengkapnya"),
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DetailTugas(dataTugas: bantuan),
                         ),
                       );
                     },
@@ -473,10 +485,22 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                                   ),
                                 ),
                                 IconButton(
-                                  onPressed: () {},
+                                  onPressed: isButtonActive
+                                      ? () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  RoomChatPage(),
+                                            ),
+                                          );
+                                        }
+                                      : null,
                                   icon: Icon(
                                     Icons.chat_outlined,
-                                    color: Colors.grey,
+                                    color: isButtonActive
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Color(0XFF666565),
                                   ),
                                 ),
                               ],
@@ -497,7 +521,15 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                                     ),
                                   ),
                                   SizedBox(width: 10),
-                                  Text(bantuan['nama_helper']),
+                                  Text(
+                                    bantuan['nama_helper'] != null &&
+                                            bantuan['nama_helper']
+                                                .toString()
+                                                .trim()
+                                                .isEmpty
+                                        ? 'Belum ada helper'
+                                        : bantuan['nama_helper'],
+                                  ),
                                 ],
                               ),
                               SizedBox(
