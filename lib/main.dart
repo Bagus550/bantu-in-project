@@ -1,4 +1,5 @@
 // ignore: unused_import
+import 'package:bantuin/bagus/screens/detail_task_user.dart';
 import 'package:bantuin/ida/splashscreen.dart';
 import 'package:flutter/material.dart';
 // ignore: unused_import
@@ -36,7 +37,7 @@ class BantuInApp extends StatelessWidget {
       initialRoute: '/',
 
       routes: {
-        '/': (context) => const IdaSplashScreen(),
+        '/': (context) => const DetailTugas(),
         '/login': (context) => const LoginScreen(),
       },
     );
