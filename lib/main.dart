@@ -8,12 +8,7 @@ import 'package:bantuin/ida/splashscreen.dart';
 import 'package:bantuin/yuliana/about.dart';
 import 'package:bantuin/yuliana/faq.dart';
 import 'package:flutter/material.dart';
-// ignore: unused_import
-import 'bagus/screens/dashboard_user_screen.dart';
-// ignore: unused_import
-import 'bagus/screens/dashboard_helper_screen.dart';
-// ignore: unused_import
-import 'ida/login_screen.dart';
+import 'ida/profile.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'danela/detail_task_helper.dart';
 
