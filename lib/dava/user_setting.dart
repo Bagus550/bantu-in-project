@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class UserSetting extends StatefulWidget {
   const UserSetting({super.key});
@@ -103,6 +105,9 @@ class _UserSettingState extends State<UserSetting> {
                   Icons.location_on_outlined,
                   'Kelola Alamat',
                   true,
+                  onTap: () {
+                    _showAddressBottomSheet(context);
+                  },
                 ),
                 _buildMenuItem(Icons.lock_outline, 'Ubah Kata Sandi', true),
                 const Divider(height: 24, thickness: 1),
@@ -173,6 +178,9 @@ class _UserSettingState extends State<UserSetting> {
                   Icons.headset_mic_outlined,
                   'Hubungi Kami',
                   true,
+                  onTap: () {
+                    _showContactBottomSheet(context);
+                  },
                 ),
                 _buildMenuItem(Icons.help_outline, 'Pusat Bantuan (FAQ)', true),
                 const SizedBox(height: 36),
@@ -229,7 +237,177 @@ class _UserSettingState extends State<UserSetting> {
     );
   }
 
-  Widget _buildMenuItem(IconData icon, String title, bool hasTrailingAction) {
+  void _showAddressBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadiusGeometry.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        return Padding(
+          padding: EdgeInsetsGeometry.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+            left: 24,
+            right: 24,
+            top: 24,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Ubah Alamat',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              const TextField(
+                maxLines: 3,
+                decoration: InputDecoration(
+                  hintText: 'Masukan alamat lengkap anda...',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.all(12),
+                ),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blueAccent,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadiusGeometry.circular(8),
+                    ),
+                  ),
+                  child: const Text(
+                    'Simpan Alamat',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showContactBottomSheet(BuildContext context) {
+    final String whatsappUrl = "https://wa.me/6285955035351";
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        return Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Hubungi Kami',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Silahkan pilih metode di bawah ini untuk menghubungi tim dukungan kami.',
+                style: TextStyle(fontSize: 14, color: Colors.grey),
+              ),
+              const SizedBox(height: 24),
+
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () async {
+                    final Uri url = Uri.parse(whatsappUrl);
+                    if (await canLaunchUrl(url)) {
+                      await launchUrl(
+                        url,
+                        mode: LaunchMode.externalApplication,
+                      );
+                    } else {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Tidak dapat membuka WhatApp'),
+                          ),
+                        );
+                      }
+                    }
+                  },
+                  icon: const Icon(Icons.chat, color: Colors.white),
+                  label: const Text(
+                    'Hubungi via WhatApp',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green.shade700,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadiusGeometry.circular(8),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    Clipboard.setData(ClipboardData(text: whatsappUrl)).then((
+                      _,
+                    ) {
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Link WhatsApp berhasil disalin!'),
+                        ),
+                      );
+                    });
+                  },
+                  icon: const Icon(Icons.copy, color: Colors.black87),
+                  label: const Text(
+                    'Salin Link Tautan',
+                    style: TextStyle(color: Colors.black87),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    side: BorderSide(color: Colors.grey.shade400),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadiusGeometry.circular(8),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildMenuItem(
+    IconData icon,
+    String title,
+    bool hasTrailingAction, {
+    VoidCallback? onTap,
+  }) {
     return ListTile(
       contentPadding: EdgeInsets.zero,
       visualDensity: const VisualDensity(vertical: -2),
@@ -241,7 +419,7 @@ class _UserSettingState extends State<UserSetting> {
       trailing: hasTrailingAction
           ? const Icon(Icons.chevron_right, color: Colors.grey)
           : null,
-      onTap: () {},
+      onTap: onTap,
     );
   }
 }
