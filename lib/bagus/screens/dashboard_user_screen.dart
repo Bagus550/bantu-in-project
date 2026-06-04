@@ -1,4 +1,6 @@
-import 'package:bantuin/bagus/backend/task_service.dart';
+import 'package:bantuin/bagus/screens/detail_task_user.dart';
+import 'package:bantuin/bagus/screens/notifications.dart';
+import 'package:bantuin/danela/roomchat.dart';
 import 'package:flutter/material.dart';
 import 'package:bantuin/data_tugas.dart';
 import 'package:bantuin/pilihan.dart';
@@ -115,9 +117,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
       case 0:
         return _buildDashboardHome();
       case 1:
-        return Center(
-          child: Text("Halaman MyTask", style: TextStyle(fontSize: 20)),
-        );
+        return NotificationsTab(tasks: tasks);
       case 2:
         return Center(
           child: Text("Halaman Message", style: TextStyle(fontSize: 20)),
@@ -223,14 +223,14 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
               _buildNavItem(index: 0, icon: Icons.home_filled, label: 'Home'),
               _buildNavItem(
                 index: 1,
-                icon: Icons.assignment_outlined,
-                label: 'My Task',
+                icon: Icons.notifications_none_outlined,
+                label: 'Notifikasi',
               ),
               _buildPostButton(),
               _buildNavItem(
                 index: 2,
                 icon: Icons.chat_bubble_outline_rounded,
-                label: 'Message',
+                label: 'Pesan',
               ),
               _buildNavItem(
                 index: 3,
@@ -245,8 +245,16 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
   }
 
   Widget _buildDashboardHome() {
-    final listMencariHelper = tasks.where((item) {
-      return item['status'] == 'Berjalan';
+    final listTugasAktif = tasks.where((item) {
+      return item['nama_requester'] == 'Bagus' &&
+          (item['status'] == 'Mencari helper' ||
+              item['status'] == 'Berjalan' ||
+              item['status'] == 'Menunggu validasi');
+    }).toList();
+
+    final listTugasSelesai = tasks.where((item) {
+      return item['nama_requester'] == 'Bagus' &&
+          (item['status'] == 'Selesai' || item['status'] == 'Dibatalkan');
     }).toList();
 
     return SingleChildScrollView(
@@ -294,9 +302,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                       clipBehavior: Clip.antiAlias,
                       child: InkWell(
                         onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text("Ke halaman buat tugas")),
-                          );
+                          _showAddTaskModal(context, initialKategori: cardPost);
                         },
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -355,9 +361,18 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
             ListView.builder(
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
-              itemCount: listMencariHelper.length,
+              itemCount: listTugasAktif.length,
               itemBuilder: (context, index) {
-                final bantuan = listMencariHelper[index];
+                final bantuan = listTugasAktif[index];
+
+                String statusTugas = (bantuan['status'] ?? '')
+                    .toString()
+                    .trim()
+                    .toLowerCase();
+                bool isButtonActive =
+                    statusTugas != 'mencari helper' &&
+                    statusTugas != 'selesai' &&
+                    statusTugas != 'dibatalkan';
 
                 return Card(
                   shape: RoundedRectangleBorder(
@@ -368,9 +383,10 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                   clipBehavior: Clip.antiAlias,
                   child: InkWell(
                     onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text("Ke halaman tugas selengkapnya"),
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DetailTugas(dataTugas: bantuan),
                         ),
                       );
                     },
@@ -476,10 +492,22 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                                   ),
                                 ),
                                 IconButton(
-                                  onPressed: () {},
+                                  onPressed: isButtonActive
+                                      ? () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  RoomChatPage(),
+                                            ),
+                                          );
+                                        }
+                                      : null,
                                   icon: Icon(
                                     Icons.chat_outlined,
-                                    color: Colors.grey,
+                                    color: isButtonActive
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Color(0XFF666565),
                                   ),
                                 ),
                               ],
@@ -500,7 +528,15 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                                     ),
                                   ),
                                   SizedBox(width: 10),
-                                  Text(bantuan['nama_helper']),
+                                  Text(
+                                    bantuan['nama_helper'] != null &&
+                                            bantuan['nama_helper']
+                                                .toString()
+                                                .trim()
+                                                .isEmpty
+                                        ? 'Belum ada helper'
+                                        : bantuan['nama_helper'],
+                                  ),
                                 ],
                               ),
                               SizedBox(
@@ -516,6 +552,219 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                                   icon: Icon(Icons.clear),
                                   label: Text(
                                     "Batalkan",
+                                    style: TextStyle(fontSize: 10),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+            SizedBox(height: 20),
+            Text(
+              "TUGAS SELESAI",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 10),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              itemCount: listTugasSelesai.length,
+              itemBuilder: (context, index) {
+                final history = listTugasSelesai[index];
+
+                String statusTugas = (history['status'] ?? '')
+                    .toString()
+                    .trim()
+                    .toLowerCase();
+                bool isButtonActive =
+                    statusTugas != 'mencari helper' &&
+                    statusTugas != 'selesai' &&
+                    statusTugas != 'dibatalkan';
+
+                return Card(
+                  shape: RoundedRectangleBorder(
+                    side: BorderSide(color: Colors.grey, width: 1),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  margin: EdgeInsets.only(bottom: 16),
+                  clipBehavior: Clip.antiAlias,
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DetailTugas(dataTugas: history),
+                        ),
+                      );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 16,
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 50,
+                                      height: 50,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(20),
+                                        color: ambilWarnaBantuan(
+                                          history['kategori_layanan'],
+                                        ),
+                                      ),
+                                      child: Icon(
+                                        ambilIconBantuan(
+                                          history['kategori_layanan'],
+                                        ),
+                                        color: ambilWarnaIkonBantuan(
+                                          history['kategori_layanan'],
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            history['judul_tugas'],
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w800,
+                                              fontSize: 15,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          SizedBox(height: 4),
+                                          Text(
+                                            'ID : ${history['id']}',
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(width: 16),
+                              Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  color: ambilBgStatus(history['status']),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 2,
+                                    horizontal: 8,
+                                  ),
+                                  child: Text(
+                                    history['status'],
+                                    style: TextStyle(
+                                      color: ambilWarnaStatus(
+                                        history['status'],
+                                      ),
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 10),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  history['nominal_pembayaran'],
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                IconButton(
+                                  onPressed: isButtonActive
+                                      ? () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  RoomChatPage(),
+                                            ),
+                                          );
+                                        }
+                                      : null,
+                                  icon: Icon(
+                                    Icons.chat_outlined,
+                                    color: isButtonActive
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Color(0XFF666565),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Divider(color: Colors.grey.shade300, thickness: 2),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 18,
+                                    backgroundColor: Colors.grey.shade300,
+                                    child: Icon(
+                                      Icons.person,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                  SizedBox(width: 10),
+                                  Text(
+                                    history['nama_helper'] != null &&
+                                            history['nama_helper']
+                                                .toString()
+                                                .trim()
+                                                .isEmpty
+                                        ? 'Belum ada helper'
+                                        : history['nama_helper'],
+                                  ),
+                                ],
+                              ),
+                              SizedBox(
+                                height: 30,
+                                child: ElevatedButton.icon(
+                                  onPressed: () {},
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: ambilWarnaStatus(
+                                      'Selesai',
+                                    ),
+                                    foregroundColor: Colors.white,
+                                  ),
+                                  icon: Icon(Icons.refresh),
+                                  label: Text(
+                                    "Pesan Ulang",
                                     style: TextStyle(fontSize: 10),
                                   ),
                                 ),
@@ -606,11 +855,13 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
     );
   }
 
-  void _showAddTaskModal(BuildContext context) {
+  void _showAddTaskModal(BuildContext context, {String? initialKategori}) {
     final TextEditingController judulController = TextEditingController();
     final TextEditingController deskripsiController = TextEditingController();
     final TextEditingController nominalController = TextEditingController();
-    String? kategoriDipilih;
+    final TextEditingController lokasiController = TextEditingController();
+
+    String? kategoriDipilih = initialKategori;
 
     showModalBottomSheet(
       context: context,
@@ -661,25 +912,36 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
 
                 const SizedBox(height: 15),
 
-                DropdownButtonFormField<String>(
-                  decoration: const InputDecoration(
-                    labelText: 'Kategori Layanan',
-                    border: OutlineInputBorder(),
-                  ),
-                  items: ['Perbaikan', 'Pembersihan', 'Belanja', 'Pendidikan']
-                      .map(
-                        (kat) => DropdownMenuItem(value: kat, child: Text(kat)),
-                      )
-                      .toList(),
-                  onChanged: (value) {
-                    kategoriDipilih = value;
+                StatefulBuilder(
+                  builder: (BuildContext context, StateSetter setModalState) {
+                    return DropdownButtonFormField(
+                      initialValue: kategoriDipilih,
+                      decoration: const InputDecoration(
+                        labelText: 'Kategori Layanan',
+                        border: OutlineInputBorder(),
+                      ),
+                      items:
+                          ['BantuFix', 'BantuClean', 'BantuShop', 'BantuStudy']
+                              .map(
+                                (kat) => DropdownMenuItem(
+                                  value: kat,
+                                  child: Text(kat),
+                                ),
+                              )
+                              .toList(),
+                      onChanged: (value) {
+                        setModalState(() {
+                          kategoriDipilih = value;
+                        });
+                      },
+                    );
                   },
                 ),
 
                 const SizedBox(height: 15),
 
                 TextField(
-                  controller: nominalController,
+                  controller: lokasiController,
                   maxLines: 2,
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
@@ -712,36 +974,10 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                           nominalController.text.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: Text("Semua kolom harus diisi, Gus!"),
+                            content: Text("Semua kolom harus diisi!"),
                           ),
                         );
                         return;
-                      }
-                      bool success = await TaskService().createTask(
-                        idRequester: idUserLogin,
-                        judulTugas: judulController.text,
-                        deskripsi: deskripsiController.text,
-                        kategoriLayanan: kategoriDipilih!,
-                        nominalPembayaran: int.parse(nominalController.text),
-                      );
-
-                      if (!context.mounted) return;
-
-                      if (success) {
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Bantuan Berhasil Diposting!"),
-                          ),
-                        );
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              "Gagal memposting bantuan. Cek server backend!",
-                            ),
-                          ),
-                        );
                       }
                     },
                     style: ElevatedButton.styleFrom(

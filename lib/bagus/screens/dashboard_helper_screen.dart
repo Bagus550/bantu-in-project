@@ -493,9 +493,7 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
 
   Widget _buildPostButton() {
     return GestureDetector(
-      onTap: () {
-        // Aksi ketika klik tombol tambah tugas baru
-      },
+      onTap: () {},
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -503,12 +501,7 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
             padding: EdgeInsets.all(8.0),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(
-                color: Color(
-                  0xFF3B82F6,
-                ), // Biru terang sesuai secondary theme kita
-                width: 2.0,
-              ),
+              border: Border.all(color: Color(0xFF3B82F6), width: 2.0),
             ),
             child: Icon(Icons.camera, color: Color(0xFF3B82F6), size: 26.0),
           ),
