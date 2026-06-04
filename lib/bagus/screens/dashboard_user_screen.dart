@@ -2,8 +2,7 @@ import 'package:bantuin/bagus/screens/detail_task_user.dart';
 import 'package:bantuin/bagus/screens/notifications.dart';
 import 'package:bantuin/danela/message.dart';
 import 'package:bantuin/danela/roomchat.dart';
-import 'package:bantuin/ida/profile.dart';
-import 'package:bantuin/ida/profile_tab.dart';
+import 'package:bantuin/dava/user_setting.dart';
 import 'package:flutter/material.dart';
 import 'package:bantuin/data_tugas.dart';
 import 'package:bantuin/pilihan.dart';
@@ -198,8 +197,9 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
               leading: Icon(Icons.settings, color: Colors.black87),
               title: Text("Pengaturan"),
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Pindah ke halaman pengaturan")),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => UserSetting()),
                 );
               },
             ),
