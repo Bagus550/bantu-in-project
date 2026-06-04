@@ -7,6 +7,7 @@ import 'package:bantuin/ida/profile_tab.dart';
 import 'package:flutter/material.dart';
 import 'package:bantuin/data_tugas.dart';
 import 'package:bantuin/pilihan.dart';
+import 'package:bantuin/danela/message_list.dart';
 
 class DashboardUserScreen extends StatefulWidget {
   const DashboardUserScreen({super.key});
@@ -122,7 +123,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
       case 1:
         return NotificationsTab(tasks: tasks);
       case 2:
-        return Message();
+        return MessageList();
       case 3:
         return ProfileTab();
       default:
@@ -497,7 +498,9 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                                             context,
                                             MaterialPageRoute(
                                               builder: (context) =>
-                                                  RoomChatPage(),
+                                                  RoomChatPage(
+                                                    namaData: bantuan,
+                                                  ),
                                             ),
                                           );
                                         }
@@ -710,7 +713,9 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                                             context,
                                             MaterialPageRoute(
                                               builder: (context) =>
-                                                  RoomChatPage(),
+                                                  RoomChatPage(
+                                                    namaData: history,
+                                                  ),
                                             ),
                                           );
                                         }
