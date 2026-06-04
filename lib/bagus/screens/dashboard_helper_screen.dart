@@ -234,7 +234,7 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) =>
-                                    DetailTugasHelper(taskData: tasks[index]),
+                                    DetailTugasHelper(taskData: tugas),
                               ),
                             );
                           },
