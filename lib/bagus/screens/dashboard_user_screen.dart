@@ -120,7 +120,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
       case 1:
         return NotificationsTab(tasks: tasks);
       case 2:
-        return MessageList(tasks: tasks);
+        return MessageList();
       case 3:
         return Center(
           child: Text("Halaman Profile", style: TextStyle(fontSize: 20)),
