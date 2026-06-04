@@ -3,6 +3,7 @@ import 'package:bantuin/ida/register.dart';
 // ignore: unused_import
 import 'package:bantuin/ida/splashscreen.dart';
 import 'package:bantuin/yuliana/about.dart';
+import 'package:bantuin/yuliana/faq.dart';
 import 'package:flutter/material.dart';
 // ignore: unused_import
 import 'bagus/screens/dashboard_user_screen.dart';
@@ -39,7 +40,7 @@ class BantuInApp extends StatelessWidget {
       initialRoute: '/',
 
       routes: {
-        '/': (context) => const About(),
+        '/': (context) => const Faq(),
         '/login': (context) => const LoginScreen(),
       },
     );
