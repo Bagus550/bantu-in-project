@@ -25,8 +25,8 @@ class _DetailTugasState extends State<DetailTugas> {
     }
   }
 
-  Color ambilWarnaIkonBantuan(String kategori_layanan) {
-    switch (kategori_layanan) {
+  Color ambilWarnaIkonBantuan(String kategoriLayanan) {
+    switch (kategoriLayanan) {
       case 'BantuFix':
         return Color(0xFF25CD25);
       case 'BantuClean':
@@ -303,7 +303,7 @@ class _DetailTugasState extends State<DetailTugas> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => RoomChatPage(),
+                                      builder: (context) => RoomChatPage(namaData: widget.dataTugas,),
                                     ),
                                   );
                                 }
