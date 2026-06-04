@@ -1,11 +1,8 @@
-import 'package:bantuin/dava/helper_setting.dart';
-import 'package:bantuin/dava/user_setting.dart';
-import 'package:bantuin/ida/lupa_katasandi.dart';
-import 'package:bantuin/ida/register.dart';
+import 'package:bantuin/yuliana/about_User.dart';
+import 'package:bantuin/ida/login_screen.dart';
 // ignore: unused_import
 import 'package:bantuin/bagus/screens/detail_task_user.dart';
 import 'package:flutter/material.dart';
-import 'ida/profile.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 
@@ -36,7 +33,7 @@ class BantuInApp extends StatelessWidget {
       initialRoute: '/',
 
       routes: {
-        '/': (context) => const DashboardHelperScreen(),
+        '/': (context) => const AboutUser(),
         '/login': (context) => const LoginScreen(),
       },
     );
