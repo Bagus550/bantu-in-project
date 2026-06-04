@@ -1,3 +1,4 @@
+import 'package:bantuin/dava/user_setting.dart';
 import 'package:bantuin/ida/lupa_katasandi.dart';
 import 'package:bantuin/ida/register.dart';
 // ignore: unused_import
@@ -39,7 +40,7 @@ class BantuInApp extends StatelessWidget {
       initialRoute: '/',
 
       routes: {
-        '/': (context) => const LupaKatasandi(),
+        '/': (context) => const UserSetting(),
         '/login': (context) => const LoginScreen(),
       },
     );

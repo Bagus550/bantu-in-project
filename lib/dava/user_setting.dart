@@ -8,6 +8,8 @@ class UserSetting extends StatefulWidget {
 }
 
 class _UserSettingState extends State<UserSetting> {
+  bool isNotificationOn = true;
+  bool isSuaraOn = true;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -89,39 +91,95 @@ class _UserSettingState extends State<UserSetting> {
               ),
             ),
             const SizedBox(height: 28),
-            const Text(
-              'Akun & Keamanan',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-            ),
-            const SizedBox(height: 8),
-            _buildMenuItem(Icons.location_on_outlined, 'Kelola Alamat', true),
-            _buildMenuItem(Icons.lock_outline, 'Ubah Kata Sandi', true),
-            const Divider(height: 24, thickness: 1),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Akun & Keamanan',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                ),
+                const SizedBox(height: 8),
+                _buildMenuItem(
+                  Icons.location_on_outlined,
+                  'Kelola Alamat',
+                  true,
+                ),
+                _buildMenuItem(Icons.lock_outline, 'Ubah Kata Sandi', true),
+                const Divider(height: 24, thickness: 1),
 
-            const Text(
-              'Preferensi Aplikasi',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-            ),
-            const SizedBox(height: 8),
-            _buildMenuItem(
-              Icons.notifications_none,
-              'Notifikasi Pesanan',
-              false,
-            ),
-            _buildMenuItem(Icons.volume_up_outlined, 'Suara & Getar', false),
-            _buildMenuItem(Icons.language, 'Bahasa', true),
-            const Divider(height: 24, thickness: 1),
+                const Text(
+                  'Preferensi Aplikasi',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                ),
+                const SizedBox(height: 8),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  visualDensity: const VisualDensity(vertical: -2),
+                  leading: const Icon(
+                    Icons.notifications_none,
+                    color: Colors.black87,
+                    size: 26,
+                  ),
+                  title: const Text(
+                    'Notifikasi Pesanan',
+                    style: TextStyle(fontSize: 14, color: Colors.black87),
+                  ),
+                  trailing: Transform.scale(
+                    scale: 0.75,
+                    child: Switch(
+                      value: isNotificationOn,
+                      activeThumbColor: Theme.of(context).colorScheme.primary,
+                      onChanged: (bool value) {
+                        setState(() {
+                          isNotificationOn = value;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  visualDensity: const VisualDensity(vertical: -2),
+                  leading: const Icon(
+                    Icons.volume_up_outlined,
+                    color: Colors.black87,
+                    size: 26,
+                  ),
+                  title: const Text(
+                    'Suara',
+                    style: TextStyle(fontSize: 14, color: Colors.black87),
+                  ),
+                  trailing: Transform.scale(
+                    scale: 0.75,
+                    child: Switch(
+                      value: isSuaraOn,
+                      activeThumbColor: Theme.of(context).colorScheme.primary,
+                      onChanged: (bool value) {
+                        setState(() {
+                          isSuaraOn = value;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+                _buildMenuItem(Icons.language, 'Bahasa', true),
+                const Divider(height: 24, thickness: 1),
 
-            const Text(
-              'Bantuan & Legalitas',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                const Text(
+                  'Bantuan & Legalitas',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                ),
+                const SizedBox(height: 8),
+                _buildMenuItem(Icons.info_outline, 'Tentang Kami', true),
+                _buildMenuItem(
+                  Icons.headset_mic_outlined,
+                  'Hubungi Kami',
+                  true,
+                ),
+                _buildMenuItem(Icons.help_outline, 'Pusat Bantuan (FAQ)', true),
+                const SizedBox(height: 36),
+              ],
             ),
-            const SizedBox(height: 8),
-            _buildMenuItem(Icons.info_outline, 'Tentang Kami', true),
-            _buildMenuItem(Icons.headset_mic_outlined, 'Hubungi Kami', true),
-            _buildMenuItem(Icons.help_outline, 'Pusat Bantuan (FAQ)', true),
-            const SizedBox(height: 36),
-
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
