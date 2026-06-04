@@ -1,3 +1,4 @@
+import 'package:bantuin/dava/helper_setting.dart';
 import 'package:bantuin/dava/user_setting.dart';
 import 'package:bantuin/ida/lupa_katasandi.dart';
 import 'package:bantuin/ida/register.dart';
@@ -39,7 +40,7 @@ class BantuInApp extends StatelessWidget {
       ),
       initialRoute: '/',
 
-      routes: {'/': (context) => const UserSetting()},
+      routes: {'/': (context) => const HelperSetting()},
     );
   }
 }
