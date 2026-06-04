@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HelperSetting extends StatefulWidget {
@@ -275,7 +276,10 @@ class _HelperSettingState extends State<HelperSetting> {
                       }
                     }
                   },
-                  icon: const Icon(Icons.chat, color: Colors.white),
+                  icon: const FaIcon(
+                    FontAwesomeIcons.whatsapp,
+                    color: Colors.white,
+                  ),
                   label: const Text(
                     'Hubungi via WhatApp',
                     style: TextStyle(
