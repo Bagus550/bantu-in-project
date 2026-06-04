@@ -1,8 +1,9 @@
+import 'package:bantuin/danela/roomchat.dart';
 import 'package:flutter/material.dart';
-import 'package:bantuin/data_tugas.dart';
 
 class DetailTugas extends StatefulWidget {
-  const DetailTugas({super.key});
+  final Map<String, dynamic> dataTugas;
+  const DetailTugas({super.key, required this.dataTugas});
 
   @override
   State<DetailTugas> createState() => _DetailTugasState();
@@ -39,15 +40,42 @@ class _DetailTugasState extends State<DetailTugas> {
     }
   }
 
+  IconData ambilIconStatus(String status) {
+    switch (status) {
+      case 'Mencari helper':
+        return Icons.search;
+      case 'Berjalan':
+        return Icons.refresh;
+      case 'Menunggu validasi':
+        return Icons.warning_amber_rounded;
+      case 'Dibatalkan':
+        return Icons.clear;
+      case 'Selesai':
+        return Icons.check;
+      default:
+        return Icons.help_outline_rounded;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final data = widget.dataTugas;
+    String statusTugas = widget.dataTugas['status'];
+    bool isButtonActive =
+        statusTugas != 'Mencari helper' && statusTugas != 'Selesai';
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
           "Detail Tugas",
           style: TextStyle(fontWeight: FontWeight.w900),
         ),
-        leading: IconButton(onPressed: () {}, icon: Icon(Icons.arrow_back_ios)),
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: Icon(Icons.arrow_back_ios),
+        ),
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -72,7 +100,7 @@ class _DetailTugasState extends State<DetailTugas> {
                   Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(50),
-                      color: ambilWarnaStatus(tasks[0]['status']),
+                      color: ambilWarnaStatus(data['status'] ?? ''),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
@@ -81,9 +109,14 @@ class _DetailTugasState extends State<DetailTugas> {
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.search, color: Colors.white, size: 20),
+                          Icon(
+                            ambilIconStatus(data['status']),
+                            size: 20,
+                            color: Colors.white,
+                          ),
+                          SizedBox(width: 5),
                           Text(
-                            tasks[0]['status'],
+                            data['status'],
                             style: TextStyle(color: Colors.white),
                           ),
                         ],
@@ -109,15 +142,15 @@ class _DetailTugasState extends State<DetailTugas> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        tasks[0]['kategori_layanan'],
+                        data['kategori_layanan'],
                         style: TextStyle(
                           color: ambilWarnaIkonBantuan(
-                            tasks[0]['kategori_layanan'],
+                            data['kategori_layanan'],
                           ),
                         ),
                       ),
                       Text(
-                        tasks[0]['judul_tugas'],
+                        data['judul_tugas'],
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -139,9 +172,9 @@ class _DetailTugasState extends State<DetailTugas> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text("Nominal Pmebayaran"),
+                                Text("Nominal Pembayaran"),
                                 Text(
-                                  tasks[0]['nominal_pembayaran'],
+                                  data['nominal_pembayaran'] ?? '0',
                                   style: TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w600,
@@ -186,7 +219,7 @@ class _DetailTugasState extends State<DetailTugas> {
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 15),
-                        child: Text(tasks[0]['deskripsi']),
+                        child: Text(data['deskripsi'] ?? "Tidak ada deskripsi"),
                       ),
                     ],
                   ),
@@ -222,7 +255,9 @@ class _DetailTugasState extends State<DetailTugas> {
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 15),
-                        child: Text(tasks[0]['lokasi_tugas']),
+                        child: Text(
+                          data['lokasi_tugas'] ?? "Lokasi tidak ditentukan",
+                        ),
                       ),
                     ],
                   ),
@@ -249,7 +284,10 @@ class _DetailTugasState extends State<DetailTugas> {
                         ),
                       ),
                       Text(
-                        "Belum Ada Helper",
+                        data['nama_helper'] != null &&
+                                data['nama_helper'].toString().trim().isEmpty
+                            ? 'Belum ada helper'
+                            : data['nama_helper'],
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -260,15 +298,26 @@ class _DetailTugasState extends State<DetailTugas> {
                         height: 45,
                         width: double.infinity,
                         child: ElevatedButton.icon(
-                          onPressed: () {},
+                          onPressed: isButtonActive
+                              ? () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => RoomChatPage(),
+                                    ),
+                                  );
+                                }
+                              : null,
                           icon: Icon(Icons.chat_outlined),
                           label: Text("Chat dengan Helper"),
                           style: ElevatedButton.styleFrom(
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            backgroundColor: Color(0XFFCDCDCD),
-                            foregroundColor: Color(0XFF666565),
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.secondary,
+                            foregroundColor: Colors.white,
                           ),
                         ),
                       ),
@@ -289,7 +338,7 @@ class _DetailTugasState extends State<DetailTugas> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    backgroundColor: Theme.of(context).colorScheme.secondary,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
                     foregroundColor: Colors.white,
                   ),
                 ),
