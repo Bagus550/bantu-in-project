@@ -96,3 +96,24 @@ List<Map<String, dynamic>> tasks = [
     "kategori_layanan": "BantuStudy",
   },
 ];
+
+final List<Map<String, dynamic>> helperList = [
+  {
+    "name": "Sarah Mitchell",
+    "role": "Helper Bantu.In",
+    "status": "ACTIVE",
+    "tasks": 142,
+  },
+  {
+    "name": "Marcus Chen",
+    "role": "Helper Bantu.In",
+    "status": "SUSPENDED",
+    "tasks": 89,
+  },
+  {
+    "name": "Elena Rodriguez",
+    "role": "Helper Bantu.In",
+    "status": "PENDING",
+    "tasks": 0,
+  },
+];
