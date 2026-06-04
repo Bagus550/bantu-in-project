@@ -45,7 +45,7 @@ class BantuInApp extends StatelessWidget {
       initialRoute: '/',
 
       routes: {
-        '/': (context) => const AboutHelper(),
+        '/': (context) => const AboutUser(),
         '/login': (context) => const LoginScreen(),
       },
     );
