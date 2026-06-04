@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class RoomChatPage extends StatefulWidget {
-  const RoomChatPage({super.key});
+  final Map<String, dynamic> namaData;
+  const RoomChatPage({super.key, required this.namaData});
 
   @override
   State<RoomChatPage> createState() => _RoomChatPageState();
@@ -12,12 +13,15 @@ class _RoomChatPageState extends State<RoomChatPage> {
 
   @override
   Widget build(BuildContext context) {
+    final String namaPelanggan =
+        widget.namaData['nama_requester'] ?? 'Tidak ada nama';
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue.shade900,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {Navigator.pop(context);
+          onPressed: () {
+            Navigator.pop(context);
           },
         ),
         title: Row(
@@ -32,11 +36,12 @@ class _RoomChatPageState extends State<RoomChatPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Cimol', 
-                style: TextStyle(
-                  color: Colors.white, 
-                  fontSize: 16, 
-                  fontWeight: FontWeight.bold,
+                Text(
+                  namaPelanggan,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
@@ -45,7 +50,7 @@ class _RoomChatPageState extends State<RoomChatPage> {
         ),
       ),
       body: Column(
-        children: [         
+        children: [
           Spacer(),
           Padding(
             padding: const EdgeInsets.all(12.0),
@@ -64,9 +69,11 @@ class _RoomChatPageState extends State<RoomChatPage> {
                 ),
                 SizedBox(width: 8),
                 IconButton(
-                  icon: Icon(Icons.send, color: Theme.of(context).colorScheme.secondary),
-                  onPressed: () {
-                  },
+                  icon: Icon(
+                    Icons.send,
+                    color: Theme.of(context).colorScheme.secondary,
+                  ),
+                  onPressed: () {},
                 ),
               ],
             ),

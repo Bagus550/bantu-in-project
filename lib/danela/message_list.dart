@@ -35,7 +35,9 @@ class MessageList extends StatelessWidget {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => RoomChatPage()),
+                    MaterialPageRoute(
+                      builder: (context) => RoomChatPage(namaData: {}),
+                    ),
                   );
                 },
               ),

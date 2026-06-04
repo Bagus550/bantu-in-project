@@ -112,7 +112,7 @@ class _RegisterState extends State<Register> {
                                       setState(() {
                                         _isRememberMe =
                                             newValue ??
-                                            false; // Update nilai saat diklik
+                                            false;
                                       });
                                     },
                                   ),
@@ -132,7 +132,7 @@ class _RegisterState extends State<Register> {
                                               style: const TextStyle(
                                                 fontWeight: FontWeight.w500,
                                                 decoration: TextDecoration
-                                                    .underline, // Memberikan efek garis bawah
+                                                    .underline,
                                                 color: Colors.black,
                                               ),
                                             ),
@@ -147,7 +147,7 @@ class _RegisterState extends State<Register> {
                                               style: const TextStyle(
                                                 fontWeight: FontWeight.w500,
                                                 decoration: TextDecoration
-                                                    .underline, // Memberikan efek garis bawah
+                                                    .underline,
                                                 color: Colors.black,
                                               ),
                                             ),
@@ -176,7 +176,7 @@ class _RegisterState extends State<Register> {
                                   Text("Sudah Punya Akun?"),
                                   TextButton(
                                     onPressed: () {
-                                      Navigator.pushReplacement(
+                                      Navigator.push(
                                         context,
                                         MaterialPageRoute(
                                           builder: (context) =>
