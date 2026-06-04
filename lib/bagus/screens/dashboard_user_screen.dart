@@ -1,5 +1,6 @@
 import 'package:bantuin/bagus/screens/detail_task_user.dart';
 import 'package:bantuin/bagus/screens/notifications.dart';
+import 'package:bantuin/danela/message.dart';
 import 'package:bantuin/danela/roomchat.dart';
 import 'package:bantuin/dava/user_setting.dart';
 import 'package:flutter/material.dart';
@@ -123,9 +124,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
       case 2:
         return MessageList();
       case 3:
-        return Center(
-          child: Text("Halaman Profile", style: TextStyle(fontSize: 20)),
-        );
+        return ProfileTab();
       default:
         return _buildDashboardHome();
     }
