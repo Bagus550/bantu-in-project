@@ -9,28 +9,32 @@ class DashboardHelperScreen extends StatefulWidget {
 }
 
 class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
+  Widget _dapatkanHalaman(int index) {
+    switch (index) {
+      case 0:
+        return _buildDashboardHelper();
+      case 1:
+        return Center(
+          child: Text("Halaman MyTask", style: TextStyle(fontSize: 20)),
+        );
+      case 2:
+        return Center(
+          child: Text("Halaman Message", style: TextStyle(fontSize: 20)),
+        );
+      case 3:
+        return Center(
+          child: Text("Halaman Profile", style: TextStyle(fontSize: 20)),
+        );
+      default:
+        return _buildDashboardHelper();
+    }
+  }
+
   int _currentIndex = 0;
   String _kategoriAktif = 'Semua';
 
   @override
   Widget build(BuildContext context) {
-    final listTerfilter = _kategoriAktif == 'Semua'
-        ? tasks.where((item) {
-            final status =
-                item['status']?.toString().toLowerCase().trim() ?? '';
-            return status == 'mencari helper';
-          }).toList()
-        : tasks.where((item) {
-            final status =
-                item['status']?.toString().toLowerCase().trim() ?? '';
-            final kategori =
-                item['kategori_layanan']?.toString().toLowerCase().trim() ?? '';
-            final kategoriTombol = _kategoriAktif.toLowerCase().trim();
-
-            // Harus memenuhi kedua syarat secara mutlak
-            return status == 'mencari helper' && kategori == kategoriTombol;
-          }).toList();
-
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -107,254 +111,7 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
           ],
         ),
       ),
-      body: Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text("Kategori", style: TextStyle(fontWeight: FontWeight.bold)),
-                TextButton(onPressed: () {}, child: Text("View All")),
-              ],
-            ),
-            // SizedBox(height: 10),
-            SizedBox(
-              height: 100,
-              width: double.infinity,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    _buildTombolKategori(
-                      nama: 'Semua',
-                      icon: Icons.grid_view_rounded,
-                    ),
-                    _buildTombolKategori(
-                      nama: 'BantuFix',
-                      icon: Icons.business_center_rounded,
-                    ),
-                    _buildTombolKategori(
-                      nama: 'BantuClean',
-                      icon: Icons.cleaning_services_rounded,
-                    ),
-                    _buildTombolKategori(
-                      nama: 'BantuShop',
-                      icon: Icons.shopping_bag_rounded,
-                    ),
-                    _buildTombolKategori(
-                      nama: 'BantuStudy',
-                      icon: Icons.school,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            // SizedBox(height: 10),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: Text(
-                "Bantuan Tersedia",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-            Expanded(
-              child: listTerfilter.isEmpty
-                  ? Center(child: Text("Tidak ada tugas untuk kategori ini"))
-                  : ListView.builder(
-                      itemCount: listTerfilter.length,
-                      itemBuilder: (context, index) {
-                        final tugas = listTerfilter[index];
-
-                        return Card(
-                          shape: RoundedRectangleBorder(
-                            side: BorderSide(color: Colors.grey, width: 1),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          margin: EdgeInsets.only(bottom: 16),
-                          clipBehavior: Clip.antiAlias,
-                          child: InkWell(
-                            onTap: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    "Ke halaman tugas selengkapnya",
-                                  ),
-                                ),
-                              );
-                            },
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                    top: 16,
-                                    left: 16,
-                                    right: 16,
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Container(
-                                        decoration: BoxDecoration(
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.secondary,
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                        ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                            vertical: 2,
-                                            horizontal: 8,
-                                          ),
-                                          child: Text(
-                                            tugas['kategori_layanan'],
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      Text(
-                                        tugas['nominal_pembayaran'],
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.secondary,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                    top: 12,
-                                    left: 16,
-                                    right: 16,
-                                    bottom: 8,
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        tugas['judul_tugas'],
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      SizedBox(height: 4),
-                                      Flexible(
-                                        child: Text(
-                                          tugas['deskripsi'],
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            color: Colors.grey.shade700,
-                                          ),
-                                        ),
-                                      ),
-                                      SizedBox(height: 4),
-                                      Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          Icon(Icons.location_on, size: 12),
-                                          Text(
-                                            tugas['lokasi_tugas'],
-                                            style: TextStyle(fontSize: 12),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                  ),
-                                  child: Divider(
-                                    color: Colors.grey.shade400,
-                                    thickness: 2,
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                    top: 8,
-                                    bottom: 12,
-                                    left: 16,
-                                    right: 16,
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.all(0),
-                                        child: Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            CircleAvatar(
-                                              radius: 18,
-                                              backgroundColor:
-                                                  Colors.grey.shade300,
-                                              child: Icon(
-                                                Icons.person,
-                                                color: Colors.grey,
-                                              ),
-                                            ),
-                                            SizedBox(width: 8),
-                                            Text(tugas['nama_requester']),
-                                          ],
-                                        ),
-                                      ),
-                                      ElevatedButton(
-                                        onPressed: () {},
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Theme.of(
-                                            context,
-                                          ).colorScheme.secondary,
-                                          foregroundColor: Colors.white,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              12,
-                                            ),
-                                          ),
-                                          padding: EdgeInsets.symmetric(
-                                            vertical: 8,
-                                            horizontal: 25,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          "Ambil Tugas",
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.w800,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-            ),
-          ],
-        ),
-      ),
+      body: _dapatkanHalaman(_currentIndex),
       bottomNavigationBar: SafeArea(
         child: Container(
           height: 88,
@@ -388,6 +145,260 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Padding _buildDashboardHelper() {
+    final semuaMencariHelper = tasks.where((item) {
+      return (item['status']?.toString().toLowerCase().trim() ?? '') ==
+          'mencari helper';
+    });
+
+    final listTerfilter = _kategoriAktif == 'Semua'
+        ? semuaMencariHelper.toList()
+        : semuaMencariHelper.where((item) {
+            final kategori =
+                item['kategori_layanan']?.toString().toLowerCase().trim() ?? '';
+            return kategori == _kategoriAktif.toLowerCase().trim();
+          }).toList();
+
+    return Padding(
+      padding: EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("Kategori", style: TextStyle(fontWeight: FontWeight.bold)),
+              TextButton(onPressed: () {}, child: Text("View All")),
+            ],
+          ),
+          // SizedBox(height: 10),
+          SizedBox(
+            height: 100,
+            width: double.infinity,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _buildTombolKategori(
+                    nama: 'Semua',
+                    icon: Icons.grid_view_rounded,
+                  ),
+                  _buildTombolKategori(
+                    nama: 'BantuFix',
+                    icon: Icons.business_center_rounded,
+                  ),
+                  _buildTombolKategori(
+                    nama: 'BantuClean',
+                    icon: Icons.cleaning_services_rounded,
+                  ),
+                  _buildTombolKategori(
+                    nama: 'BantuShop',
+                    icon: Icons.shopping_bag_rounded,
+                  ),
+                  _buildTombolKategori(nama: 'BantuStudy', icon: Icons.school),
+                ],
+              ),
+            ),
+          ),
+          // SizedBox(height: 10),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Text(
+              "Bantuan Tersedia",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          Expanded(
+            child: listTerfilter.isEmpty
+                ? Center(child: Text("Tidak ada tugas untuk kategori ini"))
+                : ListView.builder(
+                    itemCount: listTerfilter.length,
+                    itemBuilder: (context, index) {
+                      final tugas = listTerfilter[index];
+
+                      return Card(
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(color: Colors.grey, width: 1),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        margin: EdgeInsets.only(bottom: 16),
+                        clipBehavior: Clip.antiAlias,
+                        child: InkWell(
+                          onTap: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text("Ke halaman tugas selengkapnya"),
+                              ),
+                            );
+                          },
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  top: 16,
+                                  left: 16,
+                                  right: 16,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.secondary,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 2,
+                                          horizontal: 8,
+                                        ),
+                                        child: Text(
+                                          tugas['kategori_layanan'],
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ),
+                                    ),
+                                    Text(
+                                      tugas['nominal_pembayaran'],
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.secondary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  top: 12,
+                                  left: 16,
+                                  right: 16,
+                                  bottom: 8,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      tugas['judul_tugas'],
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    SizedBox(height: 4),
+                                    Flexible(
+                                      child: Text(
+                                        tugas['deskripsi'],
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          color: Colors.grey.shade700,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(height: 4),
+                                    Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.location_on, size: 12),
+                                        Text(
+                                          tugas['lokasi_tugas'],
+                                          style: TextStyle(fontSize: 12),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                ),
+                                child: Divider(
+                                  color: Colors.grey.shade400,
+                                  thickness: 2,
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  top: 8,
+                                  bottom: 12,
+                                  left: 16,
+                                  right: 16,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.all(0),
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          CircleAvatar(
+                                            radius: 18,
+                                            backgroundColor:
+                                                Colors.grey.shade300,
+                                            child: Icon(
+                                              Icons.person,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                          SizedBox(width: 8),
+                                          Text(tugas['nama_requester']),
+                                        ],
+                                      ),
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () {},
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Theme.of(
+                                          context,
+                                        ).colorScheme.secondary,
+                                        foregroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
+                                        padding: EdgeInsets.symmetric(
+                                          vertical: 8,
+                                          horizontal: 25,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        "Ambil Tugas",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w800,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+          ),
+        ],
       ),
     );
   }
