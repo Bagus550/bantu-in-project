@@ -1,4 +1,5 @@
 import 'package:bantuin/bagus/screens/detail_task_user.dart';
+import 'package:bantuin/bagus/screens/notifications.dart';
 import 'package:bantuin/danela/roomchat.dart';
 import 'package:flutter/material.dart';
 import 'package:bantuin/data_tugas.dart';
@@ -116,9 +117,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
       case 0:
         return _buildDashboardHome();
       case 1:
-        return Center(
-          child: Text("Halaman MyTask", style: TextStyle(fontSize: 20)),
-        );
+        return NotificationsTab(tasks: tasks);
       case 2:
         return Center(
           child: Text("Halaman Message", style: TextStyle(fontSize: 20)),
@@ -224,14 +223,14 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
               _buildNavItem(index: 0, icon: Icons.home_filled, label: 'Home'),
               _buildNavItem(
                 index: 1,
-                icon: Icons.assignment_outlined,
-                label: 'My Task',
+                icon: Icons.notifications_none_outlined,
+                label: 'Notifikasi',
               ),
               _buildPostButton(),
               _buildNavItem(
                 index: 2,
                 icon: Icons.chat_bubble_outline_rounded,
-                label: 'Message',
+                label: 'Pesan',
               ),
               _buildNavItem(
                 index: 3,
@@ -247,9 +246,15 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
 
   Widget _buildDashboardHome() {
     final listTugasAktif = tasks.where((item) {
-      return item['status'] == 'Berjalan' ||
-          item['nama_requester'] == 'Bagus' ||
-          item['status'] == 'Menunggu validasi';
+      return item['nama_requester'] == 'Bagus' &&
+          (item['status'] == 'Mencari helper' ||
+              item['status'] == 'Berjalan' ||
+              item['status'] == 'Menunggu validasi');
+    }).toList();
+
+    final listTugasSelesai = tasks.where((item) {
+      return item['nama_requester'] == 'Bagus' &&
+          (item['status'] == 'Selesai' || item['status'] == 'Dibatalkan');
     }).toList();
 
     return SingleChildScrollView(
@@ -365,7 +370,9 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                     .trim()
                     .toLowerCase();
                 bool isButtonActive =
-                    statusTugas != 'mencari tugas' && statusTugas != 'selesai';
+                    statusTugas != 'mencari helper' &&
+                    statusTugas != 'selesai' &&
+                    statusTugas != 'dibatalkan';
 
                 return Card(
                   shape: RoundedRectangleBorder(
@@ -545,6 +552,219 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                                   icon: Icon(Icons.clear),
                                   label: Text(
                                     "Batalkan",
+                                    style: TextStyle(fontSize: 10),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+            SizedBox(height: 20),
+            Text(
+              "TUGAS SELESAI",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 10),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              itemCount: listTugasSelesai.length,
+              itemBuilder: (context, index) {
+                final history = listTugasSelesai[index];
+
+                String statusTugas = (history['status'] ?? '')
+                    .toString()
+                    .trim()
+                    .toLowerCase();
+                bool isButtonActive =
+                    statusTugas != 'mencari helper' &&
+                    statusTugas != 'selesai' &&
+                    statusTugas != 'dibatalkan';
+
+                return Card(
+                  shape: RoundedRectangleBorder(
+                    side: BorderSide(color: Colors.grey, width: 1),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  margin: EdgeInsets.only(bottom: 16),
+                  clipBehavior: Clip.antiAlias,
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DetailTugas(dataTugas: history),
+                        ),
+                      );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 16,
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 50,
+                                      height: 50,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(20),
+                                        color: ambilWarnaBantuan(
+                                          history['kategori_layanan'],
+                                        ),
+                                      ),
+                                      child: Icon(
+                                        ambilIconBantuan(
+                                          history['kategori_layanan'],
+                                        ),
+                                        color: ambilWarnaIkonBantuan(
+                                          history['kategori_layanan'],
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            history['judul_tugas'],
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w800,
+                                              fontSize: 15,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          SizedBox(height: 4),
+                                          Text(
+                                            'ID : ${history['id']}',
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(width: 16),
+                              Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  color: ambilBgStatus(history['status']),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 2,
+                                    horizontal: 8,
+                                  ),
+                                  child: Text(
+                                    history['status'],
+                                    style: TextStyle(
+                                      color: ambilWarnaStatus(
+                                        history['status'],
+                                      ),
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 10),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  history['nominal_pembayaran'],
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                IconButton(
+                                  onPressed: isButtonActive
+                                      ? () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  RoomChatPage(),
+                                            ),
+                                          );
+                                        }
+                                      : null,
+                                  icon: Icon(
+                                    Icons.chat_outlined,
+                                    color: isButtonActive
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Color(0XFF666565),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Divider(color: Colors.grey.shade300, thickness: 2),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 18,
+                                    backgroundColor: Colors.grey.shade300,
+                                    child: Icon(
+                                      Icons.person,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                  SizedBox(width: 10),
+                                  Text(
+                                    history['nama_helper'] != null &&
+                                            history['nama_helper']
+                                                .toString()
+                                                .trim()
+                                                .isEmpty
+                                        ? 'Belum ada helper'
+                                        : history['nama_helper'],
+                                  ),
+                                ],
+                              ),
+                              SizedBox(
+                                height: 30,
+                                child: ElevatedButton.icon(
+                                  onPressed: () {},
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: ambilWarnaStatus(
+                                      'Selesai',
+                                    ),
+                                    foregroundColor: Colors.white,
+                                  ),
+                                  icon: Icon(Icons.refresh),
+                                  label: Text(
+                                    "Pesan Ulang",
                                     style: TextStyle(fontSize: 10),
                                   ),
                                 ),
