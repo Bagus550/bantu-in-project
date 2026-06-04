@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'ida/profile.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+
 void main(List<String> args) {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(BantuInApp());
