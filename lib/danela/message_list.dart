@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'roomchat.dart';
 
 class MessageList extends StatelessWidget {
-  final List<Map<String, dynamic>> tasks;
 
-  const MessageList({super.key, required this.tasks});
+  const MessageList({super.key,});
 
   @override
   Widget build(BuildContext context) {
