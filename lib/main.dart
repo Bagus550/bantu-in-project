@@ -1,4 +1,5 @@
-import 'package:bantuin/dava/user_setting.dart';
+import 'package:bantuin/danela/detail_task_helper.dart';
+// import 'package:bantuin/danela/message_list.dart';
 import 'package:bantuin/ida/lupa_katasandi.dart';
 import 'package:bantuin/ida/register.dart';
 // ignore: unused_import
@@ -39,7 +40,10 @@ class BantuInApp extends StatelessWidget {
       ),
       initialRoute: '/',
 
-      routes: {'/': (context) => const DashboardUserScreen()},
+      routes: {
+        '/': (context) => const IdaSplashScreen(),
+        '/login': (context) => const LoginScreen(),
+      },
     );
   }
 }
