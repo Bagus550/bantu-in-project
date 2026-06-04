@@ -1,4 +1,3 @@
-import 'package:bantuin/danela/message.dart';
 import 'package:flutter/material.dart';
 
 class RoomChatPage extends StatefulWidget {
@@ -10,26 +9,6 @@ class RoomChatPage extends StatefulWidget {
 
 class _RoomChatPageState extends State<RoomChatPage> {
   final TextEditingController pesanController = TextEditingController();
-  // final List<ChatMessage> _message = [];
-
-  // void _sendMessage (){
-  //   String text = pesanController.text.trim();
-  //   if (text.isEmpty) return;
-
-  //   setState(() {
-  //     _message.add(ChatMessage(text: text, isMe: true));
-  //   });    
-  //   pesanController.clear();
-
-  //   if (text.toLowerCase()
-  //   .contains('posisi dimana kak?')) {
-  //     Future.delayed(Duration(seconds: 1), (){
-  //       setState(() {
-  //         _message.add(ChatMessage(text: "Depan masjid persis kak.", isMe: false));
-  //       });
-  //     });
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +17,7 @@ class _RoomChatPageState extends State<RoomChatPage> {
         backgroundColor: Colors.blue.shade900,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {Navigator.push(context, MaterialPageRoute(builder: (context) => Message()));
+          onPressed: () {Navigator.pop(context);
           },
         ),
         title: Row(
@@ -66,12 +45,7 @@ class _RoomChatPageState extends State<RoomChatPage> {
         ),
       ),
       body: Column(
-        children: [ 
-          // Expanded(child: ListView.builder(padding: EdgeInsets.all(15),
-          // itemCount: _message.length,
-          // itemBuilder: (context, index) => _buildChatBubble(_message[index]),
-          // ),
-          // ),         
+        children: [         
           Spacer(),
           Padding(
             padding: const EdgeInsets.all(12.0),
@@ -102,20 +76,3 @@ class _RoomChatPageState extends State<RoomChatPage> {
     );
   }
 }
-
-// Widget _buildChatBubble(ChatMessage message){
-//   return Align(
-//     alignment: message.isMe ? Alignment.centerRight : Alignment.centerLeft,
-//     child: 
-//     Container(
-//       margin: EdgeInsets.symmetric(vertical: 4),
-//       padding: ,
-//     ),
-//   )
-// }
-// class ChatMessage {
-//   final String text;
-//   final String isMe;
-
-//   ChatMessage({required this.text, required this.isMe});
-// }

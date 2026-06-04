@@ -1,4 +1,5 @@
-import 'package:bantuin/danela/message.dart';
+import 'package:bantuin/danela/detail_task_helper.dart';
+// import 'package:bantuin/danela/message_list.dart';
 import 'package:bantuin/ida/lupa_katasandi.dart';
 import 'package:bantuin/ida/register.dart';
 // ignore: unused_import
@@ -40,7 +41,7 @@ class BantuInApp extends StatelessWidget {
       initialRoute: '/',
 
       routes: {
-        '/': (context) => const Message(),
+        '/': (context) => const DetailTugas(),
         '/login': (context) => const LoginScreen(),
       },
     );
