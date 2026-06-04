@@ -497,7 +497,9 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                                             context,
                                             MaterialPageRoute(
                                               builder: (context) =>
-                                                  RoomChatPage(namaData: tasks[index],),
+                                                  RoomChatPage(
+                                                    namaData: bantuan,
+                                                  ),
                                             ),
                                           );
                                         }
@@ -710,7 +712,9 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                                             context,
                                             MaterialPageRoute(
                                               builder: (context) =>
-                                                  RoomChatPage(namaData: tasks[index],),
+                                                  RoomChatPage(
+                                                    namaData: history,
+                                                  ),
                                             ),
                                           );
                                         }
