@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class UserSetting extends StatefulWidget {
@@ -342,15 +343,18 @@ class _UserSettingState extends State<UserSetting> {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: Text('Tidak dapat membuka WhatApp'),
+                            content: Text('Tidak dapat membuka WhatsApp'),
                           ),
                         );
                       }
                     }
                   },
-                  icon: const Icon(Icons.chat, color: Colors.white),
+                  icon: const FaIcon(
+                    FontAwesomeIcons.whatsapp,
+                    color: Colors.white,
+                  ),
                   label: const Text(
-                    'Hubungi via WhatApp',
+                    'Hubungi via WhatsApp',
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,

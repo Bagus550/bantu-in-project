@@ -39,6 +39,7 @@ dependencies:
   flutter_native_splash: ^2.4.7
   google_fonts: ^8.1.0
   image_picker: ^1.2.2
+  font_awesome_flutter: ^11.0.0
 
 flutter_native_splash: 
   color: "#ffffff"
