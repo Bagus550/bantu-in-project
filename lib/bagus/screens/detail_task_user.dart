@@ -303,7 +303,7 @@ class _DetailTugasState extends State<DetailTugas> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => RoomChatPage(),
+                                      builder: (context) => RoomChatPage(namaData: widget.dataTugas,),
                                     ),
                                   );
                                 }

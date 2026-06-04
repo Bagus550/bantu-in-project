@@ -1,3 +1,5 @@
+import 'package:bantuin/alen/admin.dart';
+import 'package:bantuin/ida/lupa_katasandi.dart';
 import 'package:bantuin/ida/register.dart';
 import 'package:flutter/material.dart';
 import 'package:bantuin/data_akun.dart';
@@ -72,6 +74,12 @@ class _LoginScreenState extends State<LoginScreen> {
           context,
           MaterialPageRoute(builder: (context) => DashboardUserScreen()),
         );
+        break;
+      case 'admin':
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => MyAdmin()),
+        );
     }
   }
 
@@ -99,12 +107,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       color: theme.primary,
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
 
                   Image.asset('assets/logo/logo.png', height: 120),
-                  const SizedBox(height: 40),
+                  SizedBox(height: 40),
 
-                  const Text(
+                  Text(
                     'Selamat Datang Kembali',
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -113,7 +121,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       color: Colors.black,
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  SizedBox(height: 32),
 
                   TextFormField(
                     controller: _emailController,
@@ -146,7 +154,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
 
                   TextFormField(
                     controller: _passwordController,
@@ -183,7 +191,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       TextButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => LupaKatasandi(),
+                            ),
+                          );
+                        },
                         child: Text(
                           'Lupa Kata Sandi?',
                           style: TextStyle(
@@ -221,7 +236,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           Text("Belum Punya Akun?"),
                           TextButton(
                             onPressed: () {
-                              Navigator.pushReplacement(
+                              Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => Register(),
