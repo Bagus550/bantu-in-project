@@ -1,3 +1,4 @@
+import 'package:bantuin/alen/admin.dart';
 import 'package:bantuin/ida/lupa_katasandi.dart';
 import 'package:bantuin/ida/register.dart';
 import 'package:flutter/material.dart';
@@ -73,6 +74,12 @@ class _LoginScreenState extends State<LoginScreen> {
           context,
           MaterialPageRoute(builder: (context) => DashboardUserScreen()),
         );
+        break;
+      case 'admin':
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => MyAdmin()),
+        );
     }
   }
 
@@ -100,12 +107,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       color: theme.primary,
                     ),
                   ),
-                   SizedBox(height: 16),
+                  SizedBox(height: 16),
 
                   Image.asset('assets/logo/logo.png', height: 120),
-                   SizedBox(height: 40),
+                  SizedBox(height: 40),
 
-                   Text(
+                  Text(
                     'Selamat Datang Kembali',
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -114,7 +121,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       color: Colors.black,
                     ),
                   ),
-                   SizedBox(height: 32),
+                  SizedBox(height: 32),
 
                   TextFormField(
                     controller: _emailController,
@@ -147,7 +154,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       return null;
                     },
                   ),
-                   SizedBox(height: 16),
+                  SizedBox(height: 16),
 
                   TextFormField(
                     controller: _passwordController,
