@@ -1,4 +1,5 @@
 import 'package:bantuin/danela/roomchat.dart';
+import 'package:bantuin/data_tugas.dart';
 import 'package:flutter/material.dart';
 
 class DetailTugas extends StatefulWidget {
@@ -303,7 +304,7 @@ class _DetailTugasState extends State<DetailTugas> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => RoomChatPage(),
+                                      builder: (context) => RoomChatPage(namaData: widget.dataTugas,),
                                     ),
                                   );
                                 }
