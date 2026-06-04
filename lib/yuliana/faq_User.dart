@@ -96,20 +96,26 @@ class Faq extends StatelessWidget {
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 15),
-                    child: Text("Perbaikan, Pembersihan, Belanja, Pendidikan, dll"),
+                    child: Text(
+                      "Perbaikan, Pembersihan, Belanja, Pendidikan, dll",
+                    ),
                   ),
                   SizedBox(height: 20),
                   SizedBox(
                     height: 50,
                     width: double.infinity,
-                    child: ElevatedButton(onPressed: (){}, 
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      foregroundColor: Colors.white,
+                    child: ElevatedButton(
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: Text(
+                        "Hubungi Kami",
+                        style: TextStyle(fontSize: 20),
+                      ),
                     ),
-                    child: Text("Hubungi Kami", style: TextStyle(fontSize: 20),),
-                    ),
-                  )
+                  ),
                 ],
               ),
             ),
