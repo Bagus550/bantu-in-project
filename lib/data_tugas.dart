@@ -1,17 +1,5 @@
 List<Map<String, dynamic>> tasks = [
   {
-    "id": 1,
-    "judul_tugas": "Potong Rumput Halaman Belakang",
-    "nama_helper": "",
-    "nama_requester": "Bagus",
-    "deskripsi":
-        "Memotong rumput gajah mini yang sudah tinggi di halaman belakang rumah.",
-    "lokasi_tugas": "Perumahan Indah Asri Blok C No. 4",
-    "nominal_pembayaran": "Rp 60.000",
-    "status": "Mencari helper",
-    "kategori_layanan": "BantuClean",
-  },
-  {
     "id": 2,
     "judul_tugas": "Perbaiki Kran Air Bocor",
     "nama_helper": "Dika",
@@ -38,13 +26,13 @@ List<Map<String, dynamic>> tasks = [
   {
     "id": 4,
     "judul_tugas": "Ganti Oli Motor Beat",
-    "nama_helper": "",
+    "nama_helper": "Andi",
     "nama_requester": "Bagus",
     "deskripsi":
         "Bawa motor ke AHASS terdekat buat ganti oli mesin sama oli gardan, uang oli terpisah.",
     "lokasi_tugas": "Mekarsari RT 02 RW 05",
     "nominal_pembayaran": "Rp 35.000",
-    "status": "Mencari helper",
+    "status": "Selesai",
     "kategori_layanan": "BantuFix",
   },
   {
@@ -62,13 +50,13 @@ List<Map<String, dynamic>> tasks = [
   {
     "id": 6,
     "judul_tugas": "Belikan Kuota Internet & Token",
-    "nama_helper": "",
+    "nama_helper": "Surya",
     "nama_requester": "Bagus",
     "deskripsi":
         "Belikan token listrik Rp 100.000 di konter pulsa, nomor meteran nanti saya chat.",
     "lokasi_tugas": "Kost Amanah, Kamar No. 7",
     "nominal_pembayaran": "Rp 15.000",
-    "status": "Mencari helper",
+    "status": "Berjalan",
     "kategori_layanan": "BantuShop",
   },
   {
@@ -104,18 +92,6 @@ List<Map<String, dynamic>> tasks = [
         "Angkat-angkat kardus baju dan kasur lantai dari kosan lama ke kosan baru jarak 500m.",
     "lokasi_tugas": "Gang Serayu 2, belakang kampus",
     "nominal_pembayaran": "Rp 80.000",
-    "status": "Mencari helper",
-    "kategori_layanan": "BantuStudy",
-  },
-  {
-    "id": 10,
-    "judul_tugas": "Beli Modul Cetak Kisi-Kisi Ujian",
-    "nama_helper": "",
-    "nama_requester": "Bagus",
-    "deskripsi":
-        "Ambil dan bayar fotokopi modul ujian di Fotokopi Sukses, uang print sudah ditransfer.",
-    "lokasi_tugas": "Depan Gerbang Utama Kampus",
-    "nominal_pembayaran": "Rp 20.000",
     "status": "Mencari helper",
     "kategori_layanan": "BantuStudy",
   },
