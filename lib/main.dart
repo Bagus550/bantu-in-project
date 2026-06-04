@@ -13,6 +13,7 @@ import 'bagus/screens/dashboard_helper_screen.dart';
 // ignore: unused_import
 import 'ida/login_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'alen/admin.dart';
 
 void main(List<String> args) {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,7 +42,7 @@ class BantuInApp extends StatelessWidget {
       initialRoute: '/',
 
       routes: {
-        '/': (context) => const IdaSplashScreen(),
+        '/': (context) => const MyAdmin(),
         '/login': (context) => const LoginScreen(),
       },
     );
