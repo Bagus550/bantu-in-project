@@ -1,8 +1,8 @@
-import 'package:bantuin/danela/message.dart';
 import 'package:flutter/material.dart';
 
 class RoomChatPage extends StatefulWidget {
-  const RoomChatPage({super.key});
+  final Map<String, dynamic> namaData;
+  const RoomChatPage({super.key, required this.namaData});
 
   @override
   State<RoomChatPage> createState() => _RoomChatPageState();
@@ -10,35 +10,18 @@ class RoomChatPage extends StatefulWidget {
 
 class _RoomChatPageState extends State<RoomChatPage> {
   final TextEditingController pesanController = TextEditingController();
-  // final List<ChatMessage> _message = [];
-
-  // void _sendMessage (){
-  //   String text = pesanController.text.trim();
-  //   if (text.isEmpty) return;
-
-  //   setState(() {
-  //     _message.add(ChatMessage(text: text, isMe: true));
-  //   });    
-  //   pesanController.clear();
-
-  //   if (text.toLowerCase()
-  //   .contains('posisi dimana kak?')) {
-  //     Future.delayed(Duration(seconds: 1), (){
-  //       setState(() {
-  //         _message.add(ChatMessage(text: "Depan masjid persis kak.", isMe: false));
-  //       });
-  //     });
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
+    final String namaPelanggan =
+        widget.namaData['nama_requester'] ?? 'Tidak ada nama';
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue.shade900,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {Navigator.push(context, MaterialPageRoute(builder: (context) => Message()));
+          onPressed: () {
+            Navigator.pop(context);
           },
         ),
         title: Row(
@@ -53,11 +36,12 @@ class _RoomChatPageState extends State<RoomChatPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Cimol', 
-                style: TextStyle(
-                  color: Colors.white, 
-                  fontSize: 16, 
-                  fontWeight: FontWeight.bold,
+                Text(
+                  namaPelanggan,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
@@ -66,12 +50,7 @@ class _RoomChatPageState extends State<RoomChatPage> {
         ),
       ),
       body: Column(
-        children: [ 
-          // Expanded(child: ListView.builder(padding: EdgeInsets.all(15),
-          // itemCount: _message.length,
-          // itemBuilder: (context, index) => _buildChatBubble(_message[index]),
-          // ),
-          // ),         
+        children: [
           Spacer(),
           Padding(
             padding: const EdgeInsets.all(12.0),
@@ -90,9 +69,11 @@ class _RoomChatPageState extends State<RoomChatPage> {
                 ),
                 SizedBox(width: 8),
                 IconButton(
-                  icon: Icon(Icons.send, color: Theme.of(context).colorScheme.secondary),
-                  onPressed: () {
-                  },
+                  icon: Icon(
+                    Icons.send,
+                    color: Theme.of(context).colorScheme.secondary,
+                  ),
+                  onPressed: () {},
                 ),
               ],
             ),
@@ -102,20 +83,3 @@ class _RoomChatPageState extends State<RoomChatPage> {
     );
   }
 }
-
-// Widget _buildChatBubble(ChatMessage message){
-//   return Align(
-//     alignment: message.isMe ? Alignment.centerRight : Alignment.centerLeft,
-//     child: 
-//     Container(
-//       margin: EdgeInsets.symmetric(vertical: 4),
-//       padding: ,
-//     ),
-//   )
-// }
-// class ChatMessage {
-//   final String text;
-//   final String isMe;
-
-//   ChatMessage({required this.text, required this.isMe});
-// }

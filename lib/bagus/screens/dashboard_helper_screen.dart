@@ -1,3 +1,4 @@
+import 'package:bantuin/danela/detail_task_helper.dart';
 import 'package:bantuin/data_tugas.dart';
 import 'package:flutter/material.dart';
 
@@ -229,9 +230,11 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                         clipBehavior: Clip.antiAlias,
                         child: InkWell(
                           onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text("Ke halaman tugas selengkapnya"),
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    DetailTugasHelper(taskData: tasks[index]),
                               ),
                             );
                           },
