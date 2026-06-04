@@ -8,8 +8,8 @@ class Faq extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text("FAQ"),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
         leading: IconButton(onPressed: () {}, icon: Icon(Icons.arrow_back_ios)),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
@@ -70,7 +70,7 @@ class Faq extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    "Bantu.In adalah platform yang menghubungkan Anda dengan penyedia jasa terpercaya.",
+                    "Bantu.In merupakan platform yang menghubungkan Anda dengan penyedia jasa terpercaya.",
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 15),

@@ -1,7 +1,15 @@
+<<<<<<< HEAD
 import 'package:bantuin/ida/login_screen.dart';
 import 'package:bantuin/ida/splashscreen.dart';
+=======
+import 'package:bantuin/yuliana/about_User.dart';
+import 'package:bantuin/ida/login_screen.dart';
+// ignore: unused_import
+import 'package:bantuin/bagus/screens/detail_task_user.dart';
+>>>>>>> origin/backup-dev
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+
 
 void main(List<String> args) {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,7 +38,11 @@ class BantuInApp extends StatelessWidget {
       initialRoute: '/',
 
       routes: {
+<<<<<<< HEAD
         '/': (context) => const IdaSplashScreen(),
+=======
+        '/': (context) => const AboutUser(),
+>>>>>>> origin/backup-dev
         '/login': (context) => const LoginScreen(),
       },
     );
