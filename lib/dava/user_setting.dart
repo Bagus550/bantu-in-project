@@ -20,7 +20,9 @@ class _UserSettingState extends State<UserSetting> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.pop(context);
+          },
           icon: Icon(Icons.arrow_back_ios, color: Colors.black),
         ),
         title: const Text(

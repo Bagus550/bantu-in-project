@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class UserSetting extends StatefulWidget {
-  const UserSetting({super.key});
+class HelperSetting extends StatefulWidget {
+  const HelperSetting({super.key});
 
   @override
-  State<UserSetting> createState() => _UserSettingState();
+  State<HelperSetting> createState() => _HelperSettingState();
 }
 
-class _UserSettingState extends State<UserSetting> {
+class _HelperSettingState extends State<HelperSetting> {
   bool isNotificationOn = true;
   bool isSuaraOn = true;
   @override

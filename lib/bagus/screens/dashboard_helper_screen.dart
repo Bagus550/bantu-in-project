@@ -1,5 +1,6 @@
 import 'package:bantuin/danela/detail_task_helper.dart';
 import 'package:bantuin/data_tugas.dart';
+import 'package:bantuin/dava/helper_setting.dart';
 import 'package:flutter/material.dart';
 
 class DashboardHelperScreen extends StatefulWidget {
@@ -104,8 +105,9 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
               leading: Icon(Icons.settings, color: Colors.black87),
               title: Text("Pengaturan"),
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Pindah ke halaman pengaturan")),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => HelperSetting()),
                 );
               },
             ),
