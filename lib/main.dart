@@ -1,14 +1,11 @@
 import 'package:bantuin/dava/helper_setting.dart';
-// import 'package:bantuin/danela/message_list.dart';
+import 'package:bantuin/dava/user_setting.dart';
+import 'package:bantuin/ida/lupa_katasandi.dart';
+import 'package:bantuin/ida/register.dart';
 // ignore: unused_import
 import 'package:bantuin/bagus/screens/detail_task_user.dart';
 import 'package:flutter/material.dart';
-// ignore: unused_import
-import 'bagus/screens/dashboard_user_screen.dart';
-// ignore: unused_import
-import 'bagus/screens/dashboard_helper_screen.dart';
-// ignore: unused_import
-import 'ida/login_screen.dart';
+import 'ida/profile.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 void main(List<String> args) {
