@@ -162,8 +162,6 @@ class _UserSettingState extends State<UserSetting> {
                     ),
                   ),
                 ),
-                _buildMenuItem(Icons.language, 'Bahasa', true),
-                const Divider(height: 24, thickness: 1),
 
                 const Text(
                   'Bantuan & Legalitas',
