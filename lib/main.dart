@@ -1,7 +1,10 @@
+import 'package:bantuin/yuliana/Faq_Helper.dart';
 import 'package:bantuin/yuliana/about_User.dart';
 import 'package:bantuin/ida/login_screen.dart';
 // ignore: unused_import
 import 'package:bantuin/bagus/screens/detail_task_user.dart';
+import 'package:bantuin/yuliana/about_helper.dart';
+import 'package:bantuin/yuliana/faq_User.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
