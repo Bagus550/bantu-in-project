@@ -1,3 +1,4 @@
+import 'package:bantuin/bagus/screens/notifications.dart';
 import 'package:bantuin/danela/detail_task_helper.dart';
 import 'package:bantuin/danela/message_list.dart';
 import 'package:bantuin/data_tugas.dart';
@@ -47,6 +48,15 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
         shadowColor: Colors.black.withAlpha(10),
         toolbarHeight: 80,
         actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => NotificationsHelper()),
+              );
+            },
+            icon: Icon(Icons.notifications_none_outlined),
+          ),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 15),
             child: Container(
