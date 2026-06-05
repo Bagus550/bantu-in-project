@@ -120,7 +120,9 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
       case 0:
         return _buildDashboardHome();
       case 1:
-        return NotificationsTab(tasks: tasks);
+        return Center(
+          child: Text("Halaman notifikasi", style: TextStyle(fontSize: 20)),
+        );
       case 2:
         return MessageList();
       case 3:
