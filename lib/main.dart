@@ -1,5 +1,4 @@
-import 'bagus/screens/dashboard_user_screen.dart';
-// ignore: unused_import
+import 'package:bantuin/ida/splashscreen.dart';
 import 'package:bantuin/ida/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -31,7 +30,7 @@ class BantuInApp extends StatelessWidget {
       initialRoute: '/',
 
       routes: {
-        '/': (context) => const DashboardUserScreen(),
+        '/': (context) => const IdaSplashScreen(),
         '/login': (context) => const LoginScreen(),
       },
     );

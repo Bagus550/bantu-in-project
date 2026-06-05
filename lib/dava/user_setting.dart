@@ -1,5 +1,7 @@
+import 'package:bantuin/ida/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class UserSetting extends StatefulWidget {
@@ -20,7 +22,9 @@ class _UserSettingState extends State<UserSetting> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.pop(context);
+          },
           icon: Icon(Icons.arrow_back_ios, color: Colors.black),
         ),
         title: const Text(
@@ -189,7 +193,12 @@ class _UserSettingState extends State<UserSetting> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => LoginScreen()),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFB71C1C),
                   shape: RoundedRectangleBorder(
@@ -340,15 +349,18 @@ class _UserSettingState extends State<UserSetting> {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: Text('Tidak dapat membuka WhatApp'),
+                            content: Text('Tidak dapat membuka WhatsApp'),
                           ),
                         );
                       }
                     }
                   },
-                  icon: const Icon(Icons.chat, color: Colors.white),
+                  icon: const FaIcon(
+                    FontAwesomeIcons.whatsapp,
+                    color: Colors.white,
+                  ),
                   label: const Text(
-                    'Hubungi via WhatApp',
+                    'Hubungi via WhatsApp',
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,

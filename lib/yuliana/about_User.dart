@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
-class About extends StatelessWidget {
-  const About({super.key});
+class AboutUser extends StatelessWidget {
+  const AboutUser({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text("Tentang Kami"),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
         leading: IconButton(onPressed: () {}, icon: Icon(Icons.arrow_back_ios)),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
@@ -53,7 +53,8 @@ class About extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    "Bantu.In adalah platform yang menghubungkan Anda dengan penyediajasa terpercaya untuk berbagaikebutuhan. Dari perbaikan, pembersihan hingga berbelanja, kami di sini  untuk membantu.",
+                    "Bantu.in merupakan platfrom layanan bantuan on-demand berbasis mobile yang menghubungkan pencari bantuan dengan penyedia jasa secara cepat, mudah, dan terpercaya. Kami hadir untuk membantu masyarakat menemukan tenaga bantuan harian untuk berbagai kebutuhan pekerjaan lapangan. Dengan Bantu.in, mendapatkan bantuan tidak lagi rumit. Cukup buat permintaan, temukan helper yang sesuai, dan selesai pekerjaan dengan lebih cepat dan nyaman.",
+                    textAlign: TextAlign.justify,
                   ),
                   const SizedBox(height: 12),
                   Text(

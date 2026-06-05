@@ -1,5 +1,7 @@
+import 'package:bantuin/ida/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HelperSetting extends StatefulWidget {
@@ -20,7 +22,9 @@ class _HelperSettingState extends State<HelperSetting> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.pop(context);
+          },
           icon: Icon(Icons.arrow_back_ios, color: Colors.black),
         ),
         title: const Text(
@@ -181,7 +185,12 @@ class _HelperSettingState extends State<HelperSetting> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => LoginScreen()),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFB71C1C),
                   shape: RoundedRectangleBorder(
@@ -275,7 +284,10 @@ class _HelperSettingState extends State<HelperSetting> {
                       }
                     }
                   },
-                  icon: const Icon(Icons.chat, color: Colors.white),
+                  icon: const FaIcon(
+                    FontAwesomeIcons.whatsapp,
+                    color: Colors.white,
+                  ),
                   label: const Text(
                     'Hubungi via WhatApp',
                     style: TextStyle(

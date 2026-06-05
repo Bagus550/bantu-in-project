@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 
 class Faq extends StatelessWidget {
@@ -10,8 +8,8 @@ class Faq extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text("FAQ"),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
         leading: IconButton(onPressed: () {}, icon: Icon(Icons.arrow_back_ios)),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
@@ -72,7 +70,7 @@ class Faq extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    "Bantu.In adalah platform yang menghubungkan Anda dengan penyedia jasa terpercaya.",
+                    "Bantu.In merupakan platform yang menghubungkan Anda dengan penyedia jasa terpercaya.",
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 15),
@@ -98,20 +96,26 @@ class Faq extends StatelessWidget {
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 15),
-                    child: Text("Perbaikan, Pembersihan, Belanja, Pendidikan, dll"),
+                    child: Text(
+                      "Perbaikan, Pembersihan, Belanja, Pendidikan, dll",
+                    ),
                   ),
                   SizedBox(height: 20),
                   SizedBox(
                     height: 50,
                     width: double.infinity,
-                    child: ElevatedButton(onPressed: (){}, 
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      foregroundColor: Colors.white,
+                    child: ElevatedButton(
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: Text(
+                        "Hubungi Kami",
+                        style: TextStyle(fontSize: 20),
+                      ),
                     ),
-                    child: Text("Hubungi Kami", style: TextStyle(fontSize: 20),),
-                    ),
-                  )
+                  ),
                 ],
               ),
             ),
