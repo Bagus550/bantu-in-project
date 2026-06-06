@@ -1,6 +1,6 @@
 List<Map<String, dynamic>> tasks = [
   {
-    "id": 2,
+    "id": 0,
     "judul_tugas": "Perbaiki Kran Air Bocor",
     "nama_helper": "Dika",
     "nama_requester": "Rian",
@@ -12,7 +12,7 @@ List<Map<String, dynamic>> tasks = [
     "kategori_layanan": "BantuFix",
   },
   {
-    "id": 3,
+    "id": 1,
     "judul_tugas": "Belanja Sembako Mingguan",
     "nama_helper": "",
     "nama_requester": "Ahmad",
@@ -24,7 +24,7 @@ List<Map<String, dynamic>> tasks = [
     "kategori_layanan": "BantuShop",
   },
   {
-    "id": 4,
+    "id": 2,
     "judul_tugas": "Ganti Oli Motor Beat",
     "nama_helper": "Andi",
     "nama_requester": "Bagus",
@@ -36,7 +36,7 @@ List<Map<String, dynamic>> tasks = [
     "kategori_layanan": "BantuFix",
   },
   {
-    "id": 5,
+    "id": 3,
     "judul_tugas": "Cuci Air Conditioner (AC)",
     "nama_helper": "Fahmi",
     "nama_requester": "Siti",
@@ -48,7 +48,7 @@ List<Map<String, dynamic>> tasks = [
     "kategori_layanan": "BantuFix",
   },
   {
-    "id": 6,
+    "id": 4,
     "judul_tugas": "Belikan Kuota Internet & Token",
     "nama_helper": "Surya",
     "nama_requester": "Bagus",
@@ -60,7 +60,7 @@ List<Map<String, dynamic>> tasks = [
     "kategori_layanan": "BantuShop",
   },
   {
-    "id": 7,
+    "id": 5,
     "judul_tugas": "Bersihkan Kaca Jendela Ruko",
     "nama_helper": "",
     "nama_requester": "Dewi",
@@ -72,7 +72,7 @@ List<Map<String, dynamic>> tasks = [
     "kategori_layanan": "BantuClean",
   },
   {
-    "id": 8,
+    "id": 6,
     "judul_tugas": "Ajarkan Matematika Kelas 4 SD",
     "nama_helper": "Lia",
     "nama_requester": "Budi",
@@ -84,7 +84,7 @@ List<Map<String, dynamic>> tasks = [
     "kategori_layanan": "BantuStudy",
   },
   {
-    "id": 9,
+    "id": 7,
     "judul_tugas": "Bantu Pindahan Kosan",
     "nama_helper": "",
     "nama_requester": "Roni",
@@ -115,5 +115,29 @@ final List<Map<String, dynamic>> helperList = [
     "role": "Helper Bantu.In",
     "status": "PENDING",
     "tasks": 0,
+  },
+];
+
+final List<Map<String, dynamic>> notifikasi = [
+  {
+    "judul_notifikasi": "Pembayaran Valid",
+    "tasks_id": 3,
+    "waktu": "Baru saja",
+    "deskripsi":
+        "Admin telah memvalidasi bukti pembayaran untuk tugas ID3 Status tugas berubah dari 'Menunggu Validasi' menjadi 'Selesai'.",
+  },
+  {
+    "judul_notifikasi": "Pembayaran Valid",
+    "tasks_id": 2,
+    "waktu": "2 menit lalu",
+    "deskripsi":
+        "Admin telah memvalidasi bukti pembayaran untuk tugas ID1 Status tugas berubah dari 'Menunggu Validasi' menjadi 'Selesai'.",
+  },
+  {
+    "judul_notifikasi": "Pembayaran Gagal",
+    "tasks_id": 0,
+    "waktu": "5 menit lalu",
+    "deskripsi":
+        "Admin telah memvalidasi bukti pembayaran untuk tugas ID0. pastikan nomor referensi sama dengan yang ada di foto dan submit ulang",
   },
 ];

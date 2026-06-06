@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class Faq extends StatelessWidget {
-  const Faq({super.key});
+class FaqUser extends StatelessWidget {
+  const FaqUser ({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +70,7 @@ class Faq extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    "Bantu.In merupakan platform yang menghubungkan Anda dengan penyedia jasa terpercaya.",
+                    "Bantu.in merupakan platform yang menghubungkan pengguna dengan penyedia jasa atau tenaga bantuan terpercaya untuk membantu menyelesaikan berbagai kebutuhan sehari-hari secara cepat dan mudah.",
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 15),
@@ -82,8 +82,28 @@ class Faq extends StatelessWidget {
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 15),
-                    child: Text(
-                      "Klik post untuk meminta bantuan, setelah itu isi sesuai kategori yang ada, setelah itu klik posting.",
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "1. Pesan Bantuan dengan mengklik tombol + di bottom navigation.",
+                        ),
+                        Text(
+                          "2. Anda bisa mengisi bagian judul dengan nama bantuan yang di buat.",
+                        ),
+                        Text(
+                          "3. Isikan deskripsi untuk keterangan lebih lengkap terkait bantuan yang ada buat.",
+                        ),
+                        Text(
+                          "4. Untuk lokasi bisa dibuat sendiri dengan menggunakan patokan jalan atau otomatis dari alamat akun. ",
+                        ),
+                        Text(
+                          "5. Buat nominal pembayaran berdasarkan jenis bantuan dan berat bantuan, setiap jenis bantuan memiliki minimum bayar yang berbeda.",
+                        ),
+                        Text(
+                          "6. Klik posting bantuan untuk mempublikasikan bantuan anda agar terlacak oleh helper dan bantuan akan segera di ambil. ",
+                        ),
+                      ],
                     ),
                   ),
                   Padding(
