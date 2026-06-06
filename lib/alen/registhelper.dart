@@ -1,3 +1,4 @@
+import 'package:bantuin/alen/registhelper2.dart';
 import 'package:flutter/material.dart';
 import 'admin.dart';
 
@@ -86,7 +87,7 @@ class _RegistPageState extends State<RegistPage> {
                 ),
               ),
               SizedBox(height: 24),
-              _buildFormCard(),
+              _buildFormCard(context),
             ],
           ),
         ),
@@ -101,18 +102,18 @@ class _RegistPageState extends State<RegistPage> {
           if (index == 0) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const MyAdmin()),
+              MaterialPageRoute(builder: (context) => MyAdmin()),
             );
           } else if (index == 1) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const RegistPage()),
+              MaterialPageRoute(builder: (context) => RegistPage()),
             );
           }
         },
         backgroundColor: Colors.white,
         indicatorColor: Colors.deepPurpleAccent,
-        destinations: const [
+        destinations: [
           NavigationDestination(
             icon: Icon(Icons.people_outline, color: Colors.black),
             selectedIcon: Icon(Icons.people, color: Colors.black),
@@ -136,7 +137,7 @@ class _RegistPageState extends State<RegistPage> {
   }
 }
 
-Widget _buildFormCard() {
+Widget _buildFormCard(BuildContext context) {
   return Container(
     padding: EdgeInsets.all(20),
     decoration: BoxDecoration(
@@ -177,9 +178,14 @@ Widget _buildFormCard() {
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => RegistPage2()),
+              );
+            },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color.fromARGB(255, 88, 26, 246),
+              backgroundColor: Color.fromARGB(255, 88, 26, 246),
               foregroundColor: Colors.white,
               padding: EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(

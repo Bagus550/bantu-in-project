@@ -1,4 +1,5 @@
 import 'package:bantuin/alen/registhelper.dart';
+import 'package:bantuin/alen/registhelper2.dart';
 import 'package:bantuin/ida/login_screen.dart';
 import 'package:bantuin/ida/splashscreen.dart';
 import 'package:bantuin/yuliana/faq_User.dart';
@@ -32,7 +33,7 @@ class BantuInApp extends StatelessWidget {
       initialRoute: '/',
 
       routes: {
-        '/': (context) => const RegistPage(),
+        '/': (context) => const RegistPage2(),
         '/login': (context) => const LoginScreen(),
       },
     );
