@@ -13,8 +13,15 @@ class _RoomChatPageState extends State<RoomChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    final String namaPelanggan =
+    final String currentUser =
+        widget.namaData['nama_requester'] ?? "Kelompok 4";
+    final String requester =
         widget.namaData['nama_requester'] ?? 'Tidak ada nama';
+    final String helper = widget.namaData['nama_helper'] ?? 'Tidak ada nama';
+    final String namaLawanChat = (currentUser == requester)
+        ? helper
+        : requester;
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue.shade900,
@@ -37,7 +44,7 @@ class _RoomChatPageState extends State<RoomChatPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  namaPelanggan,
+                  namaLawanChat,
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 16,

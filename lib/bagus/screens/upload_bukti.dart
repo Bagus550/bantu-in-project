@@ -154,7 +154,7 @@ class _UploadBuktiTabState extends State<UploadBuktiTab> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    backgroundColor: Theme.of(context).colorScheme.secondary,
                     foregroundColor: Colors.white,
                   ),
                   onPressed: () {},

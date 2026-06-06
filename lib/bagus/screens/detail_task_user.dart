@@ -40,6 +40,28 @@ class _DetailTugasState extends State<DetailTugas> {
     }
   }
 
+  Color ambilWarnaTombol(String status) {
+    switch (status) {
+      case 'Di batalkan' || 'Selesai':
+        return Color(0xFF25CD25);
+      case 'Berjalan':
+        return Color(0XFFCD2525);
+      default:
+        return Color(0XFFCD2525);
+    }
+  }
+
+  IconData ambilIkonTombol(String status) {
+    switch (status) {
+      case 'Di batalkan' || 'Selesai':
+        return Icons.refresh;
+      case 'Berjalan':
+        return Icons.close;
+      default:
+        return Icons.close;
+    }
+  }
+
   IconData ambilIconStatus(String status) {
     switch (status) {
       case 'Mencari helper':
@@ -303,7 +325,9 @@ class _DetailTugasState extends State<DetailTugas> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => RoomChatPage(namaData: widget.dataTugas,),
+                                      builder: (context) => RoomChatPage(
+                                        namaData: widget.dataTugas,
+                                      ),
                                     ),
                                   );
                                 }
@@ -349,14 +373,19 @@ class _DetailTugasState extends State<DetailTugas> {
                 height: 50,
                 child: ElevatedButton.icon(
                   onPressed: () {},
-                  icon: Icon(Icons.cancel_outlined),
-                  label: Text("Batalkan Tugas"),
+                  icon: Icon(ambilIkonTombol(data['status'])),
+                  label: isButtonActive
+                      ? Text("Batalkan Tugas")
+                      : Text("Pesan Ulang"),
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    side: BorderSide(color: Colors.red, width: 1.5),
-                    foregroundColor: Colors.red,
+                    side: BorderSide(
+                      color: ambilWarnaTombol(data['status']),
+                      width: 1.5,
+                    ),
+                    foregroundColor: ambilWarnaTombol(data['status']),
                   ),
                 ),
               ),
