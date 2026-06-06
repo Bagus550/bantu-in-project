@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class Faq extends StatelessWidget {
-  const Faq({super.key});
+class FaqHelper extends StatelessWidget {
+  const FaqHelper ({super.key});
 
   @override
   Widget build(BuildContext context) {

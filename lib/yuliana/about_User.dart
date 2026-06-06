@@ -62,8 +62,12 @@ class AboutUser extends StatelessWidget {
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                   ),
                   const SizedBox(height: 12),
-                  Text(
-                    "Menyediakan layanan berkualitas Membangun komunitas terpecaya Memberikan kemudahan akses untuk semua",
+                  Column(
+                    children: [
+                      Text(
+                        "Menyediakan layanan berkualitas, Membangun komunitas terpecaya, Memberikan kemudahan akses untuk semua.",
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 12),
                   Text(
