@@ -1,11 +1,11 @@
 import 'package:bantuin/bagus/screens/detail_task_user.dart';
+import 'package:bantuin/danela/message_list.dart';
 import 'package:bantuin/danela/roomchat.dart';
 import 'package:bantuin/dava/user_setting.dart';
 import 'package:bantuin/ida/profile_tab.dart';
 import 'package:flutter/material.dart';
 import 'package:bantuin/data_tugas.dart';
 import 'package:bantuin/pilihan.dart';
-import 'package:bantuin/danela/message_list.dart';
 
 class DashboardUserScreen extends StatefulWidget {
   const DashboardUserScreen({super.key});
@@ -123,7 +123,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
           child: Text("Halaman notifikasi", style: TextStyle(fontSize: 20)),
         );
       case 2:
-        return MessageList();
+        return MessageListTab();
       case 3:
         return ProfileTab();
       default:
