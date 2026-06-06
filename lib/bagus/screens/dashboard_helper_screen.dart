@@ -1,3 +1,4 @@
+import 'package:bantuin/bagus/screens/history.dart';
 import 'package:bantuin/bagus/screens/tugas_aktif_helper.dart';
 import 'package:bantuin/bagus/screens/upload_bukti.dart';
 import 'package:bantuin/danela/detail_task_helper.dart';
@@ -24,7 +25,7 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
       case 2:
         return MessageListTab();
       case 3:
-        return ProfileTab();
+        return ProfileTab(isMovedPage: true);
       default:
         return _buildDashboardHelper();
     }
@@ -58,7 +59,12 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                 borderRadius: BorderRadius.circular(50),
               ),
               child: IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => ProfileTab()),
+                  );
+                },
                 icon: Icon(Icons.person, color: Colors.white),
               ),
             ),
@@ -98,8 +104,9 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
               leading: Icon(Icons.history, color: Colors.black87),
               title: Text("History Tugas"),
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Pindah ke halaman history")),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => History()),
                 );
               },
             ),
@@ -372,7 +379,17 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                                       ),
                                     ),
                                     ElevatedButton(
-                                      onPressed: () {},
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                TugasAktifHelper(
+                                                  detailTugas: tugas,
+                                                ),
+                                          ),
+                                        );
+                                      },
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Theme.of(
                                           context,
