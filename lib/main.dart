@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import 'package:bantuin/yuliana/Faq_Helper.dart';
 import 'package:bantuin/yuliana/about_User.dart';
 import 'package:bantuin/ida/login_screen.dart';
@@ -5,6 +6,10 @@ import 'package:bantuin/ida/login_screen.dart';
 import 'package:bantuin/bagus/screens/detail_task_user.dart';
 import 'package:bantuin/yuliana/about_helper.dart';
 import 'package:bantuin/yuliana/faq_User.dart';
+=======
+import 'package:bantuin/ida/login_screen.dart';
+import 'package:bantuin/ida/splashscreen.dart';
+>>>>>>> 410c7c4e15bd74aec3b24a5b75b2324a7ed2fb74
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -35,7 +40,7 @@ class BantuInApp extends StatelessWidget {
       initialRoute: '/',
 
       routes: {
-        '/': (context) => const AboutHelper(),
+        '/': (context) => const IdaSplashScreen(),
         '/login': (context) => const LoginScreen(),
       },
     );

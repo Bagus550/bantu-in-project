@@ -1,7 +1,9 @@
+import 'package:bantuin/bagus/screens/notifications.dart';
+import 'package:bantuin/bagus/screens/upload_bukti.dart';
 import 'package:bantuin/danela/detail_task_helper.dart';
-import 'package:bantuin/danela/message_list.dart';
 import 'package:bantuin/data_tugas.dart';
 import 'package:bantuin/dava/helper_setting.dart';
+import 'package:bantuin/danela/message_list.dart';
 import 'package:bantuin/ida/profile_tab.dart';
 import 'package:flutter/material.dart';
 
@@ -18,11 +20,9 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
       case 0:
         return _buildDashboardHelper();
       case 1:
-        return Center(
-          child: Text("Halaman MyTask", style: TextStyle(fontSize: 20)),
-        );
+        return NotificationsHelper();
       case 2:
-        return MessageList();
+        return MessageListTab();
       case 3:
         return ProfileTab();
       default:
@@ -47,6 +47,7 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
         shadowColor: Colors.black.withAlpha(10),
         toolbarHeight: 80,
         actions: [
+          IconButton(onPressed: () {}, icon: Icon(Icons.help_outline)),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 15),
             child: Container(
@@ -56,7 +57,10 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                 color: Theme.of(context).colorScheme.secondary,
                 borderRadius: BorderRadius.circular(50),
               ),
-              child: Icon(Icons.person, color: Colors.white, size: 30),
+              child: IconButton(
+                onPressed: () {},
+                icon: Icon(Icons.person, color: Colors.white),
+              ),
             ),
           ),
         ],
@@ -129,8 +133,8 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
               _buildNavItem(index: 0, icon: Icons.home_filled, label: 'Home'),
               _buildNavItem(
                 index: 1,
-                icon: Icons.assignment_outlined,
-                label: 'My Task',
+                icon: Icons.notifications_none_outlined,
+                label: 'Notification',
               ),
               _buildPostButton(),
               _buildNavItem(
@@ -496,7 +500,12 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
 
   Widget _buildPostButton() {
     return GestureDetector(
-      onTap: () {},
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => UploadBuktiTab()),
+        );
+      },
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
