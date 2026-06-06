@@ -1,5 +1,6 @@
 import 'package:bantuin/ida/login_screen.dart';
 import 'package:bantuin/ida/splashscreen.dart';
+import 'package:bantuin/yuliana/Faq_Helper.dart';
 import 'package:bantuin/yuliana/faq_User.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -31,7 +32,7 @@ class BantuInApp extends StatelessWidget {
       initialRoute: '/',
 
       routes: {
-        '/': (context) => const FaqUser(),
+        '/': (context) => const FaqHelper(),
         '/login': (context) => const LoginScreen(),
       },
     );
