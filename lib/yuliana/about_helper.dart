@@ -63,7 +63,7 @@ class AboutHelper extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    "Menyediakan layanan berkualitas Membangun komunitas terpecaya Memberikan kemudahan akses untuk semua",
+                    "Menyediakan layanan berkualitas, Membangun komunitas terpecaya, Memberikan kemudahan akses untuk semua.",
                   ),
                   const SizedBox(height: 12),
                   Text(
