@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class FaqHelper extends StatelessWidget {
-  const FaqHelper ({super.key});
+  const FaqHelper({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -10,7 +10,12 @@ class FaqHelper extends StatelessWidget {
         title: Text("FAQ"),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
-        leading: IconButton(onPressed: () {}, icon: Icon(Icons.arrow_back_ios)),
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: Icon(Icons.arrow_back_ios),
+        ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(color: Color(0xFFF8FAFC), height: 1),
@@ -96,20 +101,26 @@ class FaqHelper extends StatelessWidget {
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 15),
-                    child: Text("Perbaikan, Pembersihan, Belanja, Pendidikan, dll"),
+                    child: Text(
+                      "Perbaikan, Pembersihan, Belanja, Pendidikan, dll",
+                    ),
                   ),
                   SizedBox(height: 20),
                   SizedBox(
                     height: 50,
                     width: double.infinity,
-                    child: ElevatedButton(onPressed: (){}, 
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      foregroundColor: Colors.white,
+                    child: ElevatedButton(
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: Text(
+                        "Hubungi Kami",
+                        style: TextStyle(fontSize: 20),
+                      ),
                     ),
-                    child: Text("Hubungi Kami", style: TextStyle(fontSize: 20),),
-                    ),
-                  )
+                  ),
                 ],
               ),
             ),

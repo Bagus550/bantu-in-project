@@ -10,7 +10,12 @@ class AboutUser extends StatelessWidget {
         title: Text("Tentang Kami"),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
-        leading: IconButton(onPressed: () {}, icon: Icon(Icons.arrow_back_ios)),
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: Icon(Icons.arrow_back_ios),
+        ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(color: Color(0xFFF8FAFC), height: 1),
