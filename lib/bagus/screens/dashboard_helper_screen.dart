@@ -1,4 +1,4 @@
-import 'package:bantuin/bagus/screens/notifications.dart';
+import 'package:bantuin/bagus/screens/tugas_aktif_helper.dart';
 import 'package:bantuin/bagus/screens/upload_bukti.dart';
 import 'package:bantuin/danela/detail_task_helper.dart';
 import 'package:bantuin/data_tugas.dart';
@@ -20,7 +20,7 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
       case 0:
         return _buildDashboardHelper();
       case 1:
-        return NotificationsHelper();
+        return TugasAktifHelper(detailTugas: tasks[0]);
       case 2:
         return MessageListTab();
       case 3:
@@ -133,8 +133,8 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
               _buildNavItem(index: 0, icon: Icons.home_filled, label: 'Home'),
               _buildNavItem(
                 index: 1,
-                icon: Icons.notifications_none_outlined,
-                label: 'Notification',
+                icon: Icons.task_outlined,
+                label: 'Tugas Aktif',
               ),
               _buildPostButton(),
               _buildNavItem(
