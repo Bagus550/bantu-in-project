@@ -141,3 +141,42 @@ final List<Map<String, dynamic>> notifikasi = [
         "Admin telah memvalidasi bukti pembayaran untuk tugas ID0. pastikan nomor referensi sama dengan yang ada di foto dan submit ulang",
   },
 ];
+
+final List<Map<String, dynamic>> NotifikasiRequester= [
+  {
+    "judul_notifikasi": "Tugas Selesai",
+    "waktu": "2 menit yang lalu",
+    "deskripsi":
+        "Helper telah mengonfirmasi penyelesaian tugas #BT-9821. Silakan lakukan pembayaran dan berikan ulasan.",
+  },
+  {
+    "judul_notifikasi": "Helper Ditemukan",
+    "waktu": "2 menit lalu",
+    "deskripsi":
+        "Admin telah memvalidasi bukti pembayaran untuk tugas ID1 Status tugas berubah dari 'Menunggu Validasi' menjadi 'Selesai'.",
+  },
+  {
+    "judul_notifikasi": "Tugas Dibatalkan",
+    "waktu": "5 menit lalu",
+    "deskripsi":
+        "Tugas telah dibatalkan, tunggu respon helper untuk menyetujui",
+  },
+  {
+    "judul_notifikasi": "Tugas Selesai",
+    "waktu": "2 menit yang lalu",
+    "deskripsi":
+        "Helper telah mengonfirmasi penyelesaian tugas #BT-9821. Silakan lakukan pembayaran dan berikan ulasan.",
+  },
+  {
+    "judul_notifikasi": "Helper Ditemukan",
+    "waktu": "2 menit lalu",
+    "deskripsi":
+        "Admin telah memvalidasi bukti pembayaran untuk tugas ID1 Status tugas berubah dari 'Menunggu Validasi' menjadi 'Selesai'.",
+  },
+  {
+    "judul_notifikasi": "Tugas Dibatalkan",
+    "waktu": "5 menit lalu",
+    "deskripsi":
+        "Tugas telah dibatalkan, tunggu respon helper untuk menyetujui",
+  },
+];

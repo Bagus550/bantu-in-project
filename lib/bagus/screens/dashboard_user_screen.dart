@@ -1,11 +1,10 @@
 import 'package:bantuin/bagus/screens/detail_task_user.dart';
 import 'package:bantuin/danela/message_list.dart';
 import 'package:bantuin/danela/roomchat.dart';
-import 'package:bantuin/ida/notifikasi_requester.dart';
+import 'package:bantuin/ida/notifikasi_requester.dart' as notif_requester;
 import 'package:bantuin/dava/user_setting.dart';
 import 'package:bantuin/ida/profile_tab.dart';
 import 'package:flutter/material.dart';
-import 'package:bantuin/ida/profile_tab.dart';
 import 'package:bantuin/data_tugas.dart';
 import 'package:bantuin/pilihan.dart';
 
