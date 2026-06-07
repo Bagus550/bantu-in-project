@@ -10,7 +10,12 @@ class AboutHelper extends StatelessWidget {
         title: Text("Tentang Kami"),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
-        leading: IconButton(onPressed: () {}, icon: Icon(Icons.arrow_back_ios)),
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: Icon(Icons.arrow_back_ios),
+        ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(color: Color(0xFFF8FAFC), height: 1),
@@ -54,7 +59,7 @@ class AboutHelper extends StatelessWidget {
                   const SizedBox(height: 12),
                   Text(
                     "Helper Bantu.In adalah individu yang bergabung sebagai mitra penyedia jasa untuk membantu pengguna menyelesaikan berbagai kebutuhan pekerjaan lapangan. Melalui platform Bantu.In, Helper dapat menemukan peluang kerja harian yang sesuai dengan kemampuan, pengalaman, dan ketersediaan waktu mereka.Bantu.In memberikan kesempatan bagi siapa saja yang memiliki keterampilan, tenaga, dan semangat membantu untuk memperoleh penghasilan tambahan melalui pekerjaan yang fleksibel. Dengan sistem yang transparan dan terintegrasi, Helper dapat mengelola pekerjaan, berkomunikasi dengan Requester, serta menerima pembayaran dengan lebih mudah dan aman. Menjadi Helper berarti menjadi bagian dari solusi, membantu orang lain sekaligus membuka peluang penghasilan yang lebih luas.",
-                textAlign: TextAlign.justify,
+                    textAlign: TextAlign.justify,
                   ),
                   const SizedBox(height: 12),
                   Text(
