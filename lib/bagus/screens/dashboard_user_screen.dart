@@ -3,6 +3,7 @@ import 'package:bantuin/bagus/screens/history.dart';
 import 'package:bantuin/danela/message_list.dart';
 import 'package:bantuin/danela/roomchat.dart';
 import 'package:bantuin/dava/user_setting.dart';
+import 'package:bantuin/ida/profile.dart';
 import 'package:bantuin/ida/profile_tab.dart';
 import 'package:flutter/material.dart';
 import 'package:bantuin/data_tugas.dart';
@@ -149,9 +150,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => ProfileTab(isMovedPage: true),
-                  ),
+                  MaterialPageRoute(builder: (context) => Profile()),
                 );
               },
               child: Container(
