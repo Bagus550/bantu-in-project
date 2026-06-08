@@ -3,6 +3,7 @@ import 'package:bantuin/bagus/screens/history.dart';
 import 'package:bantuin/danela/message_list.dart';
 import 'package:bantuin/danela/roomchat.dart';
 import 'package:bantuin/dava/user_setting.dart';
+import 'package:bantuin/ida/notifikasi_requester.dart';
 import 'package:bantuin/ida/profile.dart';
 import 'package:bantuin/ida/profile_tab.dart';
 import 'package:flutter/material.dart';
@@ -121,9 +122,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
       case 0:
         return _buildDashboardHome();
       case 1:
-        return Center(
-          child: Text("Halaman notifikasi", style: TextStyle(fontSize: 20)),
-        );
+        return NotifikasiRequester();
       case 2:
         return MessageListTab();
       case 3:
