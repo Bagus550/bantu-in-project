@@ -1,3 +1,7 @@
+import 'package:bantuin/alen/registhelper.dart';
+import 'package:bantuin/dava/edit_profile.dart';
+import 'package:bantuin/dava/helper_setting.dart';
+import 'package:bantuin/dava/user_setting.dart';
 import 'package:bantuin/ida/login_screen.dart';
 import 'package:bantuin/ida/splashscreen.dart';
 import 'package:flutter/material.dart';
@@ -30,7 +34,11 @@ class BantuInApp extends StatelessWidget {
       initialRoute: '/',
 
       routes: {
+<<<<<<< HEAD
         '/': (context) => const IdaSplashScreen(),
+=======
+        '/': (context) => const UserSetting(),
+>>>>>>> 1133df189fb39c6c5d70bb9bbde06cdfea0d2bcc
         '/login': (context) => const LoginScreen(),
       },
     );

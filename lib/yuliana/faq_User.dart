@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class FaqUser extends StatelessWidget {
-  const FaqUser ({super.key});
+  const FaqUser({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -10,7 +10,12 @@ class FaqUser extends StatelessWidget {
         title: Text("FAQ"),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
-        leading: IconButton(onPressed: () {}, icon: Icon(Icons.arrow_back_ios)),
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: Icon(Icons.arrow_back_ios),
+        ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(color: Color(0xFFF8FAFC), height: 1),
