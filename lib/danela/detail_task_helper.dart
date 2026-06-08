@@ -1,4 +1,4 @@
-import 'package:bantuin/bagus/screens/tugas_aktif_helper.dart';
+import 'package:bantuin/bagus/screens/tugas_aktif_screen.dart';
 import 'package:bantuin/danela/roomchat.dart';
 import 'package:flutter/material.dart';
 
@@ -188,7 +188,7 @@ class _DetailTugasState extends State<DetailTugasHelper> {
                     context,
                     MaterialPageRoute(
                       builder: (context) =>
-                          TugasAktifHelper(detailTugas: widget.taskData),
+                          TugasAktifScreen(detailTugas: widget.taskData),
                     ),
                   );
                 },
