@@ -1,8 +1,10 @@
 import 'package:bantuin/bagus/screens/detail_task_user.dart';
+import 'package:bantuin/bagus/screens/history.dart';
 import 'package:bantuin/danela/message_list.dart';
 import 'package:bantuin/danela/roomchat.dart';
 import 'package:bantuin/ida/notifikasi_requester.dart' as notif_requester;
 import 'package:bantuin/dava/user_setting.dart';
+import 'package:bantuin/ida/profile.dart';
 import 'package:bantuin/ida/profile_tab.dart';
 import 'package:flutter/material.dart';
 import 'package:bantuin/data_tugas.dart';
@@ -143,14 +145,22 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
         actions: [
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 15),
-            child: Container(
-              height: 40,
-              width: 40,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.secondary,
-                borderRadius: BorderRadius.circular(50),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Profile()),
+                );
+              },
+              child: Container(
+                height: 40,
+                width: 40,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.secondary,
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                child: Icon(Icons.person, color: Colors.white, size: 30),
               ),
-              child: Icon(Icons.person, color: Colors.white, size: 30),
             ),
           ),
         ],
@@ -188,8 +198,9 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
               leading: Icon(Icons.history, color: Colors.black87),
               title: Text("History Tugas"),
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Pindah ke halaman history")),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => History()),
                 );
               },
             ),
@@ -768,7 +779,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                                   ),
                                   icon: Icon(Icons.refresh),
                                   label: Text(
-                                    "Pesan Ulang",
+                                    "Pesan Lagi",
                                     style: TextStyle(fontSize: 10),
                                   ),
                                 ),

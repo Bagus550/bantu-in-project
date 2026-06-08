@@ -1,6 +1,11 @@
+import 'package:bantuin/dava/edit_profile.dart';
 import 'package:bantuin/ida/login_screen.dart';
+import 'package:bantuin/ida/ubah_katasandi.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:bantuin/ida/profile.dart';
+import 'package:bantuin/yuliana/about_helper.dart';
+import 'package:bantuin/yuliana/Faq_Helper.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -51,7 +56,14 @@ class _HelperSettingState extends State<HelperSetting> {
               child: Row(
                 children: [
                   InkWell(
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const Profile(),
+                        ),
+                      );
+                    },
                     child: const CircleAvatar(
                       radius: 28,
                       backgroundColor: Colors.grey,
@@ -80,7 +92,14 @@ class _HelperSettingState extends State<HelperSetting> {
                         ),
                         const SizedBox(height: 4),
                         GestureDetector(
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const EditProfile(),
+                              ),
+                            );
+                          },
                           child: const Text(
                             'Edit Profil',
                             style: TextStyle(
@@ -105,7 +124,19 @@ class _HelperSettingState extends State<HelperSetting> {
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                 ),
                 const SizedBox(height: 8),
-                _buildMenuItem(Icons.lock_outline, 'Ubah Kata Sandi', true),
+                _buildMenuItem(
+                  Icons.lock_outline,
+                  'Ubah Kata Sandi',
+                  true,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const UbahKatasandi(),
+                      ),
+                    );
+                  },
+                ),
                 const Divider(height: 24, thickness: 1),
 
                 const Text(
@@ -169,7 +200,17 @@ class _HelperSettingState extends State<HelperSetting> {
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                 ),
                 const SizedBox(height: 8),
-                _buildMenuItem(Icons.info_outline, 'Tentang Kami', true),
+                _buildMenuItem(
+                  Icons.info_outline,
+                  'Tentang Kami',
+                  true,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => AboutHelper()),
+                    );
+                  },
+                ),
                 _buildMenuItem(
                   Icons.headset_mic_outlined,
                   'Hubungi Kami',
@@ -178,7 +219,19 @@ class _HelperSettingState extends State<HelperSetting> {
                     _showContactBottomSheet(context);
                   },
                 ),
-                _buildMenuItem(Icons.help_outline, 'Pusat Bantuan (FAQ)', true),
+                _buildMenuItem(
+                  Icons.help_outline,
+                  'Pusat Bantuan (FAQ)',
+                  true,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const FaqHelper(),
+                      ),
+                    );
+                  },
+                ),
                 const SizedBox(height: 36),
               ],
             ),
@@ -186,7 +239,7 @@ class _HelperSettingState extends State<HelperSetting> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.push(
+                  Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (context) => LoginScreen()),
                   );
