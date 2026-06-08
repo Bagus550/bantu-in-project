@@ -13,8 +13,7 @@ class _RoomChatPageState extends State<RoomChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    final String currentUser =
-        widget.namaData['nama_requester'] ?? "Kelompok 4";
+    final String currentUser = "Bagus";
     final String requester =
         widget.namaData['nama_requester'] ?? 'Tidak ada nama';
     final String helper = widget.namaData['nama_helper'] ?? 'Tidak ada nama';
@@ -55,6 +54,7 @@ class _RoomChatPageState extends State<RoomChatPage> {
             ),
           ],
         ),
+        toolbarHeight: 80,
       ),
       body: Column(
         children: [

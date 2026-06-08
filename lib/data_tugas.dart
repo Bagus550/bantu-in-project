@@ -95,6 +95,31 @@ List<Map<String, dynamic>> tasks = [
     "status": "Mencari helper",
     "kategori_layanan": "BantuStudy",
   },
+  // --- TAMBAHAN MOCK DATA DENGAN STATUS DIBATALKAN ---
+  {
+    "id": 8,
+    "judul_tugas": "Antar Paket ke J&T Express",
+    "nama_helper": "Riko",
+    "nama_requester": "Sania",
+    "deskripsi":
+        "Tolong ambil paket dropship di rumah saya lalu antarkan ke konter J&T terdekat, resi sudah otomatis.",
+    "lokasi_tugas": "Perum Griya Indah Blok C-12",
+    "nominal_pembayaran": "Rp 10.000",
+    "status": "Dibatalkan",
+    "kategori_layanan": "BantuShop",
+  },
+  {
+    "id": 9,
+    "judul_tugas": "Cabut Rumput Halaman Depan",
+    "nama_helper": "Fajar",
+    "nama_requester": "Hendra",
+    "deskripsi":
+        "Membersihkan rumput liar yang sudah tinggi di pekarangan depan rumah, peralatan sudah disediakan.",
+    "lokasi_tugas": "Jl. Merdeka No. 88",
+    "nominal_pembayaran": "Rp 60.000",
+    "status": "Dibatalkan",
+    "kategori_layanan": "BantuClean",
+  },
 ];
 
 final List<Map<String, dynamic>> helperList = [
@@ -139,5 +164,92 @@ final List<Map<String, dynamic>> notifikasi = [
     "waktu": "5 menit lalu",
     "deskripsi":
         "Admin telah memvalidasi bukti pembayaran untuk tugas ID0. pastikan nomor referensi sama dengan yang ada di foto dan submit ulang",
+  },
+];
+
+List<Map<String, dynamic>> helpers = [
+  {
+    "id_helper": 1,
+    "id_admin_pendaftar": 101,
+    "nama": "Dika",
+    "email": "dika.helper@gmail.com",
+    "password": "hashed_password_123", // Anggap saja sudah ter-enkripsi
+    "no_hp": "081234567890",
+    "status_aktif": 1, // 1 berarti true / aktif
+    "nama_bank": "Bank Mandiri",
+    "nomor_rekening": "1370012345678",
+    "created_at": "2026-01-10 08:30:00",
+  },
+  {
+    "id_helper": 2,
+    "id_admin_pendaftar": 101,
+    "nama": "Andi",
+    "email": "andi.fixer@gmail.com",
+    "password": "hashed_password_456",
+    "no_hp": "082198765432",
+    "status_aktif": 1,
+    "nama_bank": "BCA",
+    "nomor_rekening": "8025112233",
+    "created_at": "2026-02-15 09:15:22",
+  },
+  {
+    "id_helper": 3,
+    "id_admin_pendaftar": 102,
+    "nama": "Fahmi",
+    "email": "fahmi.bantu@gmail.com",
+    "password": "hashed_password_789",
+    "no_hp": "085711223344",
+    "status_aktif": 1,
+    "nama_bank": "BRI",
+    "nomor_rekening": "034101000123304",
+    "created_at": "2026-03-01 14:00:10",
+  },
+  {
+    "id_helper": 4,
+    "id_admin_pendaftar": 101,
+    "nama": "Surya",
+    "email": "surya.shop@gmail.com",
+    "password": "hashed_password_abc",
+    "no_hp": "089988776655",
+    "status_aktif": 1,
+    "nama_bank": "BNI",
+    "noming_rekening": "0234567891",
+    "created_at": "2026-04-18 10:45:00",
+  },
+  {
+    "id_helper": 5,
+    "id_admin_pendaftar": 103,
+    "nama": "Lia",
+    "email": "lia.study@gmail.com",
+    "password": "hashed_password_def",
+    "no_hp": "081344556677",
+    "status_aktif": 1,
+    "nama_bank": "BCA",
+    "nomor_rekening": "8025998877",
+    "created_at": "2026-04-20 11:20:05",
+  },
+  {
+    "id_helper": 6,
+    "id_admin_pendaftar": 102,
+    "nama": "Riko",
+    "email": "riko.kurir@gmail.com",
+    "password": "hashed_password_ghi",
+    "no_hp": "087855667788",
+    "status_aktif": 1,
+    "nama_bank": "Bank Mandiri",
+    "nomor_rekening": "1370098765432",
+    "created_at": "2026-05-02 07:10:00",
+  },
+  {
+    "id_helper": 7,
+    "id_admin_pendaftar": 103,
+    "nama": "Fajar",
+    "email": "fajar.clean@gmail.com",
+    "password": "hashed_password_jkl",
+    "no_hp": "083811229900",
+    "status_aktif": 0, // Contoh helper yang sedang dinonaktifkan (tinyint 0)
+    "nama_bank": "Bank Syariah Indonesia (BSI)",
+    "nomor_rekening": "7144556677",
+    "created_at": "2026-05-05 16:55:43",
   },
 ];

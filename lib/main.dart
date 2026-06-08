@@ -1,9 +1,5 @@
-import 'package:bantuin/alen/admin.dart';
-import 'package:bantuin/alen/registhelper.dart';
-import 'package:bantuin/alen/registhelper2.dart';
 import 'package:bantuin/ida/login_screen.dart';
 import 'package:bantuin/ida/splashscreen.dart';
-import 'package:bantuin/yuliana/faq_User.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -34,7 +30,7 @@ class BantuInApp extends StatelessWidget {
       initialRoute: '/',
 
       routes: {
-        '/': (context) => const MyAdmin(),
+        '/': (context) => const IdaSplashScreen(),
         '/login': (context) => const LoginScreen(),
       },
     );

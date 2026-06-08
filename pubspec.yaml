@@ -31,6 +31,7 @@ dependencies:
   flutter:
     sdk: flutter
   url_launcher: ^6.3.2
+  flutter_launcher_icons: ^0.14.4
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -103,3 +104,11 @@ dev_dependencies:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+  # Konfigurasi Launcher Icons
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/logo/logo.png" # Sesuaikan dengan path logo Anda
+  # Opsional: Untuk Android 8.0+ (Adaptive Icons) agar ikon terlihat bagus di semua HP
+  # adaptive_icon_background: "#ffffff" # Warna background (putih)
+  # adaptive_icon_foreground: "assets/logo/logo_aplikasi.png" # Path logo
