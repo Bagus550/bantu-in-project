@@ -167,46 +167,6 @@ final List<Map<String, dynamic>> notifikasi = [
   },
 ];
 
-<<<<<<< HEAD
-final List<Map<String, dynamic>> NotifikasiRequester= [
-  {
-    "judul_notifikasi": "Tugas Selesai",
-    "waktu": "2 menit yang lalu",
-    "deskripsi":
-        "Helper telah mengonfirmasi penyelesaian tugas #BT-9821. Silakan lakukan pembayaran dan berikan ulasan.",
-  },
-  {
-    "judul_notifikasi": "Helper Ditemukan",
-    "waktu": "2 menit lalu",
-    "deskripsi":
-        "Admin telah memvalidasi bukti pembayaran untuk tugas ID1 Status tugas berubah dari 'Menunggu Validasi' menjadi 'Selesai'.",
-  },
-  {
-    "judul_notifikasi": "Tugas Dibatalkan",
-    "waktu": "5 menit lalu",
-    "deskripsi":
-        "Tugas telah dibatalkan, tunggu respon helper untuk menyetujui",
-  },
-  {
-    "judul_notifikasi": "Tugas Selesai",
-    "waktu": "2 menit yang lalu",
-    "deskripsi":
-        "Helper telah mengonfirmasi penyelesaian tugas #BT-9821. Silakan lakukan pembayaran dan berikan ulasan.",
-  },
-  {
-    "judul_notifikasi": "Helper Ditemukan",
-    "waktu": "2 menit lalu",
-    "deskripsi":
-        "Admin telah memvalidasi bukti pembayaran untuk tugas ID1 Status tugas berubah dari 'Menunggu Validasi' menjadi 'Selesai'.",
-  },
-  {
-    "judul_notifikasi": "Tugas Dibatalkan",
-    "waktu": "5 menit lalu",
-    "deskripsi":
-        "Tugas telah dibatalkan, tunggu respon helper untuk menyetujui",
-  },
-];
-=======
 List<Map<String, dynamic>> helpers = [
   {
     "id_helper": 1,
@@ -293,4 +253,3 @@ List<Map<String, dynamic>> helpers = [
     "created_at": "2026-05-05 16:55:43",
   },
 ];
->>>>>>> ded28b415c88da2aa633a539f8305ed63c45603a
