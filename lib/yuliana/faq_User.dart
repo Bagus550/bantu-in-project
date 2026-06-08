@@ -125,7 +125,7 @@ class FaqUser extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(top: 15),
                     child: Text(
-                      "Perbaikan, Pembersihan, Belanja, Pendidikan, dll",
+                      "Perbaikan, Pembersihan, Belanja, Pendidikan.",
                     ),
                   ),
                   SizedBox(height: 20),
