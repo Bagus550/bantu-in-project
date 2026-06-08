@@ -1,3 +1,4 @@
+import 'package:bantuin/alen/paypage.dart';
 import 'package:bantuin/alen/registhelper3.dart';
 import 'package:flutter/material.dart';
 import 'admin.dart';
@@ -234,6 +235,11 @@ class _RegistPage2State extends State<RegistPage2> {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => const RegistPage()),
+            );
+          } else if (index == 2) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const PayPage()),
             );
           }
         },

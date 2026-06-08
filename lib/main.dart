@@ -1,3 +1,4 @@
+import 'package:bantuin/alen/admin.dart';
 import 'package:bantuin/alen/registhelper.dart';
 import 'package:bantuin/alen/registhelper2.dart';
 import 'package:bantuin/ida/login_screen.dart';
@@ -33,7 +34,7 @@ class BantuInApp extends StatelessWidget {
       initialRoute: '/',
 
       routes: {
-        '/': (context) => const RegistPage2(),
+        '/': (context) => const MyAdmin(),
         '/login': (context) => const LoginScreen(),
       },
     );
