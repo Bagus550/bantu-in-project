@@ -24,6 +24,7 @@ class _RegistPageState extends State<RegistPage> {
           ),
         ),
         elevation: 3,
+        toolbarHeight: 80,
         actions: [
           Row(
             mainAxisSize: MainAxisSize.min,
@@ -36,14 +37,6 @@ class _RegistPageState extends State<RegistPage> {
                 ),
               ),
               SizedBox(width: 12),
-              IconButton(
-                onPressed: () {},
-                icon: Icon(
-                  Icons.account_circle,
-                  color: Theme.of(context).colorScheme.primary,
-                  size: 30,
-                ),
-              ),
             ],
           ),
         ],
