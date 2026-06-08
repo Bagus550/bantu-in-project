@@ -1,10 +1,14 @@
+import 'package:bantuin/bagus/screens/history.dart';
 import 'package:bantuin/bagus/screens/tugas_aktif_helper.dart';
+import 'package:bantuin/bagus/screens/tugas_aktif_screen.dart';
 import 'package:bantuin/bagus/screens/upload_bukti.dart';
 import 'package:bantuin/danela/detail_task_helper.dart';
 import 'package:bantuin/data_tugas.dart';
 import 'package:bantuin/dava/helper_setting.dart';
 import 'package:bantuin/danela/message_list.dart';
+import 'package:bantuin/ida/profile.dart';
 import 'package:bantuin/ida/profile_tab.dart';
+import 'package:bantuin/yuliana/Faq_Helper.dart';
 import 'package:flutter/material.dart';
 
 class DashboardHelperScreen extends StatefulWidget {
@@ -47,7 +51,15 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
         shadowColor: Colors.black.withAlpha(10),
         toolbarHeight: 80,
         actions: [
-          IconButton(onPressed: () {}, icon: Icon(Icons.help_outline)),
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => FaqHelper()),
+              );
+            },
+            icon: Icon(Icons.help_outline),
+          ),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 15),
             child: Container(
@@ -58,7 +70,12 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                 borderRadius: BorderRadius.circular(50),
               ),
               child: IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => Profile()),
+                  );
+                },
                 icon: Icon(Icons.person, color: Colors.white),
               ),
             ),
@@ -98,8 +115,9 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
               leading: Icon(Icons.history, color: Colors.black87),
               title: Text("History Tugas"),
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Pindah ke halaman history")),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => History()),
                 );
               },
             ),
@@ -372,7 +390,17 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                                       ),
                                     ),
                                     ElevatedButton(
-                                      onPressed: () {},
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                TugasAktifScreen(
+                                                  detailTugas: tugas,
+                                                ),
+                                          ),
+                                        );
+                                      },
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Theme.of(
                                           context,
