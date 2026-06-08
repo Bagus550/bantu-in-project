@@ -1,3 +1,4 @@
+import 'package:bantuin/bagus/screens/tugas_aktif_screen.dart';
 import 'package:bantuin/danela/roomchat.dart';
 import 'package:flutter/material.dart';
 
@@ -182,7 +183,15 @@ class _DetailTugasState extends State<DetailTugasHelper> {
               width: double.infinity,
               height: 55,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          TugasAktifScreen(detailTugas: widget.taskData),
+                    ),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blueAccent,
                   shape: RoundedRectangleBorder(

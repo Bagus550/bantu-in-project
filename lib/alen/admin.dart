@@ -1,3 +1,4 @@
+import 'package:bantuin/alen/registhelper.dart';
 import 'package:bantuin/data_tugas.dart';
 import 'package:flutter/material.dart';
 
@@ -61,7 +62,7 @@ class _MyAdminState extends State<MyAdmin> {
               TextField(
                 decoration: InputDecoration(
                   labelText: "Search Helpers",
-                  prefixIcon: Icon(Icons.search),
+                  icon: Icon(Icons.search),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -149,7 +150,10 @@ class _MyAdminState extends State<MyAdmin> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadiusGeometry.circular(8),
                           ),
-                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 0,
+                          ),
                         ),
                       ),
                     ],
@@ -167,24 +171,25 @@ class _MyAdminState extends State<MyAdmin> {
                   children: helperList.asMap().entries.map((entry) {
                     int index = entry.key;
                     Map<String, dynamic> helper = entry.value;
-        
+
                     return Column(
                       children: [
                         _buildHelperItem(helper),
-                        if (index != helperList.length -1)
-                        Divider(height: 1, color: Colors.grey),
+                        if (index != helperList.length - 1)
+                          Divider(height: 1, color: Colors.grey),
                       ],
                     );
                   }).toList(),
                 ),
               ),
-        
+
               SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text("Showing 3 of 1,294 helpers",
-                  style: TextStyle(color: Colors.grey, fontSize: 13),
+                  Text(
+                    "Showing 3 of 1,294 helpers",
+                    style: TextStyle(color: Colors.grey, fontSize: 13),
                   ),
                   Row(
                     children: [
@@ -200,26 +205,46 @@ class _MyAdminState extends State<MyAdmin> {
           ),
         ),
       ),
-      bottomNavigationBar: NavigationBar(selectedIndex: _currentIndex,
-      onDestinationSelected: (int index) {
-        setState(() {
-          _currentIndex = index;
-        });
-      },
-      backgroundColor: Colors.white,
-      indicatorColor: Colors.deepPurpleAccent,
-      destinations: const [
-        NavigationDestination(icon: Icon(Icons.people_outline, color: Colors.black),
-        selectedIcon: Icon(Icons.people, color: Colors.black),
-         label: "Helpers",
-         ),
-         NavigationDestination(icon: Icon(Icons.how_to_reg, color: Colors.black), label: "Registration",
-         ),
-         NavigationDestination(icon: Icon(Icons.payment_outlined, color: Colors.black), label: "Payments",
-         ),
-         NavigationDestination(icon: Icon(Icons.person_outline, color: Colors.black), label: "Profile",
-         ),
-      ],
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _currentIndex,
+        onDestinationSelected: (int index) {
+          if (_currentIndex == index) return;
+          setState(() {
+            _currentIndex = index;
+          });
+          if (index == 0) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const MyAdmin()),
+            );
+          } else if (index == 1) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const RegistPage()),
+            );
+          }
+        },
+        backgroundColor: Colors.white,
+        indicatorColor: Colors.deepPurpleAccent,
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.people_outline, color: Colors.black),
+            selectedIcon: Icon(Icons.people, color: Colors.black),
+            label: "Helpers",
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.how_to_reg, color: Colors.black),
+            label: "Registration",
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.payment_outlined, color: Colors.black),
+            label: "Payments",
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline, color: Colors.black),
+            label: "Profile",
+          ),
+        ],
       ),
     );
   }
@@ -328,48 +353,53 @@ Widget _buildWideCard({
 }
 
 Widget _buildHelperItem(Map<String, dynamic> data) {
-  return Padding(padding: EdgeInsetsGeometry.all(16),
-  child: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CircleAvatar(
-            radius: 24,
-            backgroundColor: Colors.grey, 
-            child: Icon(Icons.person, color: Colors.grey, size: 30),
-          ),
-          SizedBox(width: 12),
-          Expanded(child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(data['name'],
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+  return Padding(
+    padding: EdgeInsetsGeometry.all(16),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            CircleAvatar(
+              radius: 24,
+              backgroundColor: Colors.grey,
+              child: Icon(Icons.person, color: Colors.grey, size: 30),
+            ),
+            SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    data['name'],
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                  ),
+                  Text(
+                    data['role'],
+                    style: TextStyle(color: Colors.grey, fontSize: 13),
+                  ),
+                ],
               ),
-              Text(data['role'],
-              style: TextStyle(color: Colors.grey, fontSize: 13),
-              ),
-            ],
-          ),
-          ),
-          _buildStatusBadge(data['status']),
-        ],
-      ),
+            ),
+            _buildStatusBadge(data['status']),
+          ],
+        ),
 
-      SizedBox(height: 12),
-      Text("Tasks: ${data['tasks']}",
-      style: TextStyle(fontSize: 14, color: Colors.black),
-      ),
+        SizedBox(height: 12),
+        Text(
+          "Tasks: ${data['tasks']}",
+          style: TextStyle(fontSize: 14, color: Colors.black),
+        ),
 
-      SizedBox(height: 12),
-      
-      Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: _buildActionButtons(data['status']),
-      ),
-    ],
-  ),
+        SizedBox(height: 12),
+
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: _buildActionButtons(data['status']),
+        ),
+      ],
+    ),
   );
 }
 
@@ -379,13 +409,13 @@ Widget _buildStatusBadge(String status) {
 
   if (status == "ACTIVE") {
     bgColor = Colors.green;
-    textColor = Colors.green.shade700;
+    textColor = Colors.black;
   } else if (status == "SUSPENDED") {
     bgColor = Colors.red;
-    textColor = Colors.red.shade700;
+    textColor = Colors.black;
   } else {
     bgColor = Colors.deepPurple;
-    textColor = Colors.deepPurple.shade700;
+    textColor = Colors.black;
   }
 
   return Container(
@@ -394,16 +424,20 @@ Widget _buildStatusBadge(String status) {
       color: bgColor,
       borderRadius: BorderRadius.circular(20),
     ),
-    child: Text(status, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 11),
+    child: Text(
+      status,
+      style: TextStyle(
+        color: textColor,
+        fontWeight: FontWeight.bold,
+        fontSize: 11,
+      ),
     ),
   );
 }
 
 List<Widget> _buildActionButtons(String status) {
   if (status == "ACTIVE") {
-    return [
-      _buildElevatedButton(label: "Suspend Akun", isDanger: true),
-    ];
+    return [_buildElevatedButton(label: "Suspend Akun", isDanger: true)];
   } else if (status == "SUSPEND") {
     return [
       _buildElevatedButton(label: "Buka Suspend", isDanger: false),
@@ -411,30 +445,33 @@ List<Widget> _buildActionButtons(String status) {
       _buildElevatedButton(label: "Hapus Akun", isDanger: true),
     ];
   } else {
-    return [
-      _buildElevatedButton(label: "Terima", isDanger: false),
-    ];
+    return [_buildElevatedButton(label: "Terima", isDanger: false)];
   }
 }
 
 Widget _buildElevatedButton({required String label, required bool isDanger}) {
-  return ElevatedButton(onPressed: (){}, style: ElevatedButton.styleFrom(
-    backgroundColor: isDanger ? Colors.red : Colors.blue,
-    foregroundColor: Colors.white,
-    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-    shape: RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.circular(6)),
-    minimumSize: Size(0, 36),
-  ),
-  child: Text(label, style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),),
+  return ElevatedButton(
+    onPressed: () {},
+    style: ElevatedButton.styleFrom(
+      backgroundColor: isDanger ? Colors.red : Colors.blue,
+      foregroundColor: Colors.white,
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadiusGeometry.circular(6),
+      ),
+      minimumSize: Size(0, 36),
+    ),
+    child: Text(
+      label,
+      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+    ),
   );
 }
 
 Widget _buildPageButton(IconData icon) {
   return Container(
     padding: EdgeInsets.all(4),
-    decoration: BoxDecoration(
-      border: Border.all(color: Colors.grey),
-    ),
+    decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
     child: Icon(icon, size: 20, color: Colors.grey),
   );
 }

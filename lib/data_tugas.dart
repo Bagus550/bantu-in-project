@@ -95,6 +95,31 @@ List<Map<String, dynamic>> tasks = [
     "status": "Mencari helper",
     "kategori_layanan": "BantuStudy",
   },
+  // --- TAMBAHAN MOCK DATA DENGAN STATUS DIBATALKAN ---
+  {
+    "id": 8,
+    "judul_tugas": "Antar Paket ke J&T Express",
+    "nama_helper": "Riko",
+    "nama_requester": "Sania",
+    "deskripsi":
+        "Tolong ambil paket dropship di rumah saya lalu antarkan ke konter J&T terdekat, resi sudah otomatis.",
+    "lokasi_tugas": "Perum Griya Indah Blok C-12",
+    "nominal_pembayaran": "Rp 10.000",
+    "status": "Dibatalkan",
+    "kategori_layanan": "BantuShop",
+  },
+  {
+    "id": 9,
+    "judul_tugas": "Cabut Rumput Halaman Depan",
+    "nama_helper": "Fajar",
+    "nama_requester": "Hendra",
+    "deskripsi":
+        "Membersihkan rumput liar yang sudah tinggi di pekarangan depan rumah, peralatan sudah disediakan.",
+    "lokasi_tugas": "Jl. Merdeka No. 88",
+    "nominal_pembayaran": "Rp 60.000",
+    "status": "Dibatalkan",
+    "kategori_layanan": "BantuClean",
+  },
 ];
 
 final List<Map<String, dynamic>> helperList = [
