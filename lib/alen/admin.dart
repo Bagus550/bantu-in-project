@@ -1,5 +1,6 @@
 import 'package:bantuin/alen/registhelper.dart';
 import 'package:bantuin/data_tugas.dart';
+import 'package:bantuin/ida/login_screen.dart';
 import 'package:flutter/material.dart';
 
 class MyAdmin extends StatefulWidget {
@@ -11,9 +12,25 @@ class MyAdmin extends StatefulWidget {
 
 class _MyAdminState extends State<MyAdmin> {
   int _currentIndex = 0;
+  int currentPage = 1;
+  final int itemsPerPage = 5;
 
   @override
   Widget build(BuildContext context) {
+    int jumlahHelperTerdaftar = tasks
+        .where((task) => task['nama_helper'] != "")
+        .map((task) => task["nama_helper"])
+        .toSet()
+        .length;
+
+    int jumlahHelperAktif = helpers
+        .where((helper) => helper['status_aktif'] == 1)
+        .length;
+
+    int validasi = tasks
+        .where((task) => task['status'] == "Menunggu validasi")
+        .length;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -24,6 +41,8 @@ class _MyAdminState extends State<MyAdmin> {
           ),
         ),
         elevation: 3,
+        toolbarHeight: 80,
+        automaticallyImplyLeading: false,
         actions: [
           Row(
             mainAxisSize: MainAxisSize.min,
@@ -33,13 +52,19 @@ class _MyAdminState extends State<MyAdmin> {
                 icon: Icon(
                   Icons.notifications_none,
                   color: Theme.of(context).colorScheme.primary,
+                  size: 25,
                 ),
               ),
               SizedBox(width: 12),
               IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => LoginScreen()),
+                  );
+                },
                 icon: Icon(
-                  Icons.account_circle,
+                  Icons.logout,
                   color: Theme.of(context).colorScheme.primary,
                   size: 30,
                 ),
@@ -62,7 +87,7 @@ class _MyAdminState extends State<MyAdmin> {
               TextField(
                 decoration: InputDecoration(
                   labelText: "Search Helpers",
-                  icon: Icon(Icons.search),
+                  prefixIcon: Icon(Icons.search),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -74,21 +99,22 @@ class _MyAdminState extends State<MyAdmin> {
                   Expanded(
                     child: _buildSmallCard(
                       title: "Total Helpers",
-                      value: "1,284",
-                      subtitle: "+12% this month",
-                      isTrendingUp: true,
+                      value: jumlahHelperTerdaftar.toString(),
                     ),
                   ),
                   SizedBox(width: 16),
                   Expanded(
-                    child: _buildSmallCard(title: "Active Now", value: "456"),
+                    child: _buildSmallCard(
+                      title: "Active Now",
+                      value: jumlahHelperAktif.toString(),
+                    ),
                   ),
                 ],
               ),
               SizedBox(height: 16),
               _buildWideCard(
                 title: "Pending Approval",
-                value: "42",
+                value: validasi.toString(),
                 subtitle: "Action Required",
               ),
               SizedBox(height: 32),
@@ -165,21 +191,31 @@ class _MyAdminState extends State<MyAdmin> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey),
+                  border: Border.all(color: Colors.grey.shade300),
                 ),
                 child: Column(
-                  children: helperList.asMap().entries.map((entry) {
-                    int index = entry.key;
-                    Map<String, dynamic> helper = entry.value;
+                  children: () {
+                    // Rumus memotong list data berdasarkan halaman aktif
+                    int startIndex = (currentPage - 1) * itemsPerPage;
+                    List<Map<String, dynamic>> pagedHelpers = helpers
+                        .skip(startIndex)
+                        .take(itemsPerPage)
+                        .toList();
 
-                    return Column(
-                      children: [
-                        _buildHelperItem(helper),
-                        if (index != helperList.length - 1)
-                          Divider(height: 1, color: Colors.grey),
-                      ],
-                    );
-                  }).toList(),
+                    return pagedHelpers.asMap().entries.map((entry) {
+                      int index = entry.key;
+                      Map<String, dynamic> helper = entry.value;
+
+                      return Column(
+                        children: [
+                          _buildHelperItem(helper),
+                          // Divider tidak muncul di item paling bawah pada halaman tersebut
+                          if (index != pagedHelpers.length - 1)
+                            const Divider(height: 1, color: Colors.grey),
+                        ],
+                      );
+                    }).toList();
+                  }(),
                 ),
               ),
 
@@ -188,14 +224,41 @@ class _MyAdminState extends State<MyAdmin> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "Showing 3 of 1,294 helpers",
+                    "Showing ${((currentPage - 1) * itemsPerPage) + 1} to "
+                    "${(currentPage * itemsPerPage) > helpers.length ? helpers.length : (currentPage * itemsPerPage)} "
+                    "of ${helpers.length} helpers",
                     style: TextStyle(color: Colors.grey, fontSize: 13),
                   ),
                   Row(
                     children: [
-                      _buildPageButton(Icons.chevron_left),
+                      GestureDetector(
+                        onTap: currentPage > 1
+                            ? () {
+                                setState(() {
+                                  currentPage--;
+                                });
+                              }
+                            : null,
+                        child: _buildPageButton(
+                          Icons.chevron_left,
+                          isDisabled: currentPage == 1,
+                        ),
+                      ),
                       SizedBox(width: 8),
-                      _buildPageButton(Icons.chevron_right),
+                      GestureDetector(
+                        onTap: (currentPage * itemsPerPage) < helpers.length
+                            ? () {
+                                setState(() {
+                                  currentPage++;
+                                });
+                              }
+                            : null,
+                        child: _buildPageButton(
+                          Icons.chevron_right,
+                          isDisabled:
+                              (currentPage * itemsPerPage) >= helpers.length,
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -254,9 +317,9 @@ Widget _buildSmallCard({
   required String title,
   required String value,
   String? subtitle,
-  bool isTrendingUp = false,
 }) {
   return Container(
+    height: 125,
     padding: EdgeInsets.all(16),
     decoration: BoxDecoration(
       color: Colors.white,
@@ -285,20 +348,7 @@ Widget _buildSmallCard({
         ),
         if (subtitle != null) ...[
           SizedBox(height: 8),
-          Row(
-            children: [
-              if (isTrendingUp)
-                Icon(Icons.trending_up, color: Colors.lightGreenAccent),
-              if (isTrendingUp) SizedBox(width: 4),
-              Text(
-                subtitle,
-                style: TextStyle(
-                  fontSize: 11,
-                  color: isTrendingUp ? Colors.greenAccent : Colors.grey,
-                ),
-              ),
-            ],
-          ),
+          Row(children: [Text(subtitle, style: TextStyle(fontSize: 11))]),
         ],
       ],
     ),
@@ -353,6 +403,14 @@ Widget _buildWideCard({
 }
 
 Widget _buildHelperItem(Map<String, dynamic> data) {
+  var statusAktif = data['status_aktif'] ?? 1;
+
+  String namaHelper = data['nama'] ?? 'anonim';
+
+  int jumlahTugasDiambil = tasks.where((task) {
+    return task['nama_helper'] == namaHelper && task['status'] != "Dibatalkan";
+  }).length;
+
   return Padding(
     padding: EdgeInsetsGeometry.all(16),
     child: Column(
@@ -363,8 +421,8 @@ Widget _buildHelperItem(Map<String, dynamic> data) {
           children: [
             CircleAvatar(
               radius: 24,
-              backgroundColor: Colors.grey,
-              child: Icon(Icons.person, color: Colors.grey, size: 30),
+              backgroundColor: const Color.fromARGB(255, 205, 205, 205),
+              child: Icon(Icons.person, size: 30),
             ),
             SizedBox(width: 12),
             Expanded(
@@ -372,23 +430,23 @@ Widget _buildHelperItem(Map<String, dynamic> data) {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    data['name'],
+                    data['nama'] ?? 'anonim',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                   ),
                   Text(
-                    data['role'],
+                    data['email'] ?? '-',
                     style: TextStyle(color: Colors.grey, fontSize: 13),
                   ),
                 ],
               ),
             ),
-            _buildStatusBadge(data['status']),
+            _buildStatusBadge(statusAktif),
           ],
         ),
 
         SizedBox(height: 12),
         Text(
-          "Tasks: ${data['tasks']}",
+          "Tasks: $jumlahTugasDiambil Tugas Diambil",
           style: TextStyle(fontSize: 14, color: Colors.black),
         ),
 
@@ -396,26 +454,23 @@ Widget _buildHelperItem(Map<String, dynamic> data) {
 
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
-          children: _buildActionButtons(data['status']),
+          children: _buildActionButtons(statusAktif),
         ),
       ],
     ),
   );
 }
 
-Widget _buildStatusBadge(String status) {
+Widget _buildStatusBadge(dynamic statusAktif) {
   Color bgColor;
-  Color textColor;
+  String textStatus;
 
-  if (status == "ACTIVE") {
+  if (statusAktif == 1 || statusAktif == "ACTIVE") {
     bgColor = Colors.green;
-    textColor = Colors.black;
-  } else if (status == "SUSPENDED") {
-    bgColor = Colors.red;
-    textColor = Colors.black;
+    textStatus = "ACTIVE";
   } else {
-    bgColor = Colors.deepPurple;
-    textColor = Colors.black;
+    bgColor = Colors.red;
+    textStatus = "SUSPEND";
   }
 
   return Container(
@@ -425,9 +480,9 @@ Widget _buildStatusBadge(String status) {
       borderRadius: BorderRadius.circular(20),
     ),
     child: Text(
-      status,
+      textStatus,
       style: TextStyle(
-        color: textColor,
+        color: Colors.white,
         fontWeight: FontWeight.bold,
         fontSize: 11,
       ),
@@ -435,17 +490,15 @@ Widget _buildStatusBadge(String status) {
   );
 }
 
-List<Widget> _buildActionButtons(String status) {
-  if (status == "ACTIVE") {
+List<Widget> _buildActionButtons(dynamic statusAktif) {
+  if (statusAktif == 1) {
     return [_buildElevatedButton(label: "Suspend Akun", isDanger: true)];
-  } else if (status == "SUSPEND") {
+  } else {
     return [
       _buildElevatedButton(label: "Buka Suspend", isDanger: false),
-      SizedBox(width: 8),
+      const SizedBox(width: 8),
       _buildElevatedButton(label: "Hapus Akun", isDanger: true),
     ];
-  } else {
-    return [_buildElevatedButton(label: "Terima", isDanger: false)];
   }
 }
 
@@ -468,7 +521,7 @@ Widget _buildElevatedButton({required String label, required bool isDanger}) {
   );
 }
 
-Widget _buildPageButton(IconData icon) {
+Widget _buildPageButton(IconData icon, {bool isDisabled = false}) {
   return Container(
     padding: EdgeInsets.all(4),
     decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
