@@ -397,7 +397,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => DetailTugas(dataTugas: bantuan),
+                          builder: (context) => DetailTugas(taskData: bantuan),
                         ),
                       );
                     },
@@ -612,7 +612,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => DetailTugas(dataTugas: history),
+                          builder: (context) => DetailTugas(taskData: history),
                         ),
                       );
                     },

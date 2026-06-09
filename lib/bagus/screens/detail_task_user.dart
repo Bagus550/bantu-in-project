@@ -2,8 +2,8 @@ import 'package:bantuin/danela/roomchat.dart';
 import 'package:flutter/material.dart';
 
 class DetailTugas extends StatefulWidget {
-  final Map<String, dynamic> dataTugas;
-  const DetailTugas({super.key, required this.dataTugas});
+  final Map<String, dynamic> taskData;
+  const DetailTugas({super.key, required this.taskData});
 
   @override
   State<DetailTugas> createState() => _DetailTugasState();
@@ -81,8 +81,8 @@ class _DetailTugasState extends State<DetailTugas> {
 
   @override
   Widget build(BuildContext context) {
-    final data = widget.dataTugas;
-    String statusTugas = widget.dataTugas['status'];
+    final data = widget.taskData;
+    String statusTugas = widget.taskData['status'];
     bool isButtonActive =
         statusTugas != 'Mencari helper' && statusTugas != 'Selesai';
 
