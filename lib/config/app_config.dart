@@ -8,4 +8,6 @@ class AppConfig {
 
   static const String uploadBukti   = "$baseUrl/api/payment";
   static const String ambilTugas    = "$baseUrl/api/tasks/take";
+
+  static const String chat          = "$baseUrl/api/chat";
 }

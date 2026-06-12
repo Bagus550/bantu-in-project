@@ -15,9 +15,28 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.detailTugas.isEmpty) {
+      return const SafeArea(
+        child: Center(
+          child: Padding(
+            padding: EdgeInsets.all(20),
+            child: Text(
+              "Kamu belum mengambil tugas apapun.\nSilakan cari bantuan tersedia di halaman Home.",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     final String namaRequester =
         widget.detailTugas['nama_requester'] ?? 'Tanpa Nama';
-    final String harga = widget.detailTugas['nominal_pembayaran'] ?? '0';
+    final String harga = "Rp ${widget.detailTugas['nominal_pembayaran'] ?? 0}";
     final String lokasi = widget.detailTugas['lokasi_tugas'] ?? 'Tanpa Lokasi';
 
     return SafeArea(
