@@ -3,17 +3,8 @@ import 'package:bantuin/ida/auth/auth_service.dart';
 import 'package:bantuin/ida/screen/lupa_katasandi.dart';
 import 'package:bantuin/ida/screen/register.dart';
 import 'package:flutter/material.dart';
-<<<<<<< HEAD
-// import 'package:bantuin/data_akun.dart';
 import 'package:bantuin/bagus/dashboard_helper_screen.dart';
 import 'package:bantuin/bagus/dashboard_user_screen.dart';
-// import 'package:bantuin/data_akun.dart';
-// import 'package:bantuin/bagus/dashboard_helper_screen.dart';
-// import 'package:bantuin/bagus/dashboard_user_screen.dart';
-=======
-import 'package:bantuin/bagus/dashboard_helper_screen.dart';
-import 'package:bantuin/bagus/dashboard_user_screen.dart';
->>>>>>> e7dc225ea45c7f441e538f030df6d278b7c5ba46
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
