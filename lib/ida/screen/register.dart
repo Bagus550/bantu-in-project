@@ -1,4 +1,4 @@
-import 'package:bantuin/ida/login_screen.dart';
+import 'package:bantuin/ida/screen/login_screen.dart';
 import 'package:flutter/material.dart';
 
 class Register extends StatefulWidget {
