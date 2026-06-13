@@ -8,6 +8,8 @@ import 'package:bantuin/yuliana/about_User.dart';
 import 'package:bantuin/yuliana/faq_user.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class UserSetting extends StatefulWidget {
   const UserSetting({super.key});
@@ -173,6 +175,7 @@ class _UserSettingState extends State<UserSetting> {
                         setState(() {
                           isNotificationOn = value;
                         });
+                        _updatePreferensiBackend(value, isSuaraOn);
                       },
                     ),
                   ),
@@ -273,7 +276,30 @@ class _UserSettingState extends State<UserSetting> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      title: Text("Hapus Akun"),
+                      content: Text(
+                        "Apakah Anda yakin ingin menghapus akun ini?",
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx),
+                          child: Text("Batal"),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(ctx);
+                            _hapusAkunBackend();
+                          },
+                          child: Text("Ya, Hapus"),
+                        ),
+                      ],
+                    ),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.grey.shade300,
                   elevation: 0,
@@ -465,6 +491,38 @@ class _UserSettingState extends State<UserSetting> {
         );
       },
     );
+  }
+
+  Future<void> _updatePreferensiBackend(bool notif, bool suara) async {
+    final url = Uri.parse(
+      'https://lyricism-conch-sheath.ngrok-free.dev/api/users/1/preferensi',
+    );
+    try {
+      await http.put(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"notifikasi_on": notif, "suara_on": suara}),
+      );
+    } catch (e) {
+      print("Gagal update preferensi: $e");
+    }
+  }
+
+  Future<void> _hapusAkunBackend() async {
+    final url = Uri.parse(
+      'https://lyricism-conch-sheath.ngrok-free.dev/api/users/1/hapus',
+    );
+    try {
+      final response = await http.delete(url);
+      if (response.statusCode == 200) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => LoginScreen()),
+        );
+      }
+    } catch (e) {
+      print("Gagal hapus akun: $e");
+    }
   }
 
   Widget _buildMenuItem(
