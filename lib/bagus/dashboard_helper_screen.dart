@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:bantuin/bagus/screens/history.dart';
-import 'package:bantuin/bagus/screens/tugas_aktif_helper.dart';
-import 'package:bantuin/bagus/screens/tugas_aktif_screen.dart';
-import 'package:bantuin/bagus/screens/upload_bukti.dart';
+import 'package:bantuin/bagus/history.dart';
+import 'package:bantuin/bagus/tugas_aktif_helper.dart';
+import 'package:bantuin/bagus/tugas_aktif_screen.dart';
+import 'package:bantuin/bagus/upload_bukti.dart';
 import 'package:bantuin/danela/detail_task_helper.dart';
 // import 'package:bantuin/data_tugas.dart';
 import 'package:bantuin/dava/helper_setting.dart';
@@ -12,6 +12,7 @@ import 'package:bantuin/ida/profile.dart';
 import 'package:bantuin/ida/profile_tab.dart';
 import 'package:bantuin/yuliana/Faq_Helper.dart';
 import 'package:flutter/material.dart';
+import 'package:bantuin/config/app_config.dart';
 import 'package:http/http.dart' as http;
 
 class DashboardHelperScreen extends StatefulWidget {
@@ -22,8 +23,7 @@ class DashboardHelperScreen extends StatefulWidget {
 }
 
 class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
-  final String apiUrl =
-      "https://lyricism-conch-sheath.ngrok-free.dev/api/tasks/feed";
+  final String apiUrl = AppConfig.taskFeed;
 
   int _currentIndex = 0;
   String _kategoriAktif = 'Semua';

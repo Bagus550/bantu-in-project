@@ -1,5 +1,5 @@
-import 'package:bantuin/bagus/screens/detail_task_user.dart';
-import 'package:bantuin/bagus/screens/history.dart';
+import 'package:bantuin/bagus/detail_task_user.dart';
+import 'package:bantuin/bagus/history.dart';
 import 'package:bantuin/danela/message_list.dart';
 import 'package:bantuin/danela/roomchat.dart';
 import 'package:bantuin/dava/user_setting.dart';
