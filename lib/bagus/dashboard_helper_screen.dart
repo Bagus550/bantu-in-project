@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:bantuin/bagus/history.dart';
+import 'package:bantuin/bagus/history_helper.dart';
 import 'package:bantuin/bagus/tugas_aktif_helper.dart';
 import 'package:bantuin/bagus/tugas_aktif_screen.dart';
 import 'package:bantuin/bagus/upload_bukti.dart';
@@ -596,7 +596,10 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => UploadBuktiTab()),
+          MaterialPageRoute(
+            builder: (context) =>
+                UploadBuktiTab(idTask: '12', kodeReferensi: ''),
+          ),
         );
       },
       child: Column(

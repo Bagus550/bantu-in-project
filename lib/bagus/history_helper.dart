@@ -1,7 +1,6 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:bantuin/config/app_config.dart';
+import '../../config/app_config.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
@@ -17,6 +16,8 @@ class _HistoryState extends State<History> {
   bool isLoading = true;
   String errorPesan = '';
 
+  String idHelperLogin = "5";
+
   @override
   void initState() {
     super.initState();
@@ -30,7 +31,9 @@ class _HistoryState extends State<History> {
     });
 
     try {
-      final response = await http.get(Uri.parse(AppConfig.taskFeed));
+      idHelperLogin = "5";
+      final url = "${AppConfig.taskFeed}?id_helper=$idHelperLogin";
+      final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
@@ -49,7 +52,7 @@ class _HistoryState extends State<History> {
         });
       } else {
         setState(() {
-          errorPesan = "Gagal memuat history (${response.statusCode})";
+          errorPesan = "Gagal memuat history (Status: ${response.statusCode})";
           isLoading = false;
         });
       }
@@ -98,8 +101,8 @@ class _HistoryState extends State<History> {
     }
   }
 
-  IconData ambilIconBantuan(String kategori_layanan) {
-    switch (kategori_layanan) {
+  IconData ambilIconBantuan(String? kategoriLayanan) {
+    switch (kategoriLayanan) {
       case 'BantuFix':
         return Icons.home_repair_service_outlined;
       case 'BantuClean':
@@ -114,19 +117,19 @@ class _HistoryState extends State<History> {
   }
 
   Color ambilWarnaStatus(String status) {
-    switch (status) {
-      case 'Mencari helper':
+    switch (status.toLowerCase().trim()) {
+      case 'mencari helper':
         return const Color.fromARGB(255, 255, 158, 79);
-      case 'Berjalan':
-        return Color(0xFF283593);
-      case 'Menunggu validasi':
+      case 'berjalan':
+        return const Color(0xFF283593);
+      case 'menunggu validasi':
         return Colors.teal.shade800;
-      case 'Selesai':
+      case 'selesai':
         return Colors.green.shade800;
-      case 'Dibatalkan':
-        return Color(0xFFCD2528);
+      case 'dibatalkan':
+        return const Color(0xFFCD2528);
       default:
-        return Color(0xFF283593);
+        return const Color(0xFF283593);
     }
   }
 
@@ -134,15 +137,13 @@ class _HistoryState extends State<History> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("History"),
+        title: const Text("History"),
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
         toolbarHeight: 80,
         leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: Icon(Icons.arrow_back_ios),
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.arrow_back_ios),
         ),
       ),
       body: Padding(
@@ -186,10 +187,11 @@ class _HistoryState extends State<History> {
       itemCount: listHistoryAPI.length,
       itemBuilder: (context, index) {
         final histori = listHistoryAPI[index];
+        // Menggunakan 'status_task' secara konsisten sesuai filter API
         final String statusTask = histori['status_task'] ?? 'Dibatalkan';
 
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
           child: Container(
             width: double.infinity,
             decoration: BoxDecoration(
@@ -199,40 +201,41 @@ class _HistoryState extends State<History> {
             child: Padding(
               padding: const EdgeInsets.all(12),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Icon Kategori
                       Container(
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
-                          color: Color(0XFFDFDDF5),
+                          color: const Color(0XFFDFDDF5),
                         ),
                         child: Icon(
                           ambilIconBantuan(histori['kategori_layanan']),
+                          color: Theme.of(context).colorScheme.primary,
                         ),
                       ),
-                      SizedBox(width: 15),
+                      const SizedBox(width: 12),
+
+                      // Detail Tugas (Judul & Tanggal)
                       Expanded(
-                        child: Row(
+                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    histori['judul_tugas'] ?? '-',
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 1,
-                                  ),
-                                  Text("23 Mei 2026"),
-                                ],
+                            Text(
+                              histori['judul_tugas'] ?? '-',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
                               ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
                             ),
+                            const SizedBox(height: 4),
                             Text(
                               formatTanggal(histori['created_at']),
                               style: const TextStyle(
@@ -243,18 +246,25 @@ class _HistoryState extends State<History> {
                           ],
                         ),
                       ),
-                      SizedBox(width: 8),
+                      const SizedBox(width: 8),
+
+                      // Nominal Pembayaran
                       Text(
-                        "Rp ${histori['nominal_pembayaran']}",
+                        "Rp ${histori['nominal_pembayaran'] ?? '0'}",
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 15,
                           fontWeight: FontWeight.bold,
                           color: Theme.of(context).colorScheme.primary,
                         ),
                       ),
                     ],
                   ),
-                  Divider(color: Colors.grey.shade300, thickness: 2),
+
+                  const SizedBox(height: 8),
+                  Divider(color: Colors.grey.shade200, thickness: 1),
+                  const SizedBox(height: 4),
+
+                  // Footer (Nama Helper & Status)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -269,17 +279,19 @@ class _HistoryState extends State<History> {
                       ),
                       Container(
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          color: ambilWarnaStatus(histori['status']),
+                          borderRadius: BorderRadius.circular(8),
+                          color: ambilWarnaStatus(statusTask),
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 4,
-                            horizontal: 8,
-                          ),
-                          child: Text(
-                            histori['status'],
-                            style: TextStyle(color: Colors.white),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 4,
+                          horizontal: 10,
+                        ),
+                        child: Text(
+                          statusTask,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),

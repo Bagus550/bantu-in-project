@@ -1,5 +1,5 @@
 import 'package:bantuin/bagus/detail_task_user.dart';
-import 'package:bantuin/bagus/history.dart';
+import 'package:bantuin/bagus/history_helper.dart';
 import 'package:bantuin/danela/message_list.dart';
 import 'package:bantuin/danela/roomchat.dart';
 import 'package:bantuin/dava/user_setting.dart';
@@ -20,7 +20,7 @@ class DashboardUserScreen extends StatefulWidget {
 class _DashboardUserScreenState extends State<DashboardUserScreen> {
   int _currentIndex = 0;
 
-  String idUserLogin = "1";
+  final String idUserLogin = "1";
 
   Color ambilWarnaStatus(String status) {
     switch (status) {

@@ -1,9 +1,20 @@
+// ignore_for_file: use_build_context_synchronously
+
+import 'dart:convert';
 import 'dart:io';
+import 'package:bantuin/config/app_config.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 
 class UploadBuktiTab extends StatefulWidget {
-  const UploadBuktiTab({super.key});
+  final String idTask;
+  final String kodeReferensi;
+  const UploadBuktiTab({
+    super.key,
+    required this.idTask,
+    required this.kodeReferensi,
+  });
 
   @override
   State<UploadBuktiTab> createState() => _UploadBuktiTabState();
@@ -13,6 +24,7 @@ class _UploadBuktiTabState extends State<UploadBuktiTab> {
   File? _gambarBukti;
   final ImagePicker _picker = ImagePicker();
   final TextEditingController _catatanController = TextEditingController();
+  bool _isUploading = false;
 
   Future<void> _ambilFotoDariKamera() async {
     try {
@@ -33,10 +45,67 @@ class _UploadBuktiTabState extends State<UploadBuktiTab> {
     }
   }
 
-  @override
-  void dispose() {
-    _catatanController.dispose();
-    super.dispose();
+  Future<void> _kirimBuktiKeBackend() async {
+    if (_gambarBukti == null) return;
+
+    setState(() {
+      _isUploading = true;
+    });
+
+    try {
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse(AppConfig.uploadBukti),
+      );
+
+      request.headers.addAll({'ngrok-skip-browser-warning': 'true'});
+
+      request.fields['id_task'] = widget.idTask;
+      request.fields['catatan_tambahan'] = _catatanController.text;
+
+      var stream = http.ByteStream(_gambarBukti!.openRead());
+      var length = await _gambarBukti!.length();
+
+      var multipartFile = http.MultipartFile(
+        'bukti_foto',
+        stream,
+        length,
+        filename: _gambarBukti!.path.split('/').last,
+      );
+
+      request.files.add(multipartFile);
+
+      var response = await request.send();
+
+      if (response.statusCode == 200) {
+        var responseData = await response.stream.bytesToString();
+        var hasilJson = json.decode(responseData);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(hasilJson['message'] ?? "Berhasil mengunggah bukti!"),
+          ),
+        );
+
+        Navigator.pop(context, true);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "Gagal mengunggah bukti. Code: ${response.statusCode}",
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Terjadi kesalahan jaringan: $e")));
+    } finally {
+      setState(() {
+        _isUploading = false;
+      });
+    }
   }
 
   @override
@@ -229,9 +298,17 @@ class _UploadBuktiTabState extends State<UploadBuktiTab> {
                   borderRadius: BorderRadius.circular(12),
                   color: Colors.grey.shade200,
                 ),
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-                  child: Row(children: [Text("ID Bantuan : "), Text("ID ##")]),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 15,
+                    horizontal: 10,
+                  ),
+                  child: Row(
+                    children: [
+                      const Text("ID Bantuan : "),
+                      Text(widget.idTask),
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: 30),
@@ -248,18 +325,15 @@ class _UploadBuktiTabState extends State<UploadBuktiTab> {
                         : Theme.of(context).colorScheme.secondary,
                     foregroundColor: Colors.white,
                   ),
-                  onPressed: _gambarBukti == null
+                  onPressed: _gambarBukti == null || _isUploading
                       ? null
-                      : () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                "Bukti kamera siap dikirim ke API!",
-                              ),
-                            ),
-                          );
-                        },
-                  child: const Text("Kirim Bukti Pembayaran"),
+                      : _kirimBuktiKeBackend,
+                  child: _isUploading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text(
+                          "Kirim Bukti Pembayaran",
+                          style: TextStyle(color: Colors.white),
+                        ),
                 ),
               ),
             ],
