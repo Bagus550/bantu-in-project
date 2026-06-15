@@ -53,6 +53,6 @@ class AuthService {
   }
 
   Future<void> logout() async {
-    await _storage.delete(key: 'jwt_token');
+    await _storage.delete(key: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3ODEzNTUyMjAsImV4cCI6MTc4MTM1ODgyMCwiaWQiOiIyIiwiZW1haWwiOiJpZGFmZXJpYW5pMTkxNUBnbWFpbC5jb20ifQ.xgwNHYr2yIbFR8VxBOs1xOE1zCx2Dha-GQAv2oRQ07Q');
   }
 }
