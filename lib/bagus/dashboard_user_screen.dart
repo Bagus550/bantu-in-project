@@ -1,8 +1,9 @@
-import 'package:bantuin/bagus/screens/detail_task_user.dart';
-import 'package:bantuin/bagus/screens/history.dart';
+import 'package:bantuin/bagus/detail_task_user.dart';
+import 'package:bantuin/bagus/history_helper.dart';
 import 'package:bantuin/danela/message_list.dart';
 import 'package:bantuin/danela/roomchat.dart';
 import 'package:bantuin/dava/user_setting.dart';
+import 'package:bantuin/ida/notifikasi_requester.dart';
 import 'package:bantuin/ida/profile.dart';
 import 'package:bantuin/ida/profile_tab.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +20,7 @@ class DashboardUserScreen extends StatefulWidget {
 class _DashboardUserScreenState extends State<DashboardUserScreen> {
   int _currentIndex = 0;
 
-  String idUserLogin = "1";
+  final String idUserLogin = "1";
 
   Color ambilWarnaStatus(String status) {
     switch (status) {
@@ -121,9 +122,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
       case 0:
         return _buildDashboardHome();
       case 1:
-        return Center(
-          child: Text("Halaman notifikasi", style: TextStyle(fontSize: 20)),
-        );
+        return NotifikasiRequester();
       case 2:
         return MessageListTab();
       case 3:
@@ -398,7 +397,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => DetailTugas(dataTugas: bantuan),
+                          builder: (context) => DetailTugas(taskData: bantuan),
                         ),
                       );
                     },
@@ -613,7 +612,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => DetailTugas(dataTugas: history),
+                          builder: (context) => DetailTugas(taskData: history),
                         ),
                       );
                     },
