@@ -16,8 +16,7 @@ class _DetailTugasState extends State<DetailTugasHelper> {
     final String judul = widget.taskData['judul_tugas'] ?? 'Tidak ada judul';
     final String harga = widget.taskData['nominal_pembayaran'] ?? 'Rp 0';
     final String lokasi = widget.taskData['lokasi_tugas'] ?? 'Tidak ada lokasi';
-    final String deskripsi =
-        widget.taskData['deskripsi'] ?? 'Tidak ada deskripsi';
+    final String deskripsi = widget.taskData['deskripsi'] ?? 'Tidak ada deskripsi';
     final String namaPelanggan = widget.taskData['nama_requester'] ?? 'Anonim';
 
     return Scaffold(
