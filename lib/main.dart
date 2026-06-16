@@ -1,5 +1,6 @@
 import 'package:bantuin/ida/splashscreen.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'ida/login_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -31,7 +32,6 @@ class BantuInApp extends StatelessWidget {
       initialRoute: '/',
 
       routes: {
-        '/': (context) => const IdaSplashScreen(),
         '/': (context) => const IdaSplashScreen(),
         '/login': (context) => const LoginScreen(),
       },

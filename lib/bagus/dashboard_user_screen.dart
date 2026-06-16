@@ -124,7 +124,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
       case 1:
         return NotifikasiRequester();
       case 2:
-        return MessageListTab();
+        return MessageList();
       case 3:
         return ProfileTab();
       default:
