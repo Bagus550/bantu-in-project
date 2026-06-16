@@ -1,6 +1,4 @@
 import 'package:bantuin/ida/splashscreen.dart';
-import 'package:bantuin/yuliana/about.dart';
-import 'package:bantuin/yuliana/faq.dart';
 import 'package:flutter/material.dart';
 import 'ida/login_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
