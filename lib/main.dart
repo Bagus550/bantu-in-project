@@ -1,3 +1,4 @@
+import 'package:bantuin/alen/admin.dart';
 import 'package:bantuin/ida/login_screen.dart';
 import 'package:bantuin/ida/splashscreen.dart';
 import 'package:flutter/material.dart';
@@ -30,7 +31,7 @@ class BantuInApp extends StatelessWidget {
       initialRoute: '/',
 
       routes: {
-        '/': (context) => const IdaSplashScreen(),
+        '/': (context) => const MyAdmin(),
         '/login': (context) => const LoginScreen(),
       },
     );
