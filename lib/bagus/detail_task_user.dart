@@ -1,9 +1,10 @@
 import 'package:bantuin/danela/roomchat.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class DetailTugas extends StatefulWidget {
-  final Map<String, dynamic> dataTugas;
-  const DetailTugas({super.key, required this.dataTugas});
+  final Map<String, dynamic> taskData;
+  const DetailTugas({super.key, required this.taskData});
 
   @override
   State<DetailTugas> createState() => _DetailTugasState();
@@ -40,6 +41,28 @@ class _DetailTugasState extends State<DetailTugas> {
     }
   }
 
+  Color ambilWarnaTombol(String status) {
+    switch (status) {
+      case 'Di batalkan' || 'Selesai':
+        return Color(0xFF25CD25);
+      case 'Berjalan':
+        return Color(0XFFCD2525);
+      default:
+        return Color(0XFFCD2525);
+    }
+  }
+
+  IconData ambilIkonTombol(String status) {
+    switch (status) {
+      case 'Di batalkan' || 'Selesai':
+        return Icons.refresh;
+      case 'Berjalan':
+        return Icons.close;
+      default:
+        return Icons.close;
+    }
+  }
+
   IconData ambilIconStatus(String status) {
     switch (status) {
       case 'Mencari helper':
@@ -57,12 +80,25 @@ class _DetailTugasState extends State<DetailTugas> {
     }
   }
 
+  String formatTanggal(String? tanggalRaw) {
+    if (tanggalRaw == null || tanggalRaw.isEmpty) return 'Tanggal tidak valid';
+
+    try {
+      DateTime dateTime = DateTime.parse(tanggalRaw);
+
+      return DateFormat('d MMMM YYYY', 'id').format(dateTime);
+    } catch (e) {
+      return "Format Salah";
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final data = widget.dataTugas;
-    String statusTugas = widget.dataTugas['status'];
+    final data = widget.taskData;
+    String statusTugas = widget.taskData['status'];
     bool isButtonActive =
         statusTugas != 'Mencari helper' && statusTugas != 'Selesai';
+    String tanggalDatabase = data['created_at'];
 
     return Scaffold(
       appBar: AppBar(
@@ -76,17 +112,13 @@ class _DetailTugasState extends State<DetailTugas> {
           },
           icon: Icon(Icons.arrow_back_ios),
         ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: CircleAvatar(radius: 30, child: Icon(Icons.person)),
-          ),
-        ],
-        foregroundColor: Theme.of(context).colorScheme.primary,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Colors.white,
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(1),
           child: Container(color: Colors.grey.shade300, height: 1),
         ),
+        toolbarHeight: 80,
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -123,7 +155,7 @@ class _DetailTugasState extends State<DetailTugas> {
                       ),
                     ),
                   ),
-                  Text("Dibuat: 24 Oktober 2023"),
+                  Text("Dibuat: ${formatTanggal(tanggalDatabase)}"),
                 ],
               ),
               SizedBox(height: 15),
@@ -284,10 +316,9 @@ class _DetailTugasState extends State<DetailTugas> {
                         ),
                       ),
                       Text(
-                        data['nama_helper'] != null &&
-                                data['nama_helper'].toString().trim().isEmpty
-                            ? 'Belum ada helper'
-                            : data['nama_helper'],
+                        data['nama_helper'] != null
+                            ? data["nama_helper"]
+                            : "Belum ada helper",
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -303,7 +334,8 @@ class _DetailTugasState extends State<DetailTugas> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => RoomChatPage(namaData: widget.dataTugas,),
+                                      builder: (context) =>
+                                          RoomChatPage(namaData: data),
                                     ),
                                   );
                                 }
@@ -349,14 +381,19 @@ class _DetailTugasState extends State<DetailTugas> {
                 height: 50,
                 child: ElevatedButton.icon(
                   onPressed: () {},
-                  icon: Icon(Icons.cancel_outlined),
-                  label: Text("Batalkan Tugas"),
+                  icon: Icon(ambilIkonTombol(data['status'])),
+                  label: isButtonActive
+                      ? Text("Batalkan Tugas")
+                      : Text("Pesan Ulang"),
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    side: BorderSide(color: Colors.red, width: 1.5),
-                    foregroundColor: Colors.red,
+                    side: BorderSide(
+                      color: ambilWarnaTombol(data['status']),
+                      width: 1.5,
+                    ),
+                    foregroundColor: ambilWarnaTombol(data['status']),
                   ),
                 ),
               ),

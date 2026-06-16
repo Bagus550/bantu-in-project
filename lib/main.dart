@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'ida/login_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-void main(List<String> args) {
+void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('id', null);
   runApp(BantuInApp());
 }
 
@@ -30,6 +31,7 @@ class BantuInApp extends StatelessWidget {
       initialRoute: '/',
 
       routes: {
+        '/': (context) => const IdaSplashScreen(),
         '/': (context) => const IdaSplashScreen(),
         '/login': (context) => const LoginScreen(),
       },
