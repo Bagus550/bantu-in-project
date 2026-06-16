@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:bantuin/bagus/detail_task_user.dart';
 import 'package:bantuin/bagus/history_helper.dart';
 import 'package:bantuin/bagus/tugas_aktif_helper.dart';
 import 'package:bantuin/bagus/tugas_aktif_screen.dart';
@@ -457,16 +458,110 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                                       ),
                                     ),
                                     ElevatedButton(
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                TugasAktifScreen(
-                                                  detailTugas: tugas,
+                                      onPressed: () async {
+                                        bool konfirmasi =
+                                            await showDialog(
+                                              context: context,
+                                              builder: (context) => AlertDialog(
+                                                title: Text("Ambil Tugas"),
+                                                content: Text(
+                                                  "Apakah kamu yakin ambil?",
                                                 ),
-                                          ),
-                                        );
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () {
+                                                      Navigator.pop(
+                                                        context,
+                                                        false,
+                                                      );
+                                                    },
+                                                    child: Text("Batal"),
+                                                  ),
+                                                  TextButton(
+                                                    onPressed: () {
+                                                      Navigator.pop(
+                                                        context,
+                                                        true,
+                                                      );
+                                                    },
+                                                    child: Text("Ya, Ambil"),
+                                                  ),
+                                                ],
+                                              ),
+                                            ) ??
+                                            false;
+
+                                        if (!konfirmasi) return;
+
+                                        try {
+                                          final String takeTaskUrl =
+                                              AppConfig.ambilTugas;
+
+                                          final respon = await http.post(
+                                            Uri.parse(takeTaskUrl),
+                                            body: {
+                                              'id_task': tugas['id_task']
+                                                  .toString(),
+                                              'id_helper': '1',
+                                            },
+                                          );
+                                          if (respon.statusCode == 200) {
+                                            final jsonRespon = json.decode(
+                                              respon.body,
+                                            );
+
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  jsonRespon['message'] ??
+                                                      "Tugas Berhasil diambil!",
+                                                ),
+                                              ),
+                                            );
+                                            _refreshData();
+
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    TugasAktifScreen(
+                                                      detailTugas: tugas,
+                                                    ),
+                                              ),
+                                            );
+                                          } else {
+                                            final jsonRespon = json.decode(
+                                              respon.body,
+                                            );
+                                            throw Exception(
+                                              jsonRespon['messages'] ??
+                                                  "Gagal mengambil tugas",
+                                            );
+                                          }
+                                        } catch (e) {
+                                          showDialog(
+                                            context: context,
+                                            builder: (context) => AlertDialog(
+                                              title: Text("Gagal"),
+                                              content: Text(
+                                                e.toString().replaceAll(
+                                                  "Exception:",
+                                                  "",
+                                                ),
+                                              ),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.pop(context);
+                                                  },
+                                                  child: Text("OK"),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        }
                                       },
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Theme.of(
