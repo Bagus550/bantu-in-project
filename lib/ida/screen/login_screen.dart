@@ -76,31 +76,27 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _navigateBasedOnRole(String? role) {
-    switch (role) {
-      case 'helper':
-      case 'helper1':
-      case 'helper2':
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const DashboardHelperScreen(),
-          ),
-        );
-        break;
-      case 'requester':
-      case 'requester1':
-      case 'requester2':
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const DashboardUserScreen()),
-        );
-        break;
-      case 'admin':
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const MyAdmin()),
-        );
-        break;
+    if (role == null) return;
+
+    final String cleanRole = role.trim().toLowerCase();
+
+    if (cleanRole.startsWith('helper')) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const DashboardHelperScreen()),
+      );
+    } 
+    else if (cleanRole.startsWith('requester')) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const DashboardUserScreen()),
+      );
+    } 
+    else if (cleanRole == 'admin') {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const MyAdmin()),
+      );
     }
   }
 
