@@ -2,9 +2,11 @@ import 'package:bantuin/ida/login_screen.dart';
 import 'package:bantuin/ida/splashscreen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
-void main(List<String> args) {
+void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('id', null);
   runApp(BantuInApp());
 }
 

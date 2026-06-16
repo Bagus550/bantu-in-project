@@ -1,15 +1,20 @@
-import 'package:bantuin/bagus/screens/history.dart';
-import 'package:bantuin/bagus/screens/tugas_aktif_helper.dart';
-import 'package:bantuin/bagus/screens/tugas_aktif_screen.dart';
-import 'package:bantuin/bagus/screens/upload_bukti.dart';
+import 'dart:convert';
+
+import 'package:bantuin/bagus/detail_task_user.dart';
+import 'package:bantuin/bagus/history_helper.dart';
+import 'package:bantuin/bagus/tugas_aktif_helper.dart';
+import 'package:bantuin/bagus/tugas_aktif_screen.dart';
+import 'package:bantuin/bagus/upload_bukti.dart';
 import 'package:bantuin/danela/detail_task_helper.dart';
-import 'package:bantuin/data_tugas.dart';
+// import 'package:bantuin/data_tugas.dart';
 import 'package:bantuin/dava/helper_setting.dart';
 import 'package:bantuin/danela/message_list.dart';
 import 'package:bantuin/ida/profile.dart';
 import 'package:bantuin/ida/profile_tab.dart';
 import 'package:bantuin/yuliana/Faq_Helper.dart';
 import 'package:flutter/material.dart';
+import 'package:bantuin/config/app_config.dart';
+import 'package:http/http.dart' as http;
 
 class DashboardHelperScreen extends StatefulWidget {
   const DashboardHelperScreen({super.key});
@@ -19,175 +24,236 @@ class DashboardHelperScreen extends StatefulWidget {
 }
 
 class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
-  Widget _dapatkanHalaman(int index) {
+  final String apiUrl = AppConfig.taskFeed;
+
+  int _currentIndex = 0;
+  String _kategoriAktif = 'Semua';
+
+  Future<List<dynamic>>? _futureTasks;
+
+  @override
+  void initState() {
+    super.initState();
+    _futureTasks = fetchTasksForHelper();
+  }
+
+  Future<List<dynamic>> fetchTasksForHelper() async {
+    try {
+      final response = await http.get(Uri.parse(apiUrl));
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responsData = json.decode(response.body);
+
+        return responsData['data'];
+      } else {
+        throw Exception('Gagal memuat tugas (Status: ${response.statusCode})');
+      }
+    } catch (e) {
+      throw Exception('Terjadi kesalahan jaringan: $e');
+    }
+  }
+
+  Future<void> _refreshData() async {
+    setState(() {
+      _futureTasks = fetchTasksForHelper();
+    });
+  }
+
+  Widget _dapatkanHalaman(int index, List<dynamic>? apiTasksData) {
     switch (index) {
       case 0:
-        return _buildDashboardHelper();
+        return _buildDashboardHelper(apiTasksData ?? []);
       case 1:
-        return TugasAktifHelper(detailTugas: tasks[0]);
+        return TugasAktifHelper(
+          detailTugas: (apiTasksData != null && apiTasksData.isNotEmpty)
+              ? apiTasksData[0]
+              : {},
+        );
       case 2:
         return MessageListTab();
       case 3:
         return ProfileTab();
       default:
-        return _buildDashboardHelper();
+        return _buildDashboardHelper(apiTasksData ?? []);
     }
   }
 
-  int _currentIndex = 0;
-  String _kategoriAktif = 'Semua';
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          "Bantu.In - Helper",
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Colors.white,
-        elevation: 4,
-        shadowColor: Colors.black.withAlpha(10),
-        toolbarHeight: 80,
-        actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => FaqHelper()),
-              );
-            },
-            icon: Icon(Icons.help_outline),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 15),
-            child: Container(
-              height: 40,
-              width: 40,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.secondary,
-                borderRadius: BorderRadius.circular(50),
-              ),
-              child: IconButton(
+    return FutureBuilder(
+      future: _futureTasks,
+      builder: (context, snapshot) {
+        final apiTasksData = snapshot.data;
+
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(
+              "Bantu.In - Helper",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            foregroundColor: Colors.white,
+            elevation: 4,
+            shadowColor: Colors.black.withAlpha(10),
+            toolbarHeight: 80,
+            actions: [
+              IconButton(
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => Profile()),
+                    MaterialPageRoute(builder: (context) => FaqHelper()),
                   );
                 },
-                icon: Icon(Icons.person, color: Colors.white),
+                icon: Icon(Icons.help_outline),
               ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 15),
+                child: Container(
+                  height: 40,
+                  width: 40,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.secondary,
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                  child: IconButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => Profile()),
+                      );
+                    },
+                    icon: Icon(Icons.person, color: Colors.white),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          drawer: Drawer(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                DrawerHeader(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      CircleAvatar(
+                        radius: 30,
+                        backgroundColor: Colors.white,
+                        child: Icon(Icons.person, size: 35, color: Colors.grey),
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        "Halo, Mitra Helper!",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                ListTile(
+                  leading: Icon(Icons.history, color: Colors.black87),
+                  title: Text("History Tugas"),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => History()),
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.settings, color: Colors.black87),
+                  title: Text("Pengaturan"),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => HelperSetting()),
+                    );
+                  },
+                ),
+              ],
             ),
           ),
-        ],
-      ),
-      drawer: Drawer(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            DrawerHeader(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  CircleAvatar(
-                    radius: 30,
-                    backgroundColor: Colors.white,
-                    child: Icon(Icons.person, size: 35, color: Colors.grey),
+          body: snapshot.connectionState == ConnectionState.waiting
+              ? const Center(child: CircularProgressIndicator())
+              : snapshot.hasError
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text("Terjadi Error: ${snapshot.error}"),
+                      const SizedBox(height: 10),
+                      ElevatedButton(
+                        onPressed: _refreshData,
+                        child: const Text("Coba Lagi"),
+                      ),
+                    ],
                   ),
-                  SizedBox(height: 10),
-                  Text(
-                    "Halo, ${tasks.isNotEmpty ? tasks[1]['nama_helper'] : 'User'}",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                )
+              : RefreshIndicator(
+                  onRefresh: _refreshData,
+                  child: _dapatkanHalaman(_currentIndex, apiTasksData),
+                ),
+          bottomNavigationBar: SafeArea(
+            child: Container(
+              height: 88,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border(
+                  top: BorderSide(color: Colors.grey.withAlpha(50), width: 1.5),
+                ),
+              ),
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildNavItem(
+                    index: 0,
+                    icon: Icons.home_filled,
+                    label: 'Home',
+                  ),
+                  _buildNavItem(
+                    index: 1,
+                    icon: Icons.task_outlined,
+                    label: 'Tugas Aktif',
+                  ),
+                  _buildPostButton(),
+                  _buildNavItem(
+                    index: 2,
+                    icon: Icons.chat_bubble_outline_rounded,
+                    label: 'Message',
+                  ),
+                  _buildNavItem(
+                    index: 3,
+                    icon: Icons.person_outline_rounded,
+                    label: 'Profil',
                   ),
                 ],
               ),
             ),
-            ListTile(
-              leading: Icon(Icons.history, color: Colors.black87),
-              title: Text("History Tugas"),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => History()),
-                );
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.settings, color: Colors.black87),
-              title: Text("Pengaturan"),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => HelperSetting()),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-      body: _dapatkanHalaman(_currentIndex),
-      bottomNavigationBar: SafeArea(
-        child: Container(
-          height: 88,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border(
-              top: BorderSide(color: Colors.grey.withAlpha(50), width: 1.5),
-            ),
           ),
-          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildNavItem(index: 0, icon: Icons.home_filled, label: 'Home'),
-              _buildNavItem(
-                index: 1,
-                icon: Icons.task_outlined,
-                label: 'Tugas Aktif',
-              ),
-              _buildPostButton(),
-              _buildNavItem(
-                index: 2,
-                icon: Icons.chat_bubble_outline_rounded,
-                label: 'Message',
-              ),
-              _buildNavItem(
-                index: 3,
-                icon: Icons.person_outline_rounded,
-                label: 'Profil',
-              ),
-            ],
-          ),
-        ),
-      ),
+        );
+      },
     );
   }
 
-  Padding _buildDashboardHelper() {
-    final semuaMencariHelper = tasks.where((item) {
-      return (item['status']?.toString().toLowerCase().trim() ?? '') ==
-          'mencari helper';
-    });
-
+  Padding _buildDashboardHelper(List<dynamic> realTasks) {
     final listTerfilter = _kategoriAktif == 'Semua'
-        ? semuaMencariHelper.toList()
-        : semuaMencariHelper.where((item) {
+        ? realTasks
+        : realTasks.where((item) {
             final kategori =
                 item['kategori_layanan']?.toString().toLowerCase().trim() ?? '';
             return kategori == _kategoriAktif.toLowerCase().trim();
           }).toList();
 
     return Padding(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.only(top: 16, right: 16, left: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -287,13 +353,13 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                                           horizontal: 8,
                                         ),
                                         child: Text(
-                                          tugas['kategori_layanan'],
+                                          tugas['kategori_layanan'].toString(),
                                           style: TextStyle(color: Colors.white),
                                         ),
                                       ),
                                     ),
                                     Text(
-                                      tugas['nominal_pembayaran'],
+                                      "Rp ${tugas['nominal_pembayaran'].toString()}",
                                       style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
@@ -385,21 +451,117 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                                             ),
                                           ),
                                           SizedBox(width: 8),
-                                          Text(tugas['nama_requester']),
+                                          Text(
+                                            tugas['nama_requester'] ?? 'User',
+                                          ),
                                         ],
                                       ),
                                     ),
                                     ElevatedButton(
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                TugasAktifScreen(
-                                                  detailTugas: tugas,
+                                      onPressed: () async {
+                                        bool konfirmasi =
+                                            await showDialog(
+                                              context: context,
+                                              builder: (context) => AlertDialog(
+                                                title: Text("Ambil Tugas"),
+                                                content: Text(
+                                                  "Apakah kamu yakin ambil?",
                                                 ),
-                                          ),
-                                        );
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () {
+                                                      Navigator.pop(
+                                                        context,
+                                                        false,
+                                                      );
+                                                    },
+                                                    child: Text("Batal"),
+                                                  ),
+                                                  TextButton(
+                                                    onPressed: () {
+                                                      Navigator.pop(
+                                                        context,
+                                                        true,
+                                                      );
+                                                    },
+                                                    child: Text("Ya, Ambil"),
+                                                  ),
+                                                ],
+                                              ),
+                                            ) ??
+                                            false;
+
+                                        if (!konfirmasi) return;
+
+                                        try {
+                                          final String takeTaskUrl =
+                                              AppConfig.ambilTugas;
+
+                                          final respon = await http.post(
+                                            Uri.parse(takeTaskUrl),
+                                            body: {
+                                              'id_task': tugas['id_task']
+                                                  .toString(),
+                                              'id_helper': '1',
+                                            },
+                                          );
+                                          if (respon.statusCode == 200) {
+                                            final jsonRespon = json.decode(
+                                              respon.body,
+                                            );
+
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  jsonRespon['message'] ??
+                                                      "Tugas Berhasil diambil!",
+                                                ),
+                                              ),
+                                            );
+                                            _refreshData();
+
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    TugasAktifScreen(
+                                                      detailTugas: tugas,
+                                                    ),
+                                              ),
+                                            );
+                                          } else {
+                                            final jsonRespon = json.decode(
+                                              respon.body,
+                                            );
+                                            throw Exception(
+                                              jsonRespon['messages'] ??
+                                                  "Gagal mengambil tugas",
+                                            );
+                                          }
+                                        } catch (e) {
+                                          showDialog(
+                                            context: context,
+                                            builder: (context) => AlertDialog(
+                                              title: Text("Gagal"),
+                                              content: Text(
+                                                e.toString().replaceAll(
+                                                  "Exception:",
+                                                  "",
+                                                ),
+                                              ),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.pop(context);
+                                                  },
+                                                  child: Text("OK"),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        }
                                       },
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Theme.of(
@@ -498,7 +660,6 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
         duration: Duration(milliseconds: 200),
         padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         decoration: BoxDecoration(
-          // Jika aktif, kasih warna background biru utama kelompok kita
           color: isActive ? Color(0xFF1E3A8A) : Colors.transparent,
           borderRadius: BorderRadius.circular(16.0),
         ),
@@ -507,7 +668,6 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
           children: [
             Icon(
               icon,
-              // Jika aktif warna ikon putih, jika tidak aktif warna hitam/abu
               color: isActive ? Colors.white : Colors.black87,
               size: 26.0,
             ),
@@ -531,7 +691,10 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => UploadBuktiTab()),
+          MaterialPageRoute(
+            builder: (context) =>
+                UploadBuktiTab(idTask: '12', kodeReferensi: ''),
+          ),
         );
       },
       child: Column(
