@@ -3,8 +3,8 @@ import 'package:bantuin/ida/lupa_katasandi.dart';
 import 'package:bantuin/ida/register.dart';
 import 'package:flutter/material.dart';
 import 'package:bantuin/data_akun.dart';
-import 'package:bantuin/bagus/screens/dashboard_helper_screen.dart';
-import 'package:bantuin/bagus/screens/dashboard_user_screen.dart';
+import 'package:bantuin/bagus/dashboard_helper_screen.dart';
+import 'package:bantuin/bagus/dashboard_user_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

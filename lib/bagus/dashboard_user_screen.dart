@@ -1,5 +1,5 @@
-import 'package:bantuin/bagus/screens/detail_task_user.dart';
-import 'package:bantuin/bagus/screens/history.dart';
+import 'package:bantuin/bagus/detail_task_user.dart';
+import 'package:bantuin/bagus/history_helper.dart';
 import 'package:bantuin/danela/message_list.dart';
 import 'package:bantuin/danela/roomchat.dart';
 import 'package:bantuin/dava/user_setting.dart';
@@ -20,7 +20,7 @@ class DashboardUserScreen extends StatefulWidget {
 class _DashboardUserScreenState extends State<DashboardUserScreen> {
   int _currentIndex = 0;
 
-  String idUserLogin = "1";
+  final String idUserLogin = "1";
 
   Color ambilWarnaStatus(String status) {
     switch (status) {
@@ -397,7 +397,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => DetailTugas(dataTugas: bantuan),
+                          builder: (context) => DetailTugas(taskData: bantuan),
                         ),
                       );
                     },
@@ -612,7 +612,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => DetailTugas(dataTugas: history),
+                          builder: (context) => DetailTugas(taskData: history),
                         ),
                       );
                     },
