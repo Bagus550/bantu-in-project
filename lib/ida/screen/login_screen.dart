@@ -3,9 +3,8 @@ import 'package:bantuin/ida/auth/auth_service.dart';
 import 'package:bantuin/ida/screen/lupa_katasandi.dart';
 import 'package:bantuin/ida/screen/register.dart';
 import 'package:flutter/material.dart';
-// import 'package:bantuin/data_akun.dart';
-import 'package:bantuin/bagus/screens/dashboard_helper_screen.dart';
-import 'package:bantuin/bagus/screens/dashboard_user_screen.dart';
+import 'package:bantuin/bagus/dashboard_helper_screen.dart';
+import 'package:bantuin/bagus/dashboard_user_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -48,8 +47,12 @@ class _LoginScreenState extends State<LoginScreen> {
         _isLoading = false;
       });
 
+      print("--- DEBUG DI LOGIN SCREEN ---");
+      print("Hasil result dari AuthService: $result");
+
       if (result != null && result['success'] == true) {
         final String? role = result['role'];
+        final Map<String, dynamic> userData = result['user'] ?? {};
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -58,7 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
               backgroundColor: Theme.of(context).colorScheme.secondary,
             ),
           );
-          _navigateBasedOnRole(role);
+          _navigateBasedOnRole(role, userData);
         }
       } else {
         if (mounted) {
@@ -75,28 +78,25 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void _navigateBasedOnRole(String? role) {
-    if (role == null) return;
-
-    final String cleanRole = role.trim().toLowerCase();
-
-    if (cleanRole.startsWith('helper')) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const DashboardHelperScreen()),
-      );
-    } 
-    else if (cleanRole.startsWith('requester')) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const DashboardUserScreen()),
-      );
-    } 
-    else if (cleanRole == 'admin') {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const MyAdmin()),
-      );
+  void _navigateBasedOnRole(String? role, Map<String, dynamic> userData) {
+    switch (role) {
+      case 'helper':
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => DashboardHelperScreen()),
+        );
+        break;
+      case 'requester':
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => DashboardUserScreen(userData: userData,)),
+        );
+        break;
+      case 'admin':
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => MyAdmin()),
+        );
     }
   }
 

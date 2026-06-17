@@ -1,9 +1,10 @@
 import 'package:bantuin/danela/roomchat.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class DetailTugas extends StatefulWidget {
-  final Map<String, dynamic> dataTugas;
-  const DetailTugas({super.key, required this.dataTugas});
+  final Map<String, dynamic> taskData;
+  const DetailTugas({super.key, required this.taskData});
 
   @override
   State<DetailTugas> createState() => _DetailTugasState();
@@ -79,12 +80,25 @@ class _DetailTugasState extends State<DetailTugas> {
     }
   }
 
+  String formatTanggal(String? tanggalRaw) {
+    if (tanggalRaw == null || tanggalRaw.isEmpty) return 'Tanggal tidak valid';
+
+    try {
+      DateTime dateTime = DateTime.parse(tanggalRaw);
+
+      return DateFormat('d MMMM YYYY', 'id').format(dateTime);
+    } catch (e) {
+      return "Format Salah";
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final data = widget.dataTugas;
-    String statusTugas = widget.dataTugas['status'];
+    final data = widget.taskData;
+    String statusTugas = widget.taskData['status'];
     bool isButtonActive =
         statusTugas != 'Mencari helper' && statusTugas != 'Selesai';
+    String tanggalDatabase = data['created_at'];
 
     return Scaffold(
       appBar: AppBar(
@@ -141,7 +155,7 @@ class _DetailTugasState extends State<DetailTugas> {
                       ),
                     ),
                   ),
-                  Text("Dibuat: 24 Oktober 2023"),
+                  Text("Dibuat: ${formatTanggal(tanggalDatabase)}"),
                 ],
               ),
               SizedBox(height: 15),
