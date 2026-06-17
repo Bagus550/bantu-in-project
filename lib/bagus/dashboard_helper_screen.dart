@@ -4,9 +4,9 @@ import 'package:bantuin/bagus/tugas_aktif_helper.dart';
 import 'package:bantuin/bagus/tugas_aktif_screen.dart';
 import 'package:bantuin/bagus/upload_bukti.dart';
 import 'package:bantuin/danela/detail_task_helper.dart';
+import 'package:bantuin/danela/message_list.dart';
 // import 'package:bantuin/data_tugas.dart';
 import 'package:bantuin/dava/helper_setting.dart';
-import 'package:bantuin/danela/message_list.dart';
 import 'package:bantuin/ida/profile.dart';
 import 'package:bantuin/ida/profile_tab.dart';
 import 'package:bantuin/yuliana/Faq_Helper.dart';
@@ -68,7 +68,7 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
               : {},
         );
       case 2:
-        return MessageListTab();
+        return MessageList();
       case 3:
         return ProfileTab();
       default:
