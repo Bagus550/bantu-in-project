@@ -1,27 +1,36 @@
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:bantuin/config/app_config.dart';
 import 'package:http/http.dart' as http;
 
 class AuthService {
-  final String baseUrl = "http://localhost:8080/api";
+  final String baseUrl = '${AppConfig.baseUrl}/api';
   final _storage = FlutterSecureStorage();
 
   Future<Map<String, dynamic>?> login(String email, String password) async {
     try {
+
       final response = await http.post(
         Uri.parse('$baseUrl/auth/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'password': password}),
       );
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
 
-        await _storage.write(key: 'jwt_token', value: data['token']);
+      final data = jsonDecode(response.body);
+
+      if (data['status'] == 200 || response.statusCode == 200 || response.statusCode == 201) {
+
+        if (data['token'] != null) {
+          try{
+            await _storage.write(key: 'jwt_token', value: data['token']);
+          } catch (_){
+          }
+        }
 
         return {
           'success': true,
-          'role':
-              data['user']['role'], 
+          'role': data['user']['role'],
+          'user': data['user'],
         };
       } else {
         return {'success': false, 'role': null};
@@ -31,11 +40,41 @@ class AuthService {
     }
   }
 
+  Future<Map<String, dynamic>?> register(
+    String nama,
+    String username,
+    String email,
+    String password,
+    String noHp,
+    String jenisKelamin,
+  ) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/auth/register'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'nama': nama,
+          'username': username,
+          'email': email,
+          'password': password,
+          'no_hp': noHp,
+          'jenis_kelamin': jenisKelamin,
+          'role': 'requester',
+        }),
+      );
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        return {'success': true};
+      } else {
+        return {'success': false};
+      }
+    } catch (e) {
+      return {'success': false};
+    }
+  }
+
   Future<dynamic> getTasksFeed() async {
-    String? token = await _storage.read(
-      key:
-          'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3ODEzNTUyMjAsImV4cCI6MTc4MTM1ODgyMCwiaWQiOiIyIiwiZW1haWwiOiJpZGFmZXJpYW5pMTkxNUBnbWFpbC5jb20ifQ.xgwNHYr2yIbFR8VxBOs1xOE1zCx2Dha-GQAv2oRQ07Q',
-    );
+    String? token = await _storage.read(key: 'jwt_token');
 
     final response = await http.get(
       Uri.parse('$baseUrl/tasks/feed'),
@@ -53,6 +92,6 @@ class AuthService {
   }
 
   Future<void> logout() async {
-    await _storage.delete(key: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3ODEzNTUyMjAsImV4cCI6MTc4MTM1ODgyMCwiaWQiOiIyIiwiZW1haWwiOiJpZGFmZXJpYW5pMTkxNUBnbWFpbC5jb20ifQ.xgwNHYr2yIbFR8VxBOs1xOE1zCx2Dha-GQAv2oRQ07Q');
+    await _storage.delete(key: 'jwt_token');
   }
 }

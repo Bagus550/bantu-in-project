@@ -3,7 +3,6 @@ import 'package:bantuin/ida/auth/auth_service.dart';
 import 'package:bantuin/ida/screen/lupa_katasandi.dart';
 import 'package:bantuin/ida/screen/register.dart';
 import 'package:flutter/material.dart';
-import 'package:bantuin/data_akun.dart';
 import 'package:bantuin/bagus/dashboard_helper_screen.dart';
 import 'package:bantuin/bagus/dashboard_user_screen.dart';
 
@@ -48,8 +47,12 @@ class _LoginScreenState extends State<LoginScreen> {
         _isLoading = false;
       });
 
+      print("--- DEBUG DI LOGIN SCREEN ---");
+      print("Hasil result dari AuthService: $result");
+
       if (result != null && result['success'] == true) {
         final String? role = result['role'];
+        final Map<String, dynamic> userData = result['user'] ?? {};
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -58,7 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
               backgroundColor: Theme.of(context).colorScheme.secondary,
             ),
           );
-          _navigateBasedOnRole(role);
+          _navigateBasedOnRole(role, userData);
         }
       } else {
         if (mounted) {
@@ -75,20 +78,18 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void _navigateBasedOnRole(String? role) {
+  void _navigateBasedOnRole(String? role, Map<String, dynamic> userData) {
     switch (role) {
-      case 'helper1':
-      case 'helper2':
+      case 'helper':
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => DashboardHelperScreen()),
         );
         break;
-      case 'requester1':
-      case 'requester2':
+      case 'requester':
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => DashboardUserScreen(userData: {},)),
+          MaterialPageRoute(builder: (context) => DashboardUserScreen(userData: userData,)),
         );
         break;
       case 'admin':
