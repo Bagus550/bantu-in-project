@@ -1,6 +1,4 @@
 import 'dart:convert';
-
-import 'package:bantuin/bagus/detail_task_user.dart';
 import 'package:bantuin/bagus/history_helper.dart';
 import 'package:bantuin/bagus/tugas_aktif_helper.dart';
 import 'package:bantuin/bagus/tugas_aktif_screen.dart';
