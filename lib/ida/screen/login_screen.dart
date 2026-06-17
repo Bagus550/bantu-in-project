@@ -1,6 +1,7 @@
 import 'package:bantuin/alen/admin.dart';
-import 'package:bantuin/ida/lupa_katasandi.dart';
-import 'package:bantuin/ida/register.dart';
+import 'package:bantuin/ida/auth/auth_service.dart';
+import 'package:bantuin/ida/screen/lupa_katasandi.dart';
+import 'package:bantuin/ida/screen/register.dart';
 import 'package:flutter/material.dart';
 import 'package:bantuin/data_akun.dart';
 import 'package:bantuin/bagus/dashboard_helper_screen.dart';
@@ -15,10 +16,12 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
+  final AuthService _authService = AuthService();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
   bool _isPasswordVisible = false;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -27,34 +30,47 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _handleLogin() {
+  void _handleLogin() async {
     if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+
       final inputEmail = _emailController.text.trim();
       final inputPassword = _passwordController.text;
 
-      try {
-        final matchingAccount = akun.firstWhere(
-          (user) =>
-              user['email'] == inputEmail && user['password'] == inputPassword,
-        );
+      Map<String, dynamic>? result = await _authService.login(
+        inputEmail,
+        inputPassword,
+      );
 
-        final String? role = matchingAccount['role'];
+      setState(() {
+        _isLoading = false;
+      });
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Login Berhasil sebagai $role!'),
-            backgroundColor: Theme.of(context).colorScheme.secondary,
-          ),
-        );
+      if (result != null && result['success'] == true) {
+        final String? role = result['role'];
 
-        _navigateBasedOnRole(role);
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Email atau Kata Sandi Salah'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Login Berhasil sebagai $role!'),
+              backgroundColor: Theme.of(context).colorScheme.secondary,
+            ),
+          );
+          _navigateBasedOnRole(role);
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Email atau Kata Sandi Salah / Gagal Terhubung Server',
+              ),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     }
   }
@@ -211,25 +227,27 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(height: 20),
                   Column(
                     children: [
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(
-                            context,
-                          ).colorScheme.primary,
-                          foregroundColor: Colors.white,
-                          minimumSize: Size(double.infinity, 50),
-                        ),
-                        onPressed: () {
-                          _handleLogin();
-                        },
-                        child: Text(
-                          "Login",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
-                        ),
-                      ),
+                      _isLoading
+                          ? CircularProgressIndicator()
+                          : ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.primary,
+                                foregroundColor: Colors.white,
+                                minimumSize: Size(double.infinity, 50),
+                              ),
+                              onPressed: () {
+                                _handleLogin();
+                              },
+                              child: Text(
+                                "Login",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                ),
+                              ),
+                            ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [

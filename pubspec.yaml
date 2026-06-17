@@ -41,8 +41,12 @@ dependencies:
   google_fonts: ^8.1.0
   image_picker: ^1.2.2
   font_awesome_flutter: ^11.0.0
+<<<<<<< HEAD
   intl: ^0.20.2
   config: ^0.9.0
+=======
+  flutter_secure_storage: ^10.3.1
+>>>>>>> 9c9b2aa1a3b666c1a8814d37266960a5846e260b
 
 flutter_native_splash: 
   color: "#ffffff"
