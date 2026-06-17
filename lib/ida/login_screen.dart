@@ -72,7 +72,7 @@ class _LoginScreenState extends State<LoginScreen> {
       case 'requester2':
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => DashboardUserScreen()),
+          MaterialPageRoute(builder: (context) => DashboardUserScreen(userData: {},)),
         );
         break;
       case 'admin':
