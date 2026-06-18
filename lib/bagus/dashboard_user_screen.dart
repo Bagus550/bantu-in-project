@@ -1,17 +1,21 @@
-import 'package:bantuin/bagus/screens/detail_task_user.dart';
-import 'package:bantuin/bagus/screens/history.dart';
+import 'package:bantuin/bagus/detail_task_user.dart';
+import 'package:bantuin/bagus/history_helper.dart';
+import 'package:bantuin/bagus/service/task_service.dart';
+import 'package:bantuin/config/app_config.dart';
 import 'package:bantuin/danela/message_list.dart';
 import 'package:bantuin/danela/roomchat.dart';
 import 'package:bantuin/dava/user_setting.dart';
-import 'package:bantuin/ida/notifikasi_requester.dart';
-import 'package:bantuin/ida/profile.dart';
-import 'package:bantuin/ida/profile_tab.dart';
+import 'package:bantuin/ida/screen/notifikasi_requester.dart';
+import 'package:bantuin/ida/screen/profile.dart';
+import 'package:bantuin/ida/screen/profile_tab.dart';
 import 'package:flutter/material.dart';
-import 'package:bantuin/data_tugas.dart';
 import 'package:bantuin/pilihan.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class DashboardUserScreen extends StatefulWidget {
-  const DashboardUserScreen({super.key});
+  final Map<String, dynamic> userData;
+  const DashboardUserScreen({super.key, required this.userData});
 
   @override
   State<DashboardUserScreen> createState() => _DashboardUserScreenState();
@@ -19,8 +23,56 @@ class DashboardUserScreen extends StatefulWidget {
 
 class _DashboardUserScreenState extends State<DashboardUserScreen> {
   int _currentIndex = 0;
+  final TaskService _taskService = TaskService();
 
-  String idUserLogin = "1";
+  late String idUserLogin;
+  late String namaUserLogin;
+  late String emailLogin;
+
+  List<dynamic> listTugasDariApi = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    idUserLogin = widget.userData['id'].toString();
+    namaUserLogin = widget.userData['username'] ?? "User";
+    emailLogin = widget.userData['email'];
+
+    fetchTasksByRequester();
+  }
+
+  Future<void> fetchTasksByRequester() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    final String apiUrl =
+        "${AppConfig.taskRequester}?id_requester=$idUserLogin";
+
+    try {
+      final response = await http.get(Uri.parse(apiUrl));
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        setState(() {
+          listTugasDariApi = responseData['data'];
+          isLoading = false;
+        });
+      } else {
+        throw Exception('Gagal memuat data');
+      }
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error: Gagal mengambil data dari server")),
+        );
+      }
+    }
+  }
 
   Color ambilWarnaStatus(String status) {
     switch (status) {
@@ -124,7 +176,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
       case 1:
         return NotifikasiRequester();
       case 2:
-        return MessageListTab();
+        return MessageList();
       case 3:
         return ProfileTab();
       default:
@@ -184,13 +236,21 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                   ),
                   SizedBox(height: 10),
                   Text(
-                    "Halo, ${tasks.isNotEmpty ? tasks[0]['nama_requester'] : 'User'}",
+                    "Halo, $namaUserLogin",
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
                   ),
+                  if (emailLogin.isNotEmpty)
+                    Text(
+                      emailLogin,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.white70,
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -217,7 +277,12 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
           ],
         ),
       ),
-      body: _dapatkanHalaman(_currentIndex),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : RefreshIndicator(
+              onRefresh: fetchTasksByRequester,
+              child: _dapatkanHalaman(_currentIndex),
+            ),
       bottomNavigationBar: SafeArea(
         child: Container(
           height: 88,
@@ -256,16 +321,14 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
   }
 
   Widget _buildDashboardHome() {
-    final listTugasAktif = tasks.where((item) {
-      return item['nama_requester'] == 'Bagus' &&
-          (item['status'] == 'Mencari helper' ||
-              item['status'] == 'Berjalan' ||
-              item['status'] == 'Menunggu validasi');
+    final listTugasAktif = listTugasDariApi.where((item) {
+      return item['status'] == 'Mencari helper' ||
+          item['status'] == 'Berjalan' ||
+          item['status'] == 'Menunggu validasi';
     }).toList();
 
-    final listTugasSelesai = tasks.where((item) {
-      return item['nama_requester'] == 'Bagus' &&
-          (item['status'] == 'Selesai' || item['status'] == 'Dibatalkan');
+    final listTugasSelesai = listTugasDariApi.where((item) {
+      return item['status'] == 'Selesai' || item['Status'] == 'Dibatalkan';
     }).toList();
 
     return SingleChildScrollView(
@@ -279,7 +342,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Halo, Bagus!",
+                    "Halo, $namaUserLogin",
                     style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                   ),
                   Text("Apa yang bisa kami bantu hari ini?"),
@@ -397,7 +460,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => DetailTugas(dataTugas: bantuan),
+                          builder: (context) => DetailTugas(taskData: bantuan),
                         ),
                       );
                     },
@@ -542,13 +605,13 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                                   ),
                                   SizedBox(width: 10),
                                   Text(
-                                    bantuan['nama_helper'] != null &&
+                                    bantuan['nama_helper'] == null ||
                                             bantuan['nama_helper']
                                                 .toString()
                                                 .trim()
                                                 .isEmpty
                                         ? 'Belum ada helper'
-                                        : bantuan['nama_helper'],
+                                        : bantuan['nama_helper'].toString(),
                                   ),
                                 ],
                               ),
@@ -612,7 +675,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => DetailTugas(dataTugas: history),
+                          builder: (context) => DetailTugas(taskData: history),
                         ),
                       );
                     },
@@ -958,7 +1021,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                 TextField(
                   controller: lokasiController,
                   maxLines: 2,
-                  keyboardType: TextInputType.number,
+                  keyboardType: TextInputType.multiline,
                   decoration: const InputDecoration(
                     labelText: 'Lokasi (atau tempel link Gmaps)',
                     border: OutlineInputBorder(),
@@ -993,6 +1056,55 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                           ),
                         );
                         return;
+                      }
+
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) =>
+                            const Center(child: CircularProgressIndicator()),
+                      );
+
+                      final result = await _taskService.createTask(
+                        judulTugas: judulController.text.trim(),
+                        deskripsi: deskripsiController.text.trim(),
+                        kategoriLayanan: kategoriDipilih!,
+                        lokasi: lokasiController.text.trim(),
+                        nominalPembayaran: nominalController.text.trim(),
+                        idRequester: idUserLogin,
+                      );
+
+                      if (context.mounted) {
+                        Navigator.pop(context);
+                      }
+
+                      if (result != null && result['success'] == true) {
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                result['message'] ??
+                                    "Berhasil memposting bantuan!",
+                              ),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+
+                          fetchTasksByRequester();
+                        }
+                      } else {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                result?['message'] ??
+                                    "Gagal memposting bantuan",
+                              ),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
                       }
                     },
                     style: ElevatedButton.styleFrom(

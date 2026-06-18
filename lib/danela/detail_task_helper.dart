@@ -1,6 +1,7 @@
-import 'package:bantuin/bagus/screens/tugas_aktif_screen.dart';
+import 'package:bantuin/bagus/tugas_aktif_screen.dart';
 import 'package:bantuin/danela/roomchat.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class DetailTugasHelper extends StatefulWidget {
   final Map<String, dynamic> taskData;
@@ -11,14 +12,26 @@ class DetailTugasHelper extends StatefulWidget {
 }
 
 class _DetailTugasState extends State<DetailTugasHelper> {
+  String formatJam(String? tanggalRaw) {
+    if (tanggalRaw == null || tanggalRaw.isEmpty) return "--:--";
+
+    try {
+      DateTime dateTime = DateTime.parse(tanggalRaw);
+
+      return DateFormat("d MMMM yyyy, 'pukul' HH:mm", 'id').format(dateTime);
+    } catch (e) {
+      return "-";
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final String judul = widget.taskData['judul_tugas'] ?? 'Tidak ada judul';
     final String harga = widget.taskData['nominal_pembayaran'] ?? 'Rp 0';
     final String lokasi = widget.taskData['lokasi_tugas'] ?? 'Tidak ada lokasi';
-    final String deskripsi =
-        widget.taskData['deskripsi'] ?? 'Tidak ada deskripsi';
+    final String deskripsi = widget.taskData['deskripsi'] ?? 'Tidak ada deskripsi';
     final String namaPelanggan = widget.taskData['nama_requester'] ?? 'Anonim';
+    final String waktu = widget.taskData['created_at'] ?? '';
 
     return Scaffold(
       appBar: AppBar(
@@ -76,7 +89,7 @@ class _DetailTugasState extends State<DetailTugasHelper> {
                   children: [
                     Icon(Icons.timer_sharp, size: 15, color: Colors.grey),
                     SizedBox(width: 4),
-                    Text("Hari ini, 09.25", style: TextStyle(fontSize: 13)),
+                    Text(formatJam(waktu), style: TextStyle(fontSize: 13)),
                   ],
                 ),
                 SizedBox(height: 16),

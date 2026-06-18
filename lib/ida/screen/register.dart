@@ -1,5 +1,6 @@
-import 'package:bantuin/ida/login_screen.dart';
+import 'package:bantuin/ida/screen/login_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:bantuin/ida/auth/auth_service.dart';
 
 class Register extends StatefulWidget {
   const Register({super.key});
@@ -10,6 +11,92 @@ class Register extends StatefulWidget {
 
 class _RegisterState extends State<Register> {
   bool _isRememberMe = false;
+  bool _isLoading = false;
+
+  final AuthService _authService = AuthService();
+
+  final TextEditingController _namaController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _noHpController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
+
+  String _jenisKelaminDipilih = 'Pilih Jenis Kelamin';
+
+  void _prosesDaftar() async {
+    if (_namaController.text.isEmpty ||
+        _usernameController.text.isEmpty ||
+        _emailController.text.isEmpty ||
+        _noHpController.text.isEmpty ||
+        _passwordController.text.isEmpty) {
+      _tampilkanSnackbar("Semua kolom wajib diisi!");
+      return;
+    }
+    if (_passwordController.text.length < 6) {
+      _tampilkanSnackbar("Kata sandi minimal harus 6 karakter!");
+      return;
+    }
+    if (_jenisKelaminDipilih == 'Pilih Jenis Kelamin') {
+      _tampilkanSnackbar("Silakan pilih Jenis Kelamin terlebih dahulu!");
+      return;
+    }
+    //kecocokan passwrod
+    if (_passwordController.text != _confirmPasswordController.text) {
+      _tampilkanSnackbar("Kata sandi dan konfirmasi tidak cocok!");
+      return;
+    }
+    //checkbox persetujuan
+    if (!_isRememberMe) {
+      _tampilkanSnackbar("Anda harus menyetujui Syarat & Ketentuan.");
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    final hasil = await _authService.register(
+      _namaController.text,
+      _usernameController.text,
+      _emailController.text,
+      _passwordController.text,
+      _noHpController.text,
+      _jenisKelaminDipilih,
+    );
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    if (hasil != null && hasil['success'] == true) {
+      _tampilkanSnackbar("Registrasi Berhasil! Silakan Masuk.");
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
+        );
+      }
+    } else {
+      _tampilkanSnackbar("Registrasi Gagal! Periksa kembali data Anda.");
+    }
+  }
+
+  void _tampilkanSnackbar(String pesan) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(pesan)));
+  }
+
+  @override
+  void dispose() {
+    _namaController.dispose();
+    _usernameController.dispose();
+    _emailController.dispose();
+    _noHpController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,6 +148,7 @@ class _RegisterState extends State<Register> {
                                 ),
                               ),
                               TextField(
+                                controller: _namaController,
                                 decoration: InputDecoration(
                                   label: Text("Nama Lengkap"),
                                   border: OutlineInputBorder(
@@ -70,6 +158,45 @@ class _RegisterState extends State<Register> {
                               ),
                               SizedBox(height: 20),
                               TextField(
+                                controller: _usernameController,
+                                decoration: InputDecoration(
+                                  label: Text("Username"),
+                                  border: OutlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.black),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: 20),
+                              DropdownButtonFormField<String>(
+                                initialValue: _jenisKelaminDipilih,
+                                decoration: const InputDecoration(
+                                  label: Text("Jenis Kelamin"),
+                                  border: OutlineInputBorder(),
+                                ),
+                                items: [
+                                  DropdownMenuItem(
+                                    value: 'Pilih Jenis Kelamin',
+                                    child: Text('Pilih Jenis Kelamin'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'Laki-Laki',
+                                    child: Text('Laki-Laki'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'Perempuan',
+                                    child: Text('Perempuan'),
+                                  ),
+                                ],
+                                onChanged: (value) {
+                                  setState(() {
+                                    _jenisKelaminDipilih =
+                                        value ?? 'Pilih Jenis Kelamin';
+                                  });
+                                },
+                              ),
+                              SizedBox(height: 20),
+                              TextField(
+                                controller: _emailController,
                                 decoration: InputDecoration(
                                   label: Text("Email"),
                                   border: OutlineInputBorder(
@@ -77,8 +204,10 @@ class _RegisterState extends State<Register> {
                                   ),
                                 ),
                               ),
+
                               SizedBox(height: 20),
                               TextField(
+                                controller: _noHpController,
                                 decoration: InputDecoration(
                                   label: Text("No Telepon"),
                                   border: OutlineInputBorder(
@@ -88,6 +217,7 @@ class _RegisterState extends State<Register> {
                               ),
                               SizedBox(height: 20),
                               TextField(
+                                controller: _passwordController,
                                 decoration: InputDecoration(
                                   label: Text("Kata Sandi"),
                                   border: OutlineInputBorder(
@@ -97,6 +227,7 @@ class _RegisterState extends State<Register> {
                               ),
                               SizedBox(height: 20),
                               TextField(
+                                controller: _confirmPasswordController,
                                 decoration: InputDecoration(
                                   label: Text("Konfirmasi Kata Sandi"),
                                   border: OutlineInputBorder(
@@ -110,9 +241,7 @@ class _RegisterState extends State<Register> {
                                     value: _isRememberMe,
                                     onChanged: (bool? newValue) {
                                       setState(() {
-                                        _isRememberMe =
-                                            newValue ??
-                                            false;
+                                        _isRememberMe = newValue ?? false;
                                       });
                                     },
                                   ),
@@ -131,8 +260,8 @@ class _RegisterState extends State<Register> {
                                               text: 'Syarat & Ketentuan',
                                               style: const TextStyle(
                                                 fontWeight: FontWeight.w500,
-                                                decoration: TextDecoration
-                                                    .underline,
+                                                decoration:
+                                                    TextDecoration.underline,
                                                 color: Colors.black,
                                               ),
                                             ),
@@ -146,8 +275,8 @@ class _RegisterState extends State<Register> {
                                               text: 'Kebijakan Privasi',
                                               style: const TextStyle(
                                                 fontWeight: FontWeight.w500,
-                                                decoration: TextDecoration
-                                                    .underline,
+                                                decoration:
+                                                    TextDecoration.underline,
                                                 color: Colors.black,
                                               ),
                                             ),
@@ -167,8 +296,17 @@ class _RegisterState extends State<Register> {
                                   foregroundColor: Colors.white,
                                   minimumSize: Size(double.infinity, 50),
                                 ),
-                                onPressed: () {},
-                                child: Text("Daftar"),
+                                onPressed: _isLoading ? null : _prosesDaftar,
+                                child: _isLoading
+                                    ? SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white,
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : Text("Daftar"),
                               ),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -179,8 +317,7 @@ class _RegisterState extends State<Register> {
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (context) =>
-                                              LoginScreen(),
+                                          builder: (context) => LoginScreen(),
                                         ),
                                       );
                                     },
