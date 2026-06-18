@@ -4,6 +4,7 @@ class AppConfig {
   static const String taskFeed      = "$baseUrl/api/tasks/feed";
   static const String taskRequester = "$baseUrl/api/tasks/requester";
   static const String taskCreate    = "$baseUrl/api/tasks/create";
+  static const String taskHistory   = "$baseUrl/api/taskHistory";
   static const String login         = "$baseUrl/api/auth/login";
 
   static const String updateStatus  = "$baseUrl/api/tasks/update-status";

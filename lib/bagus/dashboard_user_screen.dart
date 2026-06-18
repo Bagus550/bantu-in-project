@@ -1,5 +1,4 @@
 import 'package:bantuin/bagus/detail_task_user.dart';
-import 'package:bantuin/bagus/history_helper.dart';
 import 'package:bantuin/bagus/service/task_service.dart';
 import 'package:bantuin/config/app_config.dart';
 import 'package:bantuin/danela/message_list.dart';
@@ -257,12 +256,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
             ListTile(
               leading: Icon(Icons.history, color: Colors.black87),
               title: Text("History Tugas"),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => History()),
-                );
-              },
+              onTap: () {},
             ),
             ListTile(
               leading: Icon(Icons.settings, color: Colors.black87),

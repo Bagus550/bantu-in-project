@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:convert';
+import 'package:http_parser/http_parser.dart';
 import 'dart:io';
 import 'package:bantuin/config/app_config.dart';
 import 'package:flutter/material.dart';
@@ -9,11 +10,9 @@ import 'package:image_picker/image_picker.dart';
 
 class UploadBuktiTab extends StatefulWidget {
   final String idTask;
-  final String kodeReferensi;
   const UploadBuktiTab({
     super.key,
     required this.idTask,
-    required this.kodeReferensi,
   });
 
   @override
@@ -66,10 +65,14 @@ class _UploadBuktiTabState extends State<UploadBuktiTab> {
       request.fields['id_task'] = widget.idTask.toString();
       request.fields['catatan_tambahan'] = _catatanController.text;
 
+      String ekstensi = _gambarBukti!.path.split('.').last.toLowerCase();
+      if (ekstensi == 'jpg') ekstensi = 'jpeg';
+
       var multipartFile = await http.MultipartFile.fromPath(
         'bukti_foto',
         _gambarBukti!.path,
         filename: _gambarBukti!.path.split('/').last,
+        contentType: MediaType('image', ekstensi),
       );
 
       request.files.add(multipartFile);
@@ -77,6 +80,9 @@ class _UploadBuktiTabState extends State<UploadBuktiTab> {
       var response = await request.send();
 
       var responseData = await response.stream.bytesToString();
+      print("=== RAW RESPONSE BACKEND ===");
+      print(responseData);
+      print("=============================");
       var hasilJson = json.decode(responseData);
 
       if (!mounted) return;
