@@ -1,3 +1,5 @@
+// ignore_for_file: empty_catches, use_build_context_synchronously
+
 import 'dart:convert';
 import 'package:bantuin/bagus/history_helper.dart';
 import 'package:bantuin/bagus/tugas_aktif_helper.dart';
@@ -347,14 +349,27 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                         margin: EdgeInsets.only(bottom: 16),
                         clipBehavior: Clip.antiAlias,
                         child: InkWell(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    DetailTugasHelper(taskData: tugas),
-                              ),
-                            );
+                          onTap: () async {
+                            final apakahBerhasilAmbil = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DetailTugasHelper(
+          taskData: tugas,
+          userData: widget.userData,
+          token: widget.token,
+          adaTugasAktif: _tugasAktifSaya.isNotEmpty && _tugasAktifSaya['id_task'] != null,
+        ),
+      ),
+    );
+
+    if (apakahBerhasilAmbil == true) {
+      _refreshData();
+      if (mounted) {
+        setState(() {
+          _currentIndex = 1; // Otomatis pindah ke tab Tugas Aktif
+        });
+      }
+    }
                           },
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -712,7 +727,6 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
           try {
             await fetchTasksForHelper();
           } catch (e) {
-            print("Gagal refresh data tugas aktif saat pindah tab: $e");
           }
         }
       },
@@ -774,7 +788,6 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
           try {
             await fetchTasksForHelper();
           } catch (e) {
-            print("Gagal menyinkronkan data tugas pasca upload: $e");
           }
         }
       },

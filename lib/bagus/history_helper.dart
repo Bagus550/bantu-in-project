@@ -36,14 +36,12 @@ class _HistoryState extends State<History> {
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         
-        print("RAW RESPONSE HISTORY: ${response.body}");
 
         final List<dynamic> semuaTugasSelesai = responseData['data'] ?? [];
 
         setState(() {
           listHistoryAPI = semuaTugasSelesai;
 
-          print("JUMLAH HISTORY SETELAH FILTER: ${listHistoryAPI.length}");
 
           isLoading = false;
         });
