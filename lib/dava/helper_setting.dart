@@ -1,9 +1,9 @@
 import 'package:bantuin/dava/edit_profile.dart';
-import 'package:bantuin/ida/login_screen.dart';
-import 'package:bantuin/ida/ubah_katasandi.dart';
+import 'package:bantuin/ida/screen/login_screen.dart';
+import 'package:bantuin/ida/screen/ubah_katasandi.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:bantuin/ida/profile.dart';
+import 'package:bantuin/ida/screen/profile.dart';
 import 'package:bantuin/yuliana/about_helper.dart';
 import 'package:bantuin/yuliana/Faq_Helper.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';

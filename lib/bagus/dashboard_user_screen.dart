@@ -1,12 +1,13 @@
 import 'package:bantuin/bagus/detail_task_user.dart';
 import 'package:bantuin/bagus/history_helper.dart';
+import 'package:bantuin/bagus/service/task_service.dart';
 import 'package:bantuin/config/app_config.dart';
 import 'package:bantuin/danela/message_list.dart';
 import 'package:bantuin/danela/roomchat.dart';
 import 'package:bantuin/dava/user_setting.dart';
-import 'package:bantuin/ida/notifikasi_requester.dart';
-import 'package:bantuin/ida/profile.dart';
-import 'package:bantuin/ida/profile_tab.dart';
+import 'package:bantuin/ida/screen/notifikasi_requester.dart';
+import 'package:bantuin/ida/screen/profile.dart';
+import 'package:bantuin/ida/screen/profile_tab.dart';
 import 'package:flutter/material.dart';
 import 'package:bantuin/pilihan.dart';
 import 'dart:convert';
@@ -22,9 +23,11 @@ class DashboardUserScreen extends StatefulWidget {
 
 class _DashboardUserScreenState extends State<DashboardUserScreen> {
   int _currentIndex = 0;
+  final TaskService _taskService = TaskService();
 
   late String idUserLogin;
   late String namaUserLogin;
+  late String emailLogin;
 
   List<dynamic> listTugasDariApi = [];
   bool isLoading = true;
@@ -34,6 +37,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
     super.initState();
     idUserLogin = widget.userData['id'].toString();
     namaUserLogin = widget.userData['username'] ?? "User";
+    emailLogin = widget.userData['email'];
 
     fetchTasksByRequester();
   }
@@ -239,6 +243,14 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                       color: Colors.white,
                     ),
                   ),
+                  if (emailLogin.isNotEmpty)
+                    Text(
+                      emailLogin,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.white70,
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -593,13 +605,13 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                                   ),
                                   SizedBox(width: 10),
                                   Text(
-                                    bantuan['nama_helper'] != null &&
+                                    bantuan['nama_helper'] == null ||
                                             bantuan['nama_helper']
                                                 .toString()
                                                 .trim()
                                                 .isEmpty
                                         ? 'Belum ada helper'
-                                        : bantuan['nama_helper'],
+                                        : bantuan['nama_helper'].toString(),
                                   ),
                                 ],
                               ),
@@ -1009,7 +1021,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                 TextField(
                   controller: lokasiController,
                   maxLines: 2,
-                  keyboardType: TextInputType.number,
+                  keyboardType: TextInputType.multiline,
                   decoration: const InputDecoration(
                     labelText: 'Lokasi (atau tempel link Gmaps)',
                     border: OutlineInputBorder(),
@@ -1044,6 +1056,55 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                           ),
                         );
                         return;
+                      }
+
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) =>
+                            const Center(child: CircularProgressIndicator()),
+                      );
+
+                      final result = await _taskService.createTask(
+                        judulTugas: judulController.text.trim(),
+                        deskripsi: deskripsiController.text.trim(),
+                        kategoriLayanan: kategoriDipilih!,
+                        lokasi: lokasiController.text.trim(),
+                        nominalPembayaran: nominalController.text.trim(),
+                        idRequester: idUserLogin,
+                      );
+
+                      if (context.mounted) {
+                        Navigator.pop(context);
+                      }
+
+                      if (result != null && result['success'] == true) {
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                result['message'] ??
+                                    "Berhasil memposting bantuan!",
+                              ),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+
+                          fetchTasksByRequester();
+                        }
+                      } else {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                result?['message'] ??
+                                    "Gagal memposting bantuan",
+                              ),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
                       }
                     },
                     style: ElevatedButton.styleFrom(
