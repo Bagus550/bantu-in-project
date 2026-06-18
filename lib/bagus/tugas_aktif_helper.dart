@@ -1,5 +1,9 @@
+import 'dart:convert';
+
 import 'package:bantuin/danela/roomchat.dart';
+import 'package:bantuin/config/app_config.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class TugasAktifHelper extends StatefulWidget {
   final Map<String, dynamic> detailTugas;
@@ -10,8 +14,75 @@ class TugasAktifHelper extends StatefulWidget {
 }
 
 class _TugasAktifHelperState extends State<TugasAktifHelper> {
-  bool _isTugasSelesai = false;
-  bool _isSudahBayar = false;
+  bool _isLoading = false;
+  String _currentStatusTask = "Berjalan";
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.detailTugas.containsKey('status_task') &&
+        widget.detailTugas['status_task'] != null) {
+      _currentStatusTask = widget.detailTugas['status_task'].toString();
+    }
+  }
+
+  Future<void> _updateStatusTaskBackend(String statusBaru) async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final String idTask = widget.detailTugas['id_task'].toString();
+
+      final response = await http.post(
+        Uri.parse(AppConfig.updateStatus),
+        headers: {
+          'ngrok-skip-browser-warning': 'true',
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'id_task': idTask, 'status_task': statusBaru}),
+      );
+
+      final hasilJson = jsonDecode(response.body);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        setState(() {
+          _currentStatusTask = statusBaru;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              hasilJson['message'] ?? "Status tugas berhasil diperbarui!",
+            ),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              hasilJson['message'] ?? "Gagal merubah status di server.",
+            ),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Terjadi kesalahan koneksi: $e"),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,6 +109,12 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
         widget.detailTugas['nama_requester'] ?? 'Tanpa Nama';
     final String harga = "Rp ${widget.detailTugas['nominal_pembayaran'] ?? 0}";
     final String lokasi = widget.detailTugas['lokasi_tugas'] ?? 'Tanpa Lokasi';
+    final String judulTugas =
+        widget.detailTugas['judul_tugas'] ?? 'Detail Tugas';
+
+    bool isBerjalan = _currentStatusTask == 'berjalan';
+    bool isMenungguValidasi = _currentStatusTask == 'menunggu_validasi';
+    bool isSelesai = _currentStatusTask == 'selesai';
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -73,9 +150,9 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
-                            !_isTugasSelesai
+                            isBerjalan
                                 ? Icons.refresh
-                                : !_isSudahBayar
+                                : isMenungguValidasi
                                 ? Icons.attach_money_outlined
                                 : Icons.admin_panel_settings_outlined,
                             color: Color(0xFF4D49E9),
@@ -89,9 +166,9 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              !_isTugasSelesai
+                              isBerjalan
                                   ? "Tugas Berlangsung"
-                                  : !_isSudahBayar
+                                  : isMenungguValidasi
                                   ? "Menunggu Dibayar"
                                   : "Menunggu Validasi",
                               style: const TextStyle(
@@ -101,9 +178,9 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
                               ),
                             ),
                             Text(
-                              !_isTugasSelesai
+                              isBerjalan
                                   ? "Kerjakan tugas sesuai jenis layanan dan konfirmasi selesai jika pekerjaan sudah selesai"
-                                  : !_isSudahBayar
+                                  : isMenungguValidasi
                                   ? "Pekerjaan selesai! Silakan tunggu atau mintalah klien untuk melakukan pembayaran nominal tugas."
                                   : "Pembayaran telah dikonfirmasi. Harap tunggu sistem memvalidasi transaksi Anda.",
                               style: TextStyle(
@@ -119,6 +196,15 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
                 ),
               ),
               const SizedBox(height: 20),
+
+              Text(
+                judulTugas,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 15),
 
               Container(
                 width: double.infinity,
@@ -161,7 +247,7 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
                         width: double.infinity,
                         child: OutlinedButton.icon(
                           icon: const Icon(Icons.chat_bubble_outline, size: 18),
-                          label: const Text("Chat"),
+                          label: const Text("Hubungi via Chat"),
                           onPressed: () {
                             Navigator.push(
                               context,
@@ -199,7 +285,7 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        "TOTAL PEMBAYARAN",
+                        "NOMINAL KOMISI / UPAH",
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.grey,
@@ -235,7 +321,7 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        "RINCIAN TUGAS",
+                        "RINCIAN LOKASI TUGAS",
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.grey,
@@ -268,8 +354,8 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
-
+              const SizedBox(height: 25),
+              if (!isSelesai)
               Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
@@ -288,48 +374,47 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            backgroundColor: _isTugasSelesai
+                            backgroundColor: isBerjalan
                                 ? Colors.grey.shade200
                                 : Theme.of(context).colorScheme.primary,
-                            foregroundColor: _isTugasSelesai
+                            foregroundColor: isBerjalan
                                 ? Colors.grey.shade700
                                 : Colors.white,
                           ),
-                          onPressed: !_isTugasSelesai
-                              ? () {
-                                  setState(() {
-                                    _isTugasSelesai = true;
-                                  });
-                                }
+                          onPressed: (isBerjalan && !_isLoading)
+                              ? () => _updateStatusTaskBackend(
+                                  'menunggu_validasi',
+                                )
                               : null,
-                          child: const Text("Konfirmasi Tugas Selesai"),
+                          child: _isLoading && isBerjalan
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : Text(
+                                  isBerjalan
+                                      ? "Konfirmasi Tugas Selesai"
+                                      : "Pekerjaan Telah Selesai",
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                         ),
                       ),
                       const SizedBox(height: 12),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 44,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            backgroundColor: (_isTugasSelesai && !_isSudahBayar)
-                                ? Theme.of(context).colorScheme.primary
-                                : Colors.grey.shade200,
-                            foregroundColor: (_isTugasSelesai && !_isSudahBayar)
-                                ? Colors.white
-                                : Colors.grey.shade700,
-                            elevation: 0,
-                          ),
-                          onPressed: (_isTugasSelesai && !_isSudahBayar)
-                              ? () {
-                                  setState(() {
-                                    _isSudahBayar = true;
-                                  });
-                                }
-                              : null,
-                          child: const Text("Konfirmasi Sudah Dibayar"),
+                      Center(
+                        child: Text(
+                          isSelesai
+                              ? "Hore! Tugas ini telah selesai sepenuhnya dan dana sudah dicairkan."
+                              : isMenungguValidasi
+                                  ? "Menunggu pemesan melakukan pembayaran"
+                                  : "Gunakan fitur chat di atas untuk koordinasi lapangan dengan pemesan.",
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 12, color: Colors.grey),
                         ),
                       ),
                     ],
