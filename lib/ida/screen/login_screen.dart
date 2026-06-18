@@ -219,7 +219,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       TextButton(
                         onPressed: () {
-                          Navigator.pushReplacement(
+                          Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) => LupaKatasandi(),
