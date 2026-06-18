@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:convert';
+import 'package:http_parser/http_parser.dart';
 import 'dart:io';
 import 'package:bantuin/config/app_config.dart';
 import 'package:flutter/material.dart';
@@ -9,11 +10,9 @@ import 'package:image_picker/image_picker.dart';
 
 class UploadBuktiTab extends StatefulWidget {
   final String idTask;
-  final String kodeReferensi;
   const UploadBuktiTab({
     super.key,
     required this.idTask,
-    required this.kodeReferensi,
   });
 
   @override
@@ -30,7 +29,7 @@ class _UploadBuktiTabState extends State<UploadBuktiTab> {
     try {
       final XFile? foto = await _picker.pickImage(
         source: ImageSource.camera,
-        imageQuality: 70,
+        imageQuality: 50,
       );
 
       if (foto != null) {
@@ -58,32 +57,41 @@ class _UploadBuktiTabState extends State<UploadBuktiTab> {
         Uri.parse(AppConfig.uploadBukti),
       );
 
-      request.headers.addAll({'ngrok-skip-browser-warning': 'true'});
+      request.headers.addAll({
+        'ngrok-skip-browser-warning': 'true',
+        'Accept': 'application/json',
+      });
 
-      request.fields['id_task'] = widget.idTask;
+      request.fields['id_task'] = widget.idTask.toString();
       request.fields['catatan_tambahan'] = _catatanController.text;
 
-      var stream = http.ByteStream(_gambarBukti!.openRead());
-      var length = await _gambarBukti!.length();
+      String ekstensi = _gambarBukti!.path.split('.').last.toLowerCase();
+      if (ekstensi == 'jpg') ekstensi = 'jpeg';
 
-      var multipartFile = http.MultipartFile(
+      var multipartFile = await http.MultipartFile.fromPath(
         'bukti_foto',
-        stream,
-        length,
+        _gambarBukti!.path,
         filename: _gambarBukti!.path.split('/').last,
+        contentType: MediaType('image', ekstensi),
       );
 
       request.files.add(multipartFile);
 
       var response = await request.send();
 
-      if (response.statusCode == 200) {
-        var responseData = await response.stream.bytesToString();
-        var hasilJson = json.decode(responseData);
+      var responseData = await response.stream.bytesToString();
+      print("=== RAW RESPONSE BACKEND ===");
+      print(responseData);
+      print("=============================");
+      var hasilJson = json.decode(responseData);
 
+      if (!mounted) return;
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(hasilJson['message'] ?? "Berhasil mengunggah bukti!"),
+            backgroundColor: Colors.green,
           ),
         );
 
@@ -92,19 +100,26 @@ class _UploadBuktiTabState extends State<UploadBuktiTab> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              "Gagal mengunggah bukti. Code: ${response.statusCode}",
+              hasilJson['message'] ??
+                  "Gagal mengunggah bukti. Code: ${response.statusCode}",
             ),
+            backgroundColor: Colors.red,
           ),
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Terjadi kesalahan jaringan: $e")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Terjadi kesalahan jaringan: $e"),
+          backgroundColor: Colors.red,
+        ),
+      );
     } finally {
-      setState(() {
-        _isUploading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isUploading = false;
+        });
+      }
     }
   }
 

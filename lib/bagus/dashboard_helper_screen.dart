@@ -189,9 +189,11 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                   leading: Icon(Icons.history, color: Colors.black87),
                   title: Text("History Tugas"),
                   onTap: () {
+                    final String idHelperLogin = widget.userData?['id']?.toString() ?? '2';
+
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => History()),
+                      MaterialPageRoute(builder: (context) => History(idHelper: idHelperLogin)),
                     );
                   },
                 ),
@@ -498,9 +500,7 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                                                 "Selesaikan dulu tugas aktifmu saat ini sebelum mengambil tugas baru!",
                                               ),
                                               backgroundColor: Colors.orange,
-                                              duration: Duration(
-                                                seconds: 3,
-                                              ),
+                                              duration: Duration(seconds: 3),
                                             ),
                                           );
                                           return;
@@ -704,10 +704,17 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
     final bool isActive = _currentIndex == index;
 
     return GestureDetector(
-      onTap: () {
+      onTap: () async {
         setState(() {
-          _currentIndex = index; // Ganti halaman aktif saat diklik
+          _currentIndex = index;
         });
+        if (index == 1) {
+          try {
+            await fetchTasksForHelper();
+          } catch (e) {
+            print("Gagal refresh data tugas aktif saat pindah tab: $e");
+          }
+        }
       },
       child: AnimatedContainer(
         duration: Duration(milliseconds: 200),
@@ -741,14 +748,35 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
 
   Widget _buildPostButton() {
     return GestureDetector(
-      onTap: () {
-        Navigator.push(
+      onTap: () async {
+        if (_tugasAktifSaya.isEmpty || _tugasAktifSaya['id_task'] == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                "Kamu tidak memiliki tugas aktif yang perlu dikirim buktinya!",
+              ),
+              backgroundColor: Colors.amber,
+            ),
+          );
+          return;
+        }
+
+        final String idTaskDinamis = _tugasAktifSaya['id_task'].toString();
+
+        final isSuksesUpload = await Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) =>
-                UploadBuktiTab(idTask: '12', kodeReferensi: ''),
+            builder: (context) => UploadBuktiTab(idTask: idTaskDinamis),
           ),
         );
+
+        if (isSuksesUpload == true) {
+          try {
+            await fetchTasksForHelper();
+          } catch (e) {
+            print("Gagal menyinkronkan data tugas pasca upload: $e");
+          }
+        }
       },
       child: Column(
         mainAxisSize: MainAxisSize.min,
