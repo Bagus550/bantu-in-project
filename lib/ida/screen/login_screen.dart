@@ -79,17 +79,27 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _navigateBasedOnRole(String? role, Map<String, dynamic> userData) {
+    
+    final String? token = userData['token'] ?? '';
+
     switch (role) {
       case 'helper':
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => DashboardHelperScreen()),
+          MaterialPageRoute(
+            builder: (context) => DashboardHelperScreen(
+              userData: userData,
+              token: token,
+            ),
+          ),
         );
         break;
       case 'requester':
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => DashboardUserScreen(userData: userData,)),
+          MaterialPageRoute(
+            builder: (context) => DashboardUserScreen(userData: userData),
+          ),
         );
         break;
       case 'admin':

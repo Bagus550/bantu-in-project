@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:bantuin/config/app_config.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'roomchat.dart';
@@ -11,7 +12,7 @@ class MessageList extends StatefulWidget {
 }
 
 class _MessageState extends State<MessageList> {
-  final String apiUrl = "https://lid-jarring-angler.ngrok-free.dev/api/chat";
+  final String apiUrl = AppConfig.chat;
   List<dynamic> _chatRooms = [];
   bool _isLoading = true;
 
@@ -26,20 +27,25 @@ class _MessageState extends State<MessageList> {
       final response = await http.get(Uri.parse(apiUrl));
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = json.decode(response.body);
-        setState(() {
-          _chatRooms = responseData['data'];
-          _isLoading = false;
-        });
+        if (mounted) {
+          setState(() {
+            _chatRooms = responseData['data'];
+            _isLoading = false;
+          });
+        }
       } else {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
         setState(() {
           _isLoading = false;
         });
       }
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      print("Error fetching chat list: $e");
     }
   }
 
@@ -56,8 +62,6 @@ class _MessageState extends State<MessageList> {
               itemBuilder: (context, index) {
                 final room = _chatRooms[index];
 
-                // LOGIKA FRONTEND: Tentukan nama lawan bicara dinamis berdasarkan data role
-                // (Sesuaikan dengan data user session login di frontend-mu)
                 String namaLawanBicara = room['nama_requester'] ?? 'Pelanggan';
 
                 return ListTile(
@@ -95,7 +99,6 @@ class _MessageState extends State<MessageList> {
                         builder: (context) => RoomChatPage(namaData: room),
                       ),
                     ).then((value) {
-                      // REFRESH DATA DAFTAR CHAT ketika user menekan tombol back dari RoomChatPage
                       _fetchChatRooms();
                     });
                   },
