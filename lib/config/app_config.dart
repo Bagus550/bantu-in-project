@@ -7,7 +7,7 @@ class AppConfig {
   static const String taskHistory   = "$baseUrl/api/taskHistory";
   static const String historyUser   = "$baseUrl/api/historyUser";
   static const String updateStatus  = "$baseUrl/api/tasks/update-status";
-
+  static const String historyHelper = "$baseUrl/api/history/helper";
   static const String login         = "$baseUrl/api/auth/login";
   static const String forgotPassword = "$baseUrl/api/forgot-password";
   static const String resetPassword = "$baseUrl/api/reset-password";

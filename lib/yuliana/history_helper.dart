@@ -30,7 +30,7 @@ class _HistoryState extends State<History> {
     });
 
     try {
-      final url = "${AppConfig.taskHistory}?id_helper=${widget.idHelper}";
+      final url = "${AppConfig.historyHelper}?id_helper=${widget.idHelper}";
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
