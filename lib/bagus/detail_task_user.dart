@@ -1,5 +1,9 @@
+import 'dart:convert';
+
+import 'package:bantuin/config/app_config.dart';
 import 'package:bantuin/danela/roomchat.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
 class DetailTugas extends StatefulWidget {
@@ -86,9 +90,64 @@ class _DetailTugasState extends State<DetailTugas> {
     try {
       DateTime dateTime = DateTime.parse(tanggalRaw);
 
-      return DateFormat('d MMMM YYYY', 'id').format(dateTime);
+      return DateFormat('d MMMM yyyy', 'id').format(dateTime);
     } catch (e) {
       return "Format Salah";
+    }
+  }
+
+  bool _isLoadingBatal = false;
+
+  Future<void> _batalkanTugas(String idTask) async {
+    setState(() {
+      _isLoadingBatal = true;
+    });
+
+    try {
+      final response = await http.post(
+        Uri.parse("${AppConfig.baseUrl}/api/tasks/ajuan-batal"),
+        body: {'id_task': idTask},
+      );
+
+      final dataResponse = jsonDecode(response.body);
+
+      if (response.statusCode == 200 && dataResponse['status'] == 200) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Tugas berhasil dibatalkan!"),
+              backgroundColor: Colors.green,
+            ),
+          );
+          Navigator.pop(context, true);
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                dataResponse['message'] ?? "Gagal membatalkan tugas",
+              ),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Terjadi kesalahan koneksi: $e"),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoadingBatal = false;
+        });
+      }
     }
   }
 
@@ -380,20 +439,193 @@ class _DetailTugasState extends State<DetailTugas> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton.icon(
-                  onPressed: () {},
-                  icon: Icon(ambilIkonTombol(data['status'])),
-                  label: isButtonActive
-                      ? Text("Batalkan Tugas")
-                      : Text("Pesan Ulang"),
+                  onPressed: () {
+                    final String statusTugas = (data['status'] ?? '')
+                        .toString()
+                        .trim()
+                        .toLowerCase();
+
+                    if (statusTugas == 'selesai' ||
+                        statusTugas == 'dibatalkan') {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text("Pesan Ulang"),
+                            content: Text(
+                              "Apakah kamu ingin membuat tugas baru dengan rincian yang sama seperti '${data['judul_tugas']}'?",
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text("Batal"),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: const Text(
+                                  "Pesan Lagi",
+                                  style: TextStyle(color: Colors.blueAccent),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    } else {
+                      final idHelper = data['id_helper'];
+                      final bool belumAdaHelper =
+                          idHelper == null ||
+                          idHelper == 0 ||
+                          idHelper.toString() == '0' ||
+                          idHelper.toString().isEmpty;
+
+                      if (belumAdaHelper) {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: const Text("Konfirmasi Batal"),
+                              content: const Text(
+                                "Apakah kamu yakin ingin membatalkan tugas ini?",
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: const Text("Tidak"),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                    _batalkanTugas(
+                                      widget.taskData['id_task'].toString(),
+                                    );
+                                  },
+                                  child: const Text(
+                                    "Ya, Batalkan",
+                                    style: TextStyle(color: Colors.red),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      } else {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text(
+                                "Peringatan Penting!",
+                                style: TextStyle(
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              content: Text(
+                                "Tugas ini sudah diambil oleh helper dan sedang berjalan. Membatalkan sepihak bisa merugikan helper.",
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: const Text("Kembali (Amankan Tugas)"),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          title: const Text(
+                                            "Yakin Tetap Batal?",
+                                          ),
+                                          content: const Text(
+                                            "Pastikan kamu sudah berdiskusi dan nego dengan helper melalui fitur CHAT sebelum membatalkan tugas ini secara sepihak!",
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () =>
+                                                  Navigator.pop(context),
+                                              child: const Text(
+                                                "Batal, saya mau chat dulu",
+                                              ),
+                                            ),
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                                _batalkanTugas(
+                                                  widget.taskData['id_task']
+                                                      .toString(),
+                                                );
+                                              },
+                                              child: const Text(
+                                                "Saya Paham, Tetap Batalkan",
+                                                style: TextStyle(
+                                                  color: Colors.red,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                  },
+                                  child: const Text(
+                                    "Lanjutkan Pembatalan",
+                                    style: TextStyle(color: Colors.orange),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      }
+                    }
+                  },
+                  icon: Icon(
+                    (data['status'].toString().toLowerCase() == 'selesai' ||
+                            data['status'].toString().toLowerCase() ==
+                                'dibatalkan')
+                        ? Icons.refresh
+                        : Icons.clear,
+                  ),
+                  label: _isLoadingBatal
+                      ? SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Color(0xFFCD2528),
+                          ),
+                        )
+                      : (data['status'].toString().toLowerCase() == 'selesai' ||
+                            data['status'].toString().toLowerCase() ==
+                                'dibatalkan')
+                      ? const Text("Pesan Ulang")
+                      : const Text("Batalkan Tugas"),
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                     side: BorderSide(
-                      color: ambilWarnaTombol(data['status']),
+                      color:
+                          (data['status'].toString().toLowerCase() ==
+                                  'selesai' ||
+                              data['status'].toString().toLowerCase() ==
+                                  'dibatalkan')
+                          ? Colors.blueAccent
+                          : const Color(0xFFCD2528),
                       width: 1.5,
                     ),
-                    foregroundColor: ambilWarnaTombol(data['status']),
+                    foregroundColor:
+                        (data['status'].toString().toLowerCase() == 'selesai' ||
+                            data['status'].toString().toLowerCase() ==
+                                'dibatalkan')
+                        ? Colors.blueAccent
+                        : const Color(0xFFCD2528),
                   ),
                 ),
               ),
