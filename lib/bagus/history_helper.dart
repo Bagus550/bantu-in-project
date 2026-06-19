@@ -32,7 +32,8 @@ class _HistoryState extends State<History> {
 
     try {
       idHelperLogin = "5";
-      final url = "${AppConfig.taskFeed}?id_helper=$idHelperLogin";
+      final url = "${AppConfig.taskHistory}?user_id=$idHelperLogin&role=helper";
+
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
@@ -40,16 +41,10 @@ class _HistoryState extends State<History> {
         final List<dynamic> semuaTugas = responseData['data'] ?? [];
 
         setState(() {
-          listHistoryAPI = semuaTugas.where((item) {
-            String status = (item['status_task'] ?? '')
-                .toString()
-                .trim()
-                .toLowerCase();
-            return status == 'selesai' || status == 'dibatalkan';
-          }).toList();
-
+          listHistoryAPI = semuaTugas;
           isLoading = false;
         });
+
       } else {
         setState(() {
           errorPesan = "Gagal memuat history (Status: ${response.statusCode})";

@@ -1,5 +1,5 @@
 class AppConfig {
-  static const String baseUrl       = "https://lyricism-conch-sheath.ngrok-free.dev";
+  static const String baseUrl       = "https://playroom-junction-kick.ngrok-free.dev";
 
   static const String taskFeed      = "$baseUrl/api/tasks/feed";
   static const String taskRequester = "$baseUrl/api/tasks/requester";
@@ -8,4 +8,6 @@ class AppConfig {
 
   static const String uploadBukti   = "$baseUrl/api/payment";
   static const String ambilTugas    = "$baseUrl/api/tasks/take";
+
+  static const String taskHistory   = "$baseUrl/api/tasks/history";
 }
