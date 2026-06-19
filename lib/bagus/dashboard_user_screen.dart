@@ -1,4 +1,5 @@
 import 'package:bantuin/bagus/detail_task_user.dart';
+import 'package:bantuin/bagus/history_user.dart';
 import 'package:bantuin/bagus/service/task_service.dart';
 import 'package:bantuin/config/app_config.dart';
 import 'package:bantuin/danela/message_list.dart';
@@ -40,7 +41,6 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
     emailLogin = widget.userData['email'];
 
     fetchTasksByRequester();
-    fetchHistoryUser(idUserLogin);
   }
 
   Future<void> fetchTasksByRequester() async {
@@ -123,98 +123,17 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
     }
   }
 
-  Future<void> fetchHistoryUser(String idRequester) async {
-    final url = Uri.parse("${AppConfig.historyUser}?id_requester=$idRequester");
-
-    try {
-      setState(() {
-        isLoading = true;
-      });
-
-      final response = await http.get(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          // Tambahkan token authorization di sini jika backend kamu menggunakan proteksi JWT/Shield
-          // 'Authorization': 'Bearer $token',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final jsonResponse = json.decode(response.body);
-
-        // Sesuai dengan struktur return respond() dari CodeIgniter kamu (status => 200)
-        if (jsonResponse['status'] == 200 && jsonResponse['data'] != null) {
-          setState(() {
-            listTugasSelesai = jsonResponse['data'];
-            isLoading = false;
-          });
-        } else {
-          setState(() {
-            listTugasSelesai = [];
-            isLoading = false;
-          });
-          print("Log: ${jsonResponse['message']}");
-        }
-      } else {
-        print("Gagal memuat data. Status Code: ${response.statusCode}");
-        setState(() {
-          isLoading = false;
-        });
-      }
-    } catch (e) {
-      print("Terjadi kesalahan network saat fetch history: $e");
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
-
-  Future<void> _pesanUlangTugas(Map<String, dynamic> tugasLama) async {
-    setState(() => isLoading = true);
-    try {
-      final result = await _taskService.createTask(
-        idRequester: idUserLogin,
-        judulTugas: tugasLama['judul_tugas'] ?? '',
-        deskripsi: tugasLama['deskripsi'] ?? '',
-        lokasi: tugasLama['lokasi_tugas'] ?? '',
-        nominalPembayaran: tugasLama['nominal_pembayaran'] ?? '',
-        kategoriLayanan: tugasLama['kategori_layanan'] ?? '',
-      );
-
-      if (!mounted) return;
-
-      if (result?['status'] == 201 || result?['status'] == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Tugas berhasil dipesan ulang!"),
-            backgroundColor: Colors.green,
-          ),
-        );
-        fetchTasksByRequester();
-      } else {
-        throw Exception(result?['message'] ?? "Gagal memesan ulang");
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
-      );
-      setState(() => isLoading = false);
-    }
-  }
-
   Color ambilWarnaStatus(String status) {
     switch (status) {
-      case 'Mencari helper':
+      case 'mencari helper':
         return const Color.fromARGB(255, 255, 158, 79);
-      case 'Berjalan':
+      case 'merjalan':
         return Color(0xFF283593);
-      case 'Menunggu validasi':
+      case 'menunggu validasi':
         return Colors.teal.shade800;
-      case 'Selesai':
+      case 'selesai':
         return Colors.green.shade800;
-      case 'Dibatalkan':
+      case 'dibatalkan':
         return Color(0xFFCD2528);
       default:
         return Color(0xFF283593);
@@ -223,11 +142,11 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
 
   Color ambilBgStatus(String status) {
     switch (status) {
-      case 'Berjalan':
+      case 'berjalan':
         return Color(0XFFDFDDF5);
-      case 'Selesai':
+      case 'selesai':
         return Color(0XFFDDF5E2);
-      case 'Dibatalkan':
+      case 'dibatalkan':
         return Color(0XFFF5DDDD);
       default:
         return Color(0XFFEEEEEE);
@@ -236,15 +155,15 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
 
   IconData ambilIconStatus(String status) {
     switch (status) {
-      case 'Mencari helper':
+      case 'mencari helper':
         return Icons.search;
-      case 'Berjalan':
+      case 'berjalan':
         return Icons.refresh;
-      case 'Menunggu validasi':
+      case 'menunggu validasi':
         return Icons.warning_amber_rounded;
-      case 'Dibatalkan':
+      case 'dibatalkan':
         return Icons.clear;
-      case 'Selesai':
+      case 'selesai':
         return Icons.check;
       default:
         return Icons.help_outline_rounded;
@@ -387,7 +306,14 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
             ListTile(
               leading: Icon(Icons.history, color: Colors.black87),
               title: Text("History Tugas"),
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => HistoryUser(idRequester: idUserLogin),
+                  ),
+                );
+              },
             ),
             ListTile(
               leading: Icon(Icons.settings, color: Colors.black87),
@@ -593,14 +519,19 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                         margin: EdgeInsets.only(bottom: 16),
                         clipBehavior: Clip.antiAlias,
                         child: InkWell(
-                          onTap: () {
-                            Navigator.push(
+                          onTap: () async {
+                            final hasilBatal = await Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (context) =>
                                     DetailTugas(taskData: bantuan),
                               ),
                             );
+                            if (hasilBatal == true) {
+                              setState(() {
+                                fetchTasksByRequester();
+                              });
+                            }
                           },
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
@@ -909,287 +840,13 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                                         },
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: ambilWarnaStatus(
-                                            'Dibatalkan',
+                                            'dibatalkan',
                                           ),
                                           foregroundColor: Colors.white,
                                         ),
                                         icon: Icon(Icons.clear),
                                         label: Text(
                                           "Batalkan",
-                                          style: TextStyle(fontSize: 10),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-            SizedBox(height: 20),
-            Text(
-              "RIWAYAT TUGAS",
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 10),
-            listTugasSelesai.isEmpty
-                ? const Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Center(
-                      child: Text(
-                        "Belum ada riwayat tugas",
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    ),
-                  )
-                : ListView.builder(
-                    shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
-                    itemCount: listTugasSelesai.length,
-                    itemBuilder: (context, index) {
-                      final history = listTugasSelesai[index];
-
-                      String statusTugas = (history['status'] ?? '')
-                          .toString()
-                          .trim()
-                          .toLowerCase();
-                      bool isButtonActive =
-                          statusTugas != 'mencari helper' &&
-                          statusTugas != 'selesai' &&
-                          statusTugas != 'dibatalkan';
-
-                      return Card(
-                        shape: RoundedRectangleBorder(
-                          side: BorderSide(color: Colors.grey, width: 1),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        margin: EdgeInsets.only(bottom: 16),
-                        clipBehavior: Clip.antiAlias,
-                        child: InkWell(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    DetailTugas(taskData: history),
-                              ),
-                            );
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 12,
-                              horizontal: 16,
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: Row(
-                                        children: [
-                                          Container(
-                                            width: 50,
-                                            height: 50,
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
-                                              color: ambilWarnaBantuan(
-                                                history['kategori_layanan'],
-                                              ),
-                                            ),
-                                            child: Icon(
-                                              ambilIconBantuan(
-                                                history['kategori_layanan'],
-                                              ),
-                                              color: ambilWarnaIkonBantuan(
-                                                history['kategori_layanan'],
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(width: 12),
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Text(
-                                                  history['judul_tugas'],
-                                                  style: TextStyle(
-                                                    fontWeight: FontWeight.w800,
-                                                    fontSize: 15,
-                                                  ),
-                                                  maxLines: 1,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                ),
-                                                SizedBox(height: 4),
-                                                Text(
-                                                  'ID : ${history['id']}',
-                                                  style: const TextStyle(
-                                                    fontSize: 12,
-                                                    color: Colors.grey,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    SizedBox(width: 16),
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(20),
-                                        color: ambilBgStatus(history['status']),
-                                      ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 2,
-                                          horizontal: 8,
-                                        ),
-                                        child: Text(
-                                          history['status'],
-                                          style: TextStyle(
-                                            color: ambilWarnaStatus(
-                                              history['status'],
-                                            ),
-                                            fontSize: 10,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 10),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        history['nominal_pembayaran'],
-                                        style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      IconButton(
-                                        onPressed: isButtonActive
-                                            ? () {
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        RoomChatPage(
-                                                          namaData: history,
-                                                        ),
-                                                  ),
-                                                );
-                                              }
-                                            : null,
-                                        icon: Icon(
-                                          Icons.chat_outlined,
-                                          color: isButtonActive
-                                              ? Theme.of(
-                                                  context,
-                                                ).colorScheme.primary
-                                              : Color(0XFF666565),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Divider(
-                                  color: Colors.grey.shade300,
-                                  thickness: 2,
-                                ),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        CircleAvatar(
-                                          radius: 18,
-                                          backgroundColor: Colors.grey.shade300,
-                                          child: Icon(
-                                            Icons.person,
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                        SizedBox(width: 10),
-                                        Text(
-                                          history['nama_helper'] != null &&
-                                                  history['nama_helper']
-                                                      .toString()
-                                                      .trim()
-                                                      .isEmpty
-                                              ? 'Belum ada helper'
-                                              : history['nama_helper'],
-                                        ),
-                                      ],
-                                    ),
-                                    SizedBox(
-                                      height: 30,
-                                      child: ElevatedButton.icon(
-                                        onPressed: () {
-                                          showDialog(
-                                            context: context,
-                                            builder: (BuildContext context) {
-                                              return AlertDialog(
-                                                title: const Text(
-                                                  "Pesan Ulang",
-                                                ),
-                                                content: Text(
-                                                  "Apakah kamu ingin membuat tugas baru dengan rincian yang sama seperti '${history['judul_tugas']}'?",
-                                                ),
-                                                actions: [
-                                                  TextButton(
-                                                    onPressed: () =>
-                                                        Navigator.pop(context),
-                                                    child: const Text("Batal"),
-                                                  ),
-                                                  TextButton(
-                                                    onPressed: () {
-                                                      Navigator.pop(context);
-                                                      _pesanUlangTugas(history);
-                                                    },
-                                                    child: const Text(
-                                                      "Pesan Lagi",
-                                                      style: TextStyle(
-                                                        color:
-                                                            Colors.blueAccent,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              );
-                                            },
-                                          );
-                                        },
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.blueAccent,
-                                          foregroundColor: Colors.white,
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 12,
-                                          ),
-                                        ),
-                                        icon: const Icon(
-                                          Icons.refresh,
-                                          size: 14,
-                                        ),
-                                        label: const Text(
-                                          "Pesan Lagi",
                                           style: TextStyle(fontSize: 10),
                                         ),
                                       ),
