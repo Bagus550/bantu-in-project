@@ -390,11 +390,25 @@ class _DetailTugasState extends State<DetailTugas> {
                         child: ElevatedButton.icon(
                           onPressed: isButtonActive
                               ? () {
+                                  Map<String, dynamic> kirimDataChat = {
+                                    // Jika dari detail tugas belum ada id_room, kita pakai id_task sebagai fallback sementara
+                                    'id_room':
+                                        data['id_room'] ?? data['id_task'],
+                                    'id_task': data['id_task'],
+                                    'is_active': data['status'] == 'Berjalan'
+                                        ? 1
+                                        : 0,
+                                    'nama_requester':
+                                        data['nama_requester'] ?? 'Pelanggan',
+                                    'nama_helper':
+                                        data['nama_helper'] ?? 'Helper',
+                                  };
+
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) =>
-                                          RoomChatPage(namaData: data),
+                                          RoomChatPage(namaData: kirimDataChat),
                                     ),
                                   );
                                 }
