@@ -1,5 +1,5 @@
 import 'package:bantuin/dava/helper_setting.dart';
-import 'package:bantuin/ida/profile_tab.dart';
+import 'package:bantuin/ida/screen/profile_tab.dart';
 import 'package:flutter/material.dart';
 
 class Profile extends StatefulWidget {

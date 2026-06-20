@@ -61,7 +61,7 @@ class AboutUser extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    "Bantu.in merupakan platfrom layanan bantuan on-demand berbasis mobile yang menghubungkan pencari bantuan dengan penyedia jasa secara cepat, mudah, dan terpercaya. Kami hadir untuk membantu masyarakat menemukan tenaga bantuan harian untuk berbagai kebutuhan pekerjaan lapangan. Dengan Bantu.in, mendapatkan bantuan tidak lagi rumit. Cukup buat permintaan, temukan helper yang sesuai, dan selesai pekerjaan dengan lebih cepat dan nyaman.",
+                    "Bantu.in merupakan platform layanan bantuan on-demand berbasis mobile yang menghubungkan pencari bantuan dengan penyedia jasa secara cepat, mudah, dan terpercaya. Kami hadir untuk membantu masyarakat menemukan tenaga bantuan harian untuk berbagai kebutuhan pekerjaan lapangan. Dengan Bantu.in, mendapatkan bantuan tidak lagi rumit. Cukup buat permintaan, temukan helper yang sesuai, dan selesai pekerjaan dengan lebih cepat dan nyaman.",
                     textAlign: TextAlign.justify,
                   ),
                   const SizedBox(height: 12),
@@ -73,7 +73,7 @@ class AboutUser extends StatelessWidget {
                   Column(
                     children: [
                       Text(
-                        "Menyediakan layanan berkualitas, Membangun komunitas terpecaya, Memberikan kemudahan akses untuk semua.",
+                        "Menyediakan layanan berkualitas, Membangun komunitas terpercaya, Memberikan kemudahan akses untuk semua.",
                       ),
                     ],
                   ),
@@ -102,7 +102,7 @@ class AboutUser extends StatelessWidget {
                             size: 80,
                             color: Theme.of(context).colorScheme.primary,
                           ),
-                          Text("Intergritas"),
+                          Text("Integritas"),
                         ],
                       ),
                       Column(
