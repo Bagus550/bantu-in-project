@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'package:bantuin/config/app_config.dart';
+import 'package:bantuin/ida/auth/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:bantuin/danela/config/chat_room_list_model.dart';
 import 'roomchat.dart';
 
 class MessageList extends StatefulWidget {
@@ -13,8 +15,12 @@ class MessageList extends StatefulWidget {
 
 class _MessageState extends State<MessageList> {
   final String apiUrl = AppConfig.chat;
-  List<dynamic> _chatRooms = [];
+  final AuthService _authService = AuthService();
+
+  List<ChatRoomListModel> _chatRooms = [];
   bool _isLoading = true;
+  String currentUser = "";
+  String currentUserId = "";
 
   @override
   void initState() {
@@ -24,28 +30,53 @@ class _MessageState extends State<MessageList> {
 
   Future<void> _fetchChatRooms() async {
     try {
-      final response = await http.get(Uri.parse(apiUrl));
+      final String? idUserAktif = await _authService.getUserId();
+      final String? roleSession = await _authService.getUserRole();
+      final String? namaSession = await _authService.getUserNama();
+
+      if (idUserAktif == null || roleSession == null) {
+        debugPrint("Session user tidak ditemukan.");
+        if (mounted) setState(() => _isLoading = false);
+        return;
+      }
+
+      if (mounted) {
+        setState(() {
+          currentUser = namaSession ?? "";
+          currentUserId = idUserAktif.toString();
+        });
+      }
+
+      final String urlDenganParameter =
+          "$apiUrl?id_user=$idUserAktif&role=$roleSession";
+
+      final response = await http.get(Uri.parse(urlDenganParameter));
+
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = json.decode(response.body);
         if (mounted) {
           setState(() {
-            _chatRooms = responseData['data'];
+            List<dynamic> listMentah = responseData['data'] ?? [];
+            debugPrint("Jumlah data room didapat: ${listMentah.length}");
+            try {
+              _chatRooms = listMentah
+                  .map((json) => ChatRoomListModel.fromJson(json))
+                  .toList();
+            } catch (modelError) {
+              debugPrint(
+                "ERROR PARSING MODEL: Gagal konversi JSON ke ChatRoomListModel!",
+              );
+              debugPrint("Detail Error Model: $modelError");
+            }
             _isLoading = false;
           });
         }
       } else {
-        if (mounted) {
-          setState(() {
-            _isLoading = false;
-          });
-        }
+        if (mounted) setState(() => _isLoading = false);
       }
     } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      debugPrint("Gagal fetching list chat: $e");
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -62,7 +93,14 @@ class _MessageState extends State<MessageList> {
               itemBuilder: (context, index) {
                 final room = _chatRooms[index];
 
-                String namaLawanBicara = room['nama_requester'] ?? 'Pelanggan';
+                String namaLawanBicara = "";
+                if (room.idRequester?.toString() == currentUserId) {
+                  // Jika saya requester, maka lawan bicara saya adalah Helper
+                  namaLawanBicara = room.namaHelper ?? 'Helper';
+                } else {
+                  // Jika saya bukan requester (artinya saya helper), lawan bicara saya adalah Requester
+                  namaLawanBicara = room.namaRequester ?? 'Pelanggan';
+                }
 
                 return ListTile(
                   leading: CircleAvatar(
@@ -77,10 +115,10 @@ class _MessageState extends State<MessageList> {
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   subtitle: Text(
-                    room['last_message'] ?? 'Belum ada pesan teks.',
+                    room.lastMessage ?? 'Belum ada pesan teks.',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: room['last_message'] != null
+                      color: room.lastMessage != null
                           ? Colors.black87
                           : Colors.grey,
                     ),
@@ -88,15 +126,23 @@ class _MessageState extends State<MessageList> {
                     overflow: TextOverflow.ellipsis,
                   ),
                   trailing: Text(
-                    room['sent_at'] ?? '--.--',
+                    room.sentAt ?? '--.--',
                     style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                   onTap: () {
-                    // Data satu objek 'room' dari API dioper langsung ke RoomChatPage
+                    Map<String, dynamic> dataMap = {
+                      'id_room': room.idRoom,
+                      'id_task': room.idTask,
+                      'is_active': room.isActive,
+                      'nama_requester': room.namaRequester,
+                      'nama_helper': room.namaHelper,
+                      'nama_lawan': namaLawanBicara,
+                    };
+
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => RoomChatPage(namaData: room),
+                        builder: (context) => RoomChatPage(namaData: dataMap),
                       ),
                     ).then((value) {
                       _fetchChatRooms();
