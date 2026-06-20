@@ -22,4 +22,8 @@ class Message {
       sentAt: json['sent_at'],
     );
   }
+
+  String? operator [](String other) {
+    return null;
+  }
 }

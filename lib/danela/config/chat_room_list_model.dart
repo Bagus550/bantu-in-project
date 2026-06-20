@@ -8,6 +8,7 @@ class ChatRoomListModel {
   final String? namaHelper;
   final String? lastMessage;
   final String? sentAt;
+  final String? statusTask;
 
   ChatRoomListModel({
     required this.idRoom,
@@ -19,6 +20,7 @@ class ChatRoomListModel {
     this.namaHelper,
     this.lastMessage,
     this.sentAt,
+    this.statusTask,
   });
 
   factory ChatRoomListModel.fromJson(Map<String, dynamic> json) {
@@ -32,6 +34,7 @@ class ChatRoomListModel {
       namaHelper: json['nama_helper'],
       lastMessage: json['last_message'],
       sentAt: json['sent_at'],
+      statusTask: json['status']?.toString() ?? json['status_task']?.toString(),
     );
   }
 }

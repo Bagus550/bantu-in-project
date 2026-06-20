@@ -137,6 +137,7 @@ class _MessageState extends State<MessageList> {
                       'nama_requester': room.namaRequester,
                       'nama_helper': room.namaHelper,
                       'nama_lawan': namaLawanBicara,
+                      'status_task': room.statusTask,
                     };
 
                     Navigator.push(
