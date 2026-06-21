@@ -8,8 +8,10 @@ import 'package:bantuin/dava/user_setting.dart';
 import 'package:bantuin/ida/screen/notifikasi_requester.dart';
 import 'package:bantuin/ida/screen/profile.dart';
 import 'package:bantuin/ida/screen/profile_tab.dart';
+import 'package:bantuin/utils/task_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:bantuin/pilihan.dart';
+import 'package:bantuin/utils/currency_extension.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -500,14 +502,15 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                     physics: NeverScrollableScrollPhysics(),
                     itemCount: listTugasAktif.length,
                     itemBuilder: (context, index) {
-                      final bantuan = listTugasAktif[index];
+                      final Map<String, dynamic> bantuan =
+                          Map<String, dynamic>.from(listTugasAktif[index] as Map);
 
-                      String statusTugas = (bantuan['status'] ?? '')
+                      String statusTugas = (bantuan['status_task'] ?? '')
                           .toString()
                           .trim()
                           .toLowerCase();
                       bool isButtonActive =
-                          statusTugas != 'mencari helper' &&
+                          statusTugas != 'mencari_helper' &&
                           statusTugas != 'selesai' &&
                           statusTugas != 'dibatalkan';
 
@@ -589,7 +592,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                                                 ),
                                                 SizedBox(height: 4),
                                                 Text(
-                                                  'ID : ${bantuan['id']}',
+                                                  "ID TUGAS: ${(bantuan as Map).cast<String, dynamic>().toProfessionalId()}",
                                                   style: const TextStyle(
                                                     fontSize: 12,
                                                     color: Colors.grey,
@@ -618,7 +621,8 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                                             color: ambilWarnaStatus(
                                               bantuan['status'],
                                             ),
-                                            fontSize: 10,
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.bold
                                           ),
                                         ),
                                       ),
@@ -632,7 +636,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                                         MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
-                                        bantuan['nominal_pembayaran'],
+                                        bantuan['nominal_pembayaran']?.toString().toRupiah() ?? 'Rp 0',
                                         style: TextStyle(
                                           fontSize: 20,
                                           fontWeight: FontWeight.bold,
