@@ -1,4 +1,10 @@
+<<<<<<< HEAD
 import 'package:bantuin/ida/screen/splashscreen.dart';
+=======
+import 'package:bantuin/alen/admin.dart';
+import 'package:bantuin/ida/login_screen.dart';
+import 'package:bantuin/ida/splashscreen.dart';
+>>>>>>> 13d4b5e5f789f3513f809159ca230d67723d63ef
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'ida/screen/login_screen.dart';
@@ -32,7 +38,7 @@ class BantuInApp extends StatelessWidget {
       initialRoute: '/',
 
       routes: {
-        '/': (context) => const IdaSplashScreen(),
+        '/': (context) => const MyAdmin(),
         '/login': (context) => const LoginScreen(),
       },
     );
