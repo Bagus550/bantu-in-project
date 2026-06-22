@@ -1,5 +1,5 @@
 import 'package:bantuin/bagus/detail_task_user.dart';
-import 'package:bantuin/bagus/history_helper.dart';
+import 'package:bantuin/bagus/history_user.dart';
 import 'package:bantuin/bagus/service/task_service.dart';
 import 'package:bantuin/config/app_config.dart';
 import 'package:bantuin/danela/message_list.dart';
@@ -30,6 +30,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
   late String emailLogin;
 
   List<dynamic> listTugasDariApi = [];
+  List<dynamic> listTugasSelesai = [];
   bool isLoading = true;
 
   @override
@@ -74,17 +75,65 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
     }
   }
 
+  Future<void> _batalkanTugasLangsung(String idTask) async {
+    setState(() => isLoading = true);
+
+    try {
+      final respon = await http.post(
+        Uri.parse("${AppConfig.baseUrl}/api/tasks/update-status"),
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: jsonEncode({'id_task': idTask, 'status_task': 'dibatalkan'}),
+      );
+
+      if (!mounted) return;
+
+      final Map<String, dynamic> dataRespons = jsonDecode(respon.body);
+
+      if (respon.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Tugas berhasil dibatalkan!"),
+
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        fetchTasksByRequester();
+      } else {
+        throw Exception(dataRespons['message'] ?? "Gagal membatalkan tugas");
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "Error: ${e.toString().replaceAll('Exception:', '')}",
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
+    }
+  }
+
   Color ambilWarnaStatus(String status) {
     switch (status) {
-      case 'Mencari helper':
+      case 'mencari helper':
         return const Color.fromARGB(255, 255, 158, 79);
-      case 'Berjalan':
+      case 'merjalan':
         return Color(0xFF283593);
-      case 'Menunggu validasi':
+      case 'menunggu validasi':
         return Colors.teal.shade800;
-      case 'Selesai':
+      case 'selesai':
         return Colors.green.shade800;
-      case 'Dibatalkan':
+      case 'dibatalkan':
         return Color(0xFFCD2528);
       default:
         return Color(0xFF283593);
@@ -93,11 +142,11 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
 
   Color ambilBgStatus(String status) {
     switch (status) {
-      case 'Berjalan':
+      case 'berjalan':
         return Color(0XFFDFDDF5);
-      case 'Selesai':
+      case 'selesai':
         return Color(0XFFDDF5E2);
-      case 'Dibatalkan':
+      case 'dibatalkan':
         return Color(0XFFF5DDDD);
       default:
         return Color(0XFFEEEEEE);
@@ -106,15 +155,15 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
 
   IconData ambilIconStatus(String status) {
     switch (status) {
-      case 'Mencari helper':
+      case 'mencari helper':
         return Icons.search;
-      case 'Berjalan':
+      case 'berjalan':
         return Icons.refresh;
-      case 'Menunggu validasi':
+      case 'menunggu validasi':
         return Icons.warning_amber_rounded;
-      case 'Dibatalkan':
+      case 'dibatalkan':
         return Icons.clear;
-      case 'Selesai':
+      case 'selesai':
         return Icons.check;
       default:
         return Icons.help_outline_rounded;
@@ -260,7 +309,9 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => History()),
+                  MaterialPageRoute(
+                    builder: (context) => HistoryUser(idRequester: idUserLogin),
+                  ),
                 );
               },
             ),
@@ -327,9 +378,11 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
           item['status'] == 'Menunggu validasi';
     }).toList();
 
-    final listTugasSelesai = listTugasDariApi.where((item) {
-      return item['status'] == 'Selesai' || item['Status'] == 'Dibatalkan';
-    }).toList();
+    // final listTugasSelesai = listTugasDariApi.where((item) {
+    //   return item['status'] == 'Selesai' || item['Status'] == 'Dibatalkan';
+    // }).toList();
+
+    // final historyTampilkan = listTugasSelesai.take(5).toList();
 
     return SingleChildScrollView(
       child: Padding(
@@ -432,430 +485,381 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              itemCount: listTugasAktif.length,
-              itemBuilder: (context, index) {
-                final bantuan = listTugasAktif[index];
-
-                String statusTugas = (bantuan['status'] ?? '')
-                    .toString()
-                    .trim()
-                    .toLowerCase();
-                bool isButtonActive =
-                    statusTugas != 'mencari helper' &&
-                    statusTugas != 'selesai' &&
-                    statusTugas != 'dibatalkan';
-
-                return Card(
-                  shape: RoundedRectangleBorder(
-                    side: BorderSide(color: Colors.grey, width: 1),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  margin: EdgeInsets.only(bottom: 16),
-                  clipBehavior: Clip.antiAlias,
-                  child: InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => DetailTugas(taskData: bantuan),
-                        ),
-                      );
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 12,
-                        horizontal: 16,
+            listTugasAktif.isEmpty
+                ? const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Center(
+                      child: Text(
+                        "Buat pesanan anda dan tugaskan helper",
+                        style: TextStyle(color: Colors.grey),
                       ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Row(
+                    ),
+                  )
+                : ListView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: listTugasAktif.length,
+                    itemBuilder: (context, index) {
+                      final bantuan = listTugasAktif[index];
+
+                      String statusTugas = (bantuan['status'] ?? '')
+                          .toString()
+                          .trim()
+                          .toLowerCase();
+                      bool isButtonActive =
+                          statusTugas != 'mencari helper' &&
+                          statusTugas != 'selesai' &&
+                          statusTugas != 'dibatalkan';
+
+                      return Card(
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(color: Colors.grey, width: 1),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        margin: EdgeInsets.only(bottom: 16),
+                        clipBehavior: Clip.antiAlias,
+                        child: InkWell(
+                          onTap: () async {
+                            final hasilBatal = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    DetailTugas(taskData: bantuan),
+                              ),
+                            );
+                            if (hasilBatal == true) {
+                              setState(() {
+                                fetchTasksByRequester();
+                              });
+                            }
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 12,
+                              horizontal: 16,
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Container(
-                                      width: 50,
-                                      height: 50,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(20),
-                                        color: ambilWarnaBantuan(
-                                          bantuan['kategori_layanan'],
-                                        ),
-                                      ),
-                                      child: Icon(
-                                        ambilIconBantuan(
-                                          bantuan['kategori_layanan'],
-                                        ),
-                                        color: ambilWarnaIkonBantuan(
-                                          bantuan['kategori_layanan'],
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(width: 12),
                                     Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        mainAxisSize: MainAxisSize.min,
+                                      child: Row(
                                         children: [
-                                          Text(
-                                            bantuan['judul_tugas'],
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.w800,
-                                              fontSize: 15,
+                                          Container(
+                                            width: 50,
+                                            height: 50,
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                              color: ambilWarnaBantuan(
+                                                bantuan['kategori_layanan'],
+                                              ),
                                             ),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
+                                            child: Icon(
+                                              ambilIconBantuan(
+                                                bantuan['kategori_layanan'],
+                                              ),
+                                              color: ambilWarnaIkonBantuan(
+                                                bantuan['kategori_layanan'],
+                                              ),
+                                            ),
                                           ),
-                                          SizedBox(height: 4),
-                                          Text(
-                                            'ID : ${bantuan['id']}',
-                                            style: const TextStyle(
-                                              fontSize: 12,
-                                              color: Colors.grey,
+                                          SizedBox(width: 12),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Text(
+                                                  bantuan['judul_tugas'],
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.w800,
+                                                    fontSize: 15,
+                                                  ),
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                                SizedBox(height: 4),
+                                                Text(
+                                                  'ID : ${bantuan['id']}',
+                                                  style: const TextStyle(
+                                                    fontSize: 12,
+                                                    color: Colors.grey,
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                           ),
                                         ],
                                       ),
                                     ),
+                                    SizedBox(width: 16),
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(20),
+                                        color: ambilBgStatus(bantuan['status']),
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 2,
+                                          horizontal: 8,
+                                        ),
+                                        child: Text(
+                                          bantuan['status'],
+                                          style: TextStyle(
+                                            color: ambilWarnaStatus(
+                                              bantuan['status'],
+                                            ),
+                                            fontSize: 10,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
                                   ],
                                 ),
-                              ),
-                              SizedBox(width: 16),
-                              Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20),
-                                  color: ambilBgStatus(bantuan['status']),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 2,
-                                    horizontal: 8,
-                                  ),
-                                  child: Text(
-                                    bantuan['status'],
-                                    style: TextStyle(
-                                      color: ambilWarnaStatus(
-                                        bantuan['status'],
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 10),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        bantuan['nominal_pembayaran'],
+                                        style: TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
-                                      fontSize: 10,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(top: 10),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  bantuan['nominal_pembayaran'],
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                IconButton(
-                                  onPressed: isButtonActive
-                                      ? () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  RoomChatPage(
-                                                    namaData: bantuan,
+                                      IconButton(
+                                        onPressed: isButtonActive
+                                            ? () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        RoomChatPage(
+                                                          namaData: bantuan,
+                                                        ),
                                                   ),
-                                            ),
-                                          );
-                                        }
-                                      : null,
-                                  icon: Icon(
-                                    Icons.chat_outlined,
-                                    color: isButtonActive
-                                        ? Theme.of(context).colorScheme.primary
-                                        : Color(0XFF666565),
+                                                );
+                                              }
+                                            : null,
+                                        icon: Icon(
+                                          Icons.chat_outlined,
+                                          color: isButtonActive
+                                              ? Theme.of(
+                                                  context,
+                                                ).colorScheme.primary
+                                              : Color(0XFF666565),
+                                        ),
+                                      ),
+                                    ],
                                   ),
+                                ),
+                                Divider(
+                                  color: Colors.grey.shade300,
+                                  thickness: 2,
+                                ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        CircleAvatar(
+                                          radius: 18,
+                                          backgroundColor: Colors.grey.shade300,
+                                          child: Icon(
+                                            Icons.person,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                        SizedBox(width: 10),
+                                        Text(
+                                          bantuan['nama_helper'] == null ||
+                                                  bantuan['nama_helper']
+                                                      .toString()
+                                                      .trim()
+                                                      .isEmpty
+                                              ? 'Belum ada helper'
+                                              : bantuan['nama_helper']
+                                                    .toString(),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(
+                                      height: 30,
+                                      child: ElevatedButton.icon(
+                                        onPressed: () {
+                                          final idHelper = bantuan['id_helper'];
+                                          final bool belumAdaHelper =
+                                              idHelper == null ||
+                                              idHelper == 0 ||
+                                              idHelper.toString() == '0' ||
+                                              idHelper.toString().isEmpty;
+
+                                          if (belumAdaHelper) {
+                                            showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return AlertDialog(
+                                                  title: const Text(
+                                                    "Konfirmasi Batal",
+                                                  ),
+                                                  content: const Text(
+                                                    "Apakah kamu yakin ingin membatalkan tugas ini?",
+                                                  ),
+                                                  actions: [
+                                                    TextButton(
+                                                      onPressed: () =>
+                                                          Navigator.pop(
+                                                            context,
+                                                          ),
+                                                      child: const Text(
+                                                        "Tidak",
+                                                      ),
+                                                    ),
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        Navigator.pop(context);
+                                                        _batalkanTugasLangsung(
+                                                          bantuan['id_task']
+                                                              .toString(),
+                                                        );
+                                                      },
+                                                      child: const Text(
+                                                        "Ya, Batalkan",
+                                                        style: TextStyle(
+                                                          color: Colors.red,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                );
+                                              },
+                                            );
+                                          } else {
+                                            showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return AlertDialog(
+                                                  title: const Text(
+                                                    "Peringatan Penting!",
+                                                    style: TextStyle(
+                                                      color: Colors.red,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                  content: const Text(
+                                                    "Tugas ini sudah diambil oleh helper dan sedang berjalan. Membatalkan sepihak bisa merugikan helper.",
+                                                  ),
+                                                  actions: [
+                                                    TextButton(
+                                                      onPressed: () =>
+                                                          Navigator.pop(
+                                                            context,
+                                                          ),
+                                                      child: const Text(
+                                                        "Kembali (Amankan Tugas)",
+                                                      ),
+                                                    ),
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        Navigator.pop(
+                                                          context,
+                                                        ); // Tutup dialog lapis 1
+
+                                                        // Buka Dialog Lapis 2: Konfirmasi Nekat & suruh chat
+                                                        showDialog(
+                                                          context: context,
+                                                          builder: (BuildContext context) {
+                                                            return AlertDialog(
+                                                              title: const Text(
+                                                                "Yakin Tetap Batal?",
+                                                              ),
+                                                              content: const Text(
+                                                                "Pastikan kamu sudah berdiskusi dan nego dengan helper melalui fitur CHAT sebelum membatalkan tugas ini secara sepihak!",
+                                                              ),
+                                                              actions: [
+                                                                TextButton(
+                                                                  onPressed: () =>
+                                                                      Navigator.pop(
+                                                                        context,
+                                                                      ),
+                                                                  child: const Text(
+                                                                    "Batal, saya mau chat dulu",
+                                                                  ),
+                                                                ),
+                                                                TextButton(
+                                                                  onPressed: () {
+                                                                    Navigator.pop(
+                                                                      context,
+                                                                    );
+                                                                    _batalkanTugasLangsung(
+                                                                      bantuan['id_task']
+                                                                          .toString(),
+                                                                    );
+                                                                  },
+                                                                  child: const Text(
+                                                                    "Saya Paham, Tetap Batalkan",
+                                                                    style: TextStyle(
+                                                                      color: Colors
+                                                                          .red,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .bold,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            );
+                                                          },
+                                                        );
+                                                      },
+                                                      child: const Text(
+                                                        "Lanjutkan Pembatalan",
+                                                        style: TextStyle(
+                                                          color: Colors.orange,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                );
+                                              },
+                                            );
+                                          }
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: ambilWarnaStatus(
+                                            'dibatalkan',
+                                          ),
+                                          foregroundColor: Colors.white,
+                                        ),
+                                        icon: Icon(Icons.clear),
+                                        label: Text(
+                                          "Batalkan",
+                                          style: TextStyle(fontSize: 10),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
                           ),
-                          Divider(color: Colors.grey.shade300, thickness: 2),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  CircleAvatar(
-                                    radius: 18,
-                                    backgroundColor: Colors.grey.shade300,
-                                    child: Icon(
-                                      Icons.person,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    bantuan['nama_helper'] == null ||
-                                            bantuan['nama_helper']
-                                                .toString()
-                                                .trim()
-                                                .isEmpty
-                                        ? 'Belum ada helper'
-                                        : bantuan['nama_helper'].toString(),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(
-                                height: 30,
-                                child: ElevatedButton.icon(
-                                  onPressed: () {},
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: ambilWarnaStatus(
-                                      'Dibatalkan',
-                                    ),
-                                    foregroundColor: Colors.white,
-                                  ),
-                                  icon: Icon(Icons.clear),
-                                  label: Text(
-                                    "Batalkan",
-                                    style: TextStyle(fontSize: 10),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-            SizedBox(height: 20),
-            Text(
-              "TUGAS SELESAI",
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 10),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              itemCount: listTugasSelesai.length,
-              itemBuilder: (context, index) {
-                final history = listTugasSelesai[index];
-
-                String statusTugas = (history['status'] ?? '')
-                    .toString()
-                    .trim()
-                    .toLowerCase();
-                bool isButtonActive =
-                    statusTugas != 'mencari helper' &&
-                    statusTugas != 'selesai' &&
-                    statusTugas != 'dibatalkan';
-
-                return Card(
-                  shape: RoundedRectangleBorder(
-                    side: BorderSide(color: Colors.grey, width: 1),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  margin: EdgeInsets.only(bottom: 16),
-                  clipBehavior: Clip.antiAlias,
-                  child: InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => DetailTugas(taskData: history),
                         ),
                       );
                     },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 12,
-                        horizontal: 16,
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      width: 50,
-                                      height: 50,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(20),
-                                        color: ambilWarnaBantuan(
-                                          history['kategori_layanan'],
-                                        ),
-                                      ),
-                                      child: Icon(
-                                        ambilIconBantuan(
-                                          history['kategori_layanan'],
-                                        ),
-                                        color: ambilWarnaIkonBantuan(
-                                          history['kategori_layanan'],
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            history['judul_tugas'],
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.w800,
-                                              fontSize: 15,
-                                            ),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                          SizedBox(height: 4),
-                                          Text(
-                                            'ID : ${history['id']}',
-                                            style: const TextStyle(
-                                              fontSize: 12,
-                                              color: Colors.grey,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              SizedBox(width: 16),
-                              Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20),
-                                  color: ambilBgStatus(history['status']),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 2,
-                                    horizontal: 8,
-                                  ),
-                                  child: Text(
-                                    history['status'],
-                                    style: TextStyle(
-                                      color: ambilWarnaStatus(
-                                        history['status'],
-                                      ),
-                                      fontSize: 10,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(top: 10),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  history['nominal_pembayaran'],
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                IconButton(
-                                  onPressed: isButtonActive
-                                      ? () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  RoomChatPage(
-                                                    namaData: history,
-                                                  ),
-                                            ),
-                                          );
-                                        }
-                                      : null,
-                                  icon: Icon(
-                                    Icons.chat_outlined,
-                                    color: isButtonActive
-                                        ? Theme.of(context).colorScheme.primary
-                                        : Color(0XFF666565),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Divider(color: Colors.grey.shade300, thickness: 2),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  CircleAvatar(
-                                    radius: 18,
-                                    backgroundColor: Colors.grey.shade300,
-                                    child: Icon(
-                                      Icons.person,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    history['nama_helper'] != null &&
-                                            history['nama_helper']
-                                                .toString()
-                                                .trim()
-                                                .isEmpty
-                                        ? 'Belum ada helper'
-                                        : history['nama_helper'],
-                                  ),
-                                ],
-                              ),
-                              SizedBox(
-                                height: 30,
-                                child: ElevatedButton.icon(
-                                  onPressed: () {},
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: ambilWarnaStatus(
-                                      'Selesai',
-                                    ),
-                                    foregroundColor: Colors.white,
-                                  ),
-                                  icon: Icon(Icons.refresh),
-                                  label: Text(
-                                    "Pesan Lagi",
-                                    style: TextStyle(fontSize: 10),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
                   ),
-                );
-              },
-            ),
           ],
         ),
       ),

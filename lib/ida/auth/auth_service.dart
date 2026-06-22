@@ -9,7 +9,6 @@ class AuthService {
 
   Future<Map<String, dynamic>?> login(String email, String password) async {
     try {
-
       final response = await http.post(
         Uri.parse('$baseUrl/auth/login'),
         headers: {'Content-Type': 'application/json'},
@@ -18,13 +17,26 @@ class AuthService {
 
       final data = jsonDecode(response.body);
 
-      if (data['status'] == 200 || response.statusCode == 200 || response.statusCode == 201) {
-
+      if (data['status'] == 200 ||
+          response.statusCode == 200 ||
+          response.statusCode == 201) {
         if (data['token'] != null) {
-          try{
+          try {
             await _storage.write(key: 'jwt_token', value: data['token']);
-          } catch (_){
-          }
+            await _storage.write(
+              key: 'user_nama',
+              value: data['user']['nama'].toString(),
+            );
+            await _storage.write(
+              key: 'user_id',
+              value: (data['user']['id_user'] ?? data['user']['id'] ?? '')
+                  .toString(),
+            );
+            await _storage.write(
+              key: 'user_role',
+              value: data['user']['role'].toString(),
+            );
+          } catch (_) {}
         }
 
         return {
@@ -38,6 +50,18 @@ class AuthService {
     } catch (e) {
       return {'success': false, 'role': null};
     }
+  }
+
+  Future<String?> getUserId() async {
+    return await _storage.read(key: 'user_id');
+  }
+
+  Future<String?> getUserNama() async {
+    return await _storage.read(key: 'user_nama');
+  }
+
+  Future<String?> getUserRole() async {
+    return await _storage.read(key: 'user_role');
   }
 
   Future<Map<String, dynamic>?> register(
@@ -93,5 +117,7 @@ class AuthService {
 
   Future<void> logout() async {
     await _storage.delete(key: 'jwt_token');
+    await _storage.delete(key: 'user_nama');
+    await _storage.delete(key: 'user_role');
   }
 }
