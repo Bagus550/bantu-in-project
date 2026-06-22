@@ -1,3 +1,4 @@
+import 'package:bantuin/alen/paypage.dart';
 import 'package:bantuin/alen/registhelper.dart';
 import 'package:bantuin/data_tugas.dart';
 import 'package:bantuin/ida/screen/login_screen.dart';
@@ -284,6 +285,11 @@ class _MyAdminState extends State<MyAdmin> {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => const RegistPage()),
+            );
+          } else if (index == 2) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const PayPage()),
             );
           }
         },

@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'package:bantuin/bagus/upload_bukti.dart';
 import 'package:bantuin/danela/roomchat.dart';
 import 'package:bantuin/config/app_config.dart';
+import 'package:bantuin/utils/currency_extension.dart';
 import 'package:flutter/material.dart';
+import 'package:bantuin/utils/task_extension.dart';
 import 'package:http/http.dart' as http;
 
 class TugasAktifHelper extends StatefulWidget {
@@ -51,6 +53,7 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
         setState(() {
           _currentStatusTask = statusBaru;
         });
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -60,6 +63,7 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
           ),
         );
       } else {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -108,10 +112,11 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
 
     final String namaRequester =
         widget.detailTugas['nama_requester'] ?? 'Tanpa Nama';
-    final String harga = "Rp ${widget.detailTugas['nominal_pembayaran'] ?? 0}";
+    final String harga = widget.detailTugas['nominal_pembayaran'] ?? 0;
     final String lokasi = widget.detailTugas['lokasi_tugas'] ?? 'Tanpa Lokasi';
     final String judulTugas =
         widget.detailTugas['judul_tugas'] ?? 'Detail Tugas';
+    final String idTugas = widget.detailTugas.toProfessionalId();
 
     bool isBerjalan = _currentStatusTask == 'berjalan';
     bool isMenungguValidasi = _currentStatusTask == 'menunggu_validasi';
@@ -123,87 +128,167 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: const Color(0xFFDEDCFF),
-                  border: Border.all(color: const Color(0xFF4D49E9), width: 1),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: 45,
-                        height: 45,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF4D49E9),
-                          shape: BoxShape.circle,
-                        ),
-                        alignment: Alignment.center,
-                        child: Container(
-                          width: 25,
-                          height: 25,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFDEDCFF),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            isBerjalan
-                                ? Icons.refresh
-                                : (_currentStatusTask == 'selesai_kerja'
-                                      ? Icons.payments_outlined
-                                      : Icons.admin_panel_settings_outlined),
+              IntrinsicHeight(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          color: const Color(0xFFDEDCFF),
+                          border: Border.all(
                             color: const Color(0xFF4D49E9),
-                            size: 20,
+                            width: 1,
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: 45,
+                                height: 45,
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFF4D49E9),
+                                  shape: BoxShape.circle,
+                                ),
+                                alignment: Alignment.center,
+                                child: Container(
+                                  width: 25,
+                                  height: 25,
+                                  decoration: const BoxDecoration(
+                                    color: Color(0xFFDEDCFF),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    isBerjalan
+                                        ? Icons.refresh
+                                        : (_currentStatusTask == 'selesai_kerja'
+                                              ? Icons.payments_outlined
+                                              : Icons
+                                                    .admin_panel_settings_outlined),
+                                    color: const Color(0xFF4D49E9),
+                                    size: 20,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 15),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      isBerjalan
+                                          ? "Tugas Berlangsung"
+                                          : (_currentStatusTask ==
+                                                    'selesai_kerja'
+                                                ? "Pekerjaan Selesai (Konfirmasi Upah)"
+                                                : "Menunggu Validasi Admin"),
+                                      style: const TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF4D49E9),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      isBerjalan
+                                          ? "Kerjakan tugas sesuai jenis layanan dan konfirmasi selesai jika pekerjaan sudah selesai."
+                                          : (_currentStatusTask ==
+                                                    'selesai_kerja'
+                                                ? "Kamu telah menyelesaikan pekerjaan! Pastikan upah dari requester sudah kamu terima dengan aman, lalu klik tombol di bawah untuk kirim bukti ke admin."
+                                                : "Bukti pembayaran/transfer sudah dikirim ke server. Harap tunggu admin memvalidasi transaksi Anda untuk menutup tugas."),
+                                      style: TextStyle(
+                                        color: Colors.grey.shade800,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                      const SizedBox(width: 15),
-                      Expanded(
+                    ),
+                    const SizedBox(width: 12),
+
+                    Container(
+                      width: 85,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF4D49E9),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              isBerjalan
-                                  ? "Tugas Berlangsung"
-                                  : (_currentStatusTask == 'selesai_kerja'
-                                        ? "Pekerjaan Selesai (Konfirmasi Upah)"
-                                        : "Menunggu Validasi Admin"),
-                              style: const TextStyle(
-                                fontSize: 15,
+                              "ID TUGAS",
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 10,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF4D49E9),
+                                letterSpacing: 0.5,
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              isBerjalan
-                                  ? "Kerjakan tugas sesuai jenis layanan dan konfirmasi selesai jika pekerjaan sudah selesai."
-                                  : (_currentStatusTask == 'selesai_kerja'
-                                        ? "Kamu telah menyelesaikan pekerjaan! Pastikan upah dari requester sudah kamu terima dengan aman, lalu klik tombol di bawah untuk kirim bukti ke admin."
-                                        : "Bukti pembayaran/transfer sudah dikirim ke server. Harap tunggu admin memvalidasi transaksi Anda untuk menutup tugas."),
-                              style: TextStyle(
-                                color: Colors.grey.shade800,
-                                fontSize: 13,
+                            SizedBox(height: 4),
+                            Expanded(
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    idTugas,
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 25,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 20),
-
-              Text(
-                judulTugas,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+              const SizedBox(height: 15),
+              Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "JUDUL TUGAS",
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        judulTugas,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: 15),
@@ -297,7 +382,7 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         child: Text(
-                          harga,
+                          harga.toString().toRupiah(),
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 22,

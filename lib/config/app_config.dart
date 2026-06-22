@@ -9,6 +9,7 @@ class AppConfig {
   static const String updateStatus  = "$baseUrl/api/tasks/update-status";
 
   static const String login         = "$baseUrl/api/auth/login";
+  static const String register      = "$baseUrl/api/auth/register";
   static const String forgotPassword = "$baseUrl/api/forgot-password";
   static const String resetPassword = "$baseUrl/api/reset-password";
 
