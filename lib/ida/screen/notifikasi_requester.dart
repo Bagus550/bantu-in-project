@@ -1,21 +1,63 @@
-import 'package:bantuin/data_tugas.dart';
+import 'dart:convert';
+import 'package:bantuin/config/app_config.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class NotifikasiRequester extends StatefulWidget {
-  const NotifikasiRequester({super.key});
+  final int idUser;
+
+  const NotifikasiRequester({super.key, required this.idUser});
 
   @override
   State<NotifikasiRequester> createState() => _NotifikasiRequesterState();
 }
 
 class _NotifikasiRequesterState extends State<NotifikasiRequester> {
+  final String apiUrl = AppConfig.notif;
+  List<dynamic> listNotifikasi = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    ambilDataNotifikasi();
+  }
+
+  Future<void> ambilDataNotifikasi() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final response = await http.get(Uri.parse('$apiUrl/${widget.idUser}'));
+
+      if (response.statusCode == 200) {
+        setState(() {
+          listNotifikasi = json.decode(response.body);
+          isLoading = false;
+        });
+      } else {
+        throw Exception("Gagal mengambil data");
+      }
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Koneksi bermasalah: $e")));
+    }
+  }
+
   IconData ambilIconNotif(String type) {
     switch (type) {
-      case "completed":
+      case "selesai":
         return Icons.done;
-      case "helper_found":
+      case "berjalan":
+      case "menunggu_validasi":
+      case "mencari_helper":
         return Icons.info;
-      case "cancelled":
+      case "dibatalkan":
         return Icons.clear;
       default:
         return Icons.help_outline;
@@ -24,11 +66,15 @@ class _NotifikasiRequesterState extends State<NotifikasiRequester> {
 
   Color ambilWarnaNotif(String type) {
     switch (type) {
-      case "completed":
+      case "selesai":
         return Colors.green;
-      case "helper_found":
+      case "berjalan":
         return Colors.blue;
-      case "cancelled":
+      case "menunggu_validasi":
+        return Colors.orange;
+      case "mencari_helper":
+        return Colors.teal;
+      case "dibatalkan":
         return Colors.pink;
       default:
         return Colors.grey;
@@ -46,12 +92,16 @@ class _NotifikasiRequesterState extends State<NotifikasiRequester> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
+                const Text(
                   "Notifikasi",
                   style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                 ),
                 GestureDetector(
-                  onTap: () {},
+                  onTap: () {
+                    setState(() {
+                      listNotifikasi.clear();
+                    });
+                  },
                   child: Text(
                     "Clear Notification",
                     style: TextStyle(
@@ -62,65 +112,75 @@ class _NotifikasiRequesterState extends State<NotifikasiRequester> {
                 ),
               ],
             ),
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
             Expanded(
-              child: ListView.builder(
-                itemCount: notifikasiRequester.length,
-                itemBuilder: (context, index) {
-                  final notif = notifikasiRequester[index];
+              child: isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : listNotifikasi.isEmpty
+                  ? const Center(child: Text("Tidak ada notifikasi baru"))
+                  : RefreshIndicator(
+                      onRefresh: ambilDataNotifikasi,
+                      child: ListView.builder(
+                        itemCount: listNotifikasi.length,
+                        itemBuilder: (context, index) {
+                          final notif = listNotifikasi[index];
 
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 20),
-                    child: Container(
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: ambilWarnaNotif(notif['type']),
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              width: 40,
-                              height: 40,
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 20),
+                            child: Container(
+                              width: double.infinity,
                               decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(50),
-                                color: ambilWarnaNotif(notif['type']),
+                                border: Border.all(
+                                  color: ambilWarnaNotif(notif['type'] ?? ''),
+                                ),
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                              child: Icon(
-                                ambilIconNotif(notif['type']),
-                                color: Colors.white,
-                              ),
-                            ),
-                            Expanded(
                               child: Padding(
-                                padding: const EdgeInsets.only(left: 10),
-                                child: Column(
+                                padding: const EdgeInsets.all(10),
+                                child: Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      notif['title'],
-                                      style: TextStyle(
-                                        fontSize: 17,
-                                        fontWeight: FontWeight.bold,
+                                    Container(
+                                      width: 40,
+                                      height: 40,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(50),
+                                        color: ambilWarnaNotif(
+                                          notif['type'] ?? '',
+                                        ),
+                                      ),
+                                      child: Icon(
+                                        ambilIconNotif(notif['type'] ?? ''),
+                                        color: Colors.white,
                                       ),
                                     ),
-                                    Text(notif['description']),
+                                    const SizedBox(
+                                      width: 10,
+                                    ), // Memberi jarak agar tidak menempel
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            notif['title'] ?? '',
+                                            style: const TextStyle(
+                                              fontSize: 17,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          Text(notif['description'] ?? ''),
+                                        ],
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
                             ),
-                          ],
-                        ),
+                          );
+                        },
                       ),
                     ),
-                  );
-                },
-              ),
             ),
           ],
         ),
