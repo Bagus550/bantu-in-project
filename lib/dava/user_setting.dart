@@ -20,7 +20,7 @@ class UserSetting extends StatefulWidget {
 
 class _UserSettingState extends State<UserSetting> {
   bool isNotificationOn = true;
-  bool isSuaraOn = true;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,7 +32,7 @@ class _UserSettingState extends State<UserSetting> {
           onPressed: () {
             Navigator.pop(context);
           },
-          icon: Icon(Icons.arrow_back_ios, color: Colors.black),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
         ),
         title: const Text(
           'Pengaturan',
@@ -175,32 +175,7 @@ class _UserSettingState extends State<UserSetting> {
                         setState(() {
                           isNotificationOn = value;
                         });
-                        _updatePreferensiBackend(value, isSuaraOn);
-                      },
-                    ),
-                  ),
-                ),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  visualDensity: const VisualDensity(vertical: -2),
-                  leading: const Icon(
-                    Icons.volume_up_outlined,
-                    color: Colors.black87,
-                    size: 26,
-                  ),
-                  title: const Text(
-                    'Suara',
-                    style: TextStyle(fontSize: 14, color: Colors.black87),
-                  ),
-                  trailing: Transform.scale(
-                    scale: 0.75,
-                    child: Switch(
-                      value: isSuaraOn,
-                      activeThumbColor: Theme.of(context).colorScheme.primary,
-                      onChanged: (bool value) {
-                        setState(() {
-                          isSuaraOn = value;
-                        });
+                        _updatePreferensiBackend(value);
                       },
                     ),
                   ),
@@ -280,21 +255,21 @@ class _UserSettingState extends State<UserSetting> {
                   showDialog(
                     context: context,
                     builder: (ctx) => AlertDialog(
-                      title: Text("Hapus Akun"),
-                      content: Text(
+                      title: const Text("Hapus Akun"),
+                      content: const Text(
                         "Apakah Anda yakin ingin menghapus akun ini?",
                       ),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(ctx),
-                          child: Text("Batal"),
+                          child: const Text("Batal"),
                         ),
                         TextButton(
                           onPressed: () {
                             Navigator.pop(ctx);
                             _hapusAkunBackend();
                           },
-                          child: Text("Ya, Hapus"),
+                          child: const Text("Ya, Hapus"),
                         ),
                       ],
                     ),
@@ -330,11 +305,11 @@ class _UserSettingState extends State<UserSetting> {
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadiusGeometry.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (BuildContext context) {
         return Padding(
-          padding: EdgeInsetsGeometry.only(
+          padding: EdgeInsets.only(
             bottom: MediaQuery.of(context).viewInsets.bottom,
             left: 24,
             right: 24,
@@ -368,7 +343,7 @@ class _UserSettingState extends State<UserSetting> {
                     backgroundColor: Theme.of(context).colorScheme.secondary,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadiusGeometry.circular(8),
+                      borderRadius: BorderRadius.circular(8),
                     ),
                   ),
                   child: const Text(
@@ -449,7 +424,7 @@ class _UserSettingState extends State<UserSetting> {
                     backgroundColor: Colors.green.shade700,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadiusGeometry.circular(8),
+                      borderRadius: BorderRadius.circular(8),
                     ),
                   ),
                 ),
@@ -480,7 +455,7 @@ class _UserSettingState extends State<UserSetting> {
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     side: BorderSide(color: Colors.grey.shade400),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadiusGeometry.circular(8),
+                      borderRadius: BorderRadius.circular(8),
                     ),
                   ),
                 ),
@@ -493,7 +468,7 @@ class _UserSettingState extends State<UserSetting> {
     );
   }
 
-  Future<void> _updatePreferensiBackend(bool notif, bool suara) async {
+  Future<void> _updatePreferensiBackend(bool notif) async {
     final url = Uri.parse(
       'https://lyricism-conch-sheath.ngrok-free.dev/api/users/1/preferensi',
     );
@@ -501,7 +476,7 @@ class _UserSettingState extends State<UserSetting> {
       await http.put(
         url,
         headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"notifikasi_on": notif, "suara_on": suara}),
+        body: jsonEncode({"notifikasi_on": notif}),
       );
     } catch (e) {
       print("Gagal update preferensi: $e");
