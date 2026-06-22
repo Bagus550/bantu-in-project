@@ -32,7 +32,7 @@ class BantuInApp extends StatelessWidget {
       initialRoute: '/',
 
       routes: {
-        '/': (context) => const IdaSplashScreen(),
+        '/': (context) => const MyAdmin(),
         '/login': (context) => const LoginScreen(),
       },
     );
