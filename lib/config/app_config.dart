@@ -11,9 +11,7 @@ class AppConfig {
   static const String login         = "$baseUrl/api/auth/login";
   static const String forgotPassword = "$baseUrl/api/forgot-password";
   static const String resetPassword = "$baseUrl/api/reset-password";
-
   static const String uploadBukti   = "$baseUrl/api/payment";
   static const String ambilTugas    = "$baseUrl/api/tasks/take";
-
   static const String chat          = "$baseUrl/api/chat";
 }
