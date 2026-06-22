@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:bantuin/utils/currency_extension.dart';
 import 'package:flutter/material.dart';
 import '../../config/app_config.dart';
 import 'package:http/http.dart' as http;
@@ -30,18 +31,16 @@ class _HistoryState extends State<History> {
     });
 
     try {
-      final url = "${AppConfig.taskHistory}?id_helper=${widget.idHelper}";
+      final url = "${AppConfig.historyHelper}?id_helper=${widget.idHelper}";
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
-        
 
         final List<dynamic> semuaTugasSelesai = responseData['data'] ?? [];
 
         setState(() {
           listHistoryAPI = semuaTugasSelesai;
-
 
           isLoading = false;
         });
@@ -130,6 +129,7 @@ class _HistoryState extends State<History> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("History"),
@@ -182,7 +182,6 @@ class _HistoryState extends State<History> {
       itemCount: listHistoryAPI.length,
       itemBuilder: (context, index) {
         final histori = listHistoryAPI[index];
-        // Menggunakan 'status_task' secara konsisten sesuai filter API
         final String statusTask = histori['status_task'] ?? 'Dibatalkan';
 
         return RefreshIndicator(
@@ -217,7 +216,7 @@ class _HistoryState extends State<History> {
                           ),
                         ),
                         const SizedBox(width: 12),
-          
+
                         // Detail Tugas (Judul & Tanggal)
                         Expanded(
                           child: Column(
@@ -244,10 +243,10 @@ class _HistoryState extends State<History> {
                           ),
                         ),
                         const SizedBox(width: 8),
-          
+
                         // Nominal Pembayaran
                         Text(
-                          "Rp ${histori['nominal_pembayaran'] ?? '0'}",
+                          (histori['nominal_pembayaran']?.toString()).toRupiah(),
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.bold,
@@ -256,19 +255,19 @@ class _HistoryState extends State<History> {
                         ),
                       ],
                     ),
-          
+
                     const SizedBox(height: 8),
                     Divider(color: Colors.grey.shade200, thickness: 1),
                     const SizedBox(height: 4),
-          
+
                     // Footer (Nama Helper & Status)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          histori['nama_helper'] ?? 'Belum ada helper',
+                          histori['nama_requester'] ?? 'Requester tidak diketahui',
                           style: TextStyle(
-                            color: histori['nama_helper'] == null
+                            color: histori['nama_requester'] == null
                                 ? Colors.grey
                                 : Colors.black87,
                             fontSize: 13,
