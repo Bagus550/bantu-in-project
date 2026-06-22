@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:bantuin/config/app_config.dart';
 import 'package:bantuin/danela/roomchat.dart';
+import 'package:bantuin/utils/currency_extension.dart';
+import 'package:bantuin/utils/task_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -240,12 +242,42 @@ class _DetailTugasState extends State<DetailTugas> {
                           ),
                         ),
                       ),
-                      Text(
-                        data['judul_tugas'],
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              data['judul_tugas'],
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(
+                                0xFF4D49E9,
+                              ),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              "ID: ${data.toProfessionalId()}",
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 20),
@@ -265,7 +297,10 @@ class _DetailTugasState extends State<DetailTugas> {
                               children: [
                                 Text("Nominal Pembayaran"),
                                 Text(
-                                  data['nominal_pembayaran'] ?? '0',
+                                  data['nominal_pembayaran']
+                                          ?.toString()
+                                          .toRupiah() ??
+                                      'Rp 0',
                                   style: TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w600,
@@ -390,11 +425,25 @@ class _DetailTugasState extends State<DetailTugas> {
                         child: ElevatedButton.icon(
                           onPressed: isButtonActive
                               ? () {
+                                  Map<String, dynamic> kirimDataChat = {
+                                    // Jika dari detail tugas belum ada id_room, kita pakai id_task sebagai fallback sementara
+                                    'id_room':
+                                        data['id_room'] ?? data['id_task'],
+                                    'id_task': data['id_task'],
+                                    'is_active': data['status'] == 'Berjalan'
+                                        ? 1
+                                        : 0,
+                                    'nama_requester':
+                                        data['nama_requester'] ?? 'Pelanggan',
+                                    'nama_helper':
+                                        data['nama_helper'] ?? 'Helper',
+                                  };
+
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) =>
-                                          RoomChatPage(namaData: data),
+                                          RoomChatPage(namaData: kirimDataChat),
                                     ),
                                   );
                                 }
