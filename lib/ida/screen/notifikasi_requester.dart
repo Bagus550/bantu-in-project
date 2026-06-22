@@ -13,7 +13,7 @@ class NotifikasiRequester extends StatefulWidget {
 }
 
 class _NotifikasiRequesterState extends State<NotifikasiRequester> {
-  final String apiUrl = AppConfig.Notif;
+  final String apiUrl = AppConfig.notif;
   List<dynamic> listNotifikasi = [];
   bool isLoading = true;
 
