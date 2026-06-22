@@ -79,6 +79,7 @@ class _RegisterState extends State<Register> {
         );
       }
     } else {
+      debugPrint("Respon Gagal dari API: $hasil");
       _tampilkanSnackbar("Registrasi Gagal! Periksa kembali data Anda.");
     }
   }
