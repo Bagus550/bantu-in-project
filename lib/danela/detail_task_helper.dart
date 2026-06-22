@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:bantuin/config/app_config.dart';
-import 'package:bantuin/danela/roomchat.dart';
+import 'package:bantuin/utils/currency_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -177,19 +177,24 @@ class _DetailTugasState extends State<DetailTugasHelper> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: Text(
-                        judul,
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      child: Row(
+                        children: [
+                          Text(
+                            judul,
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          
+                        ],
                       ),
                     ),
                     SizedBox(width: 10),
                     Text(
-                      harga,
+                      harga.toString().toRupiah(),
                       style: TextStyle(
-                        fontSize: 15,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: Colors.blueAccent,
                       ),
@@ -280,22 +285,7 @@ class _DetailTugasState extends State<DetailTugasHelper> {
                         ),
                       ),
 
-                      IconButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  RoomChatPage(namaData: widget.taskData),
-                            ),
-                          );
-                        },
-                        icon: Icon(
-                          Icons.chat_bubble_outline,
-                          color: Colors.black,
-                          size: 20,
-                        ),
-                      ),
+                      Icon(Icons.verified, color: Colors.green,)
                     ],
                   ),
                 ),
