@@ -5,6 +5,7 @@ import 'package:bantuin/ida/screen/register.dart';
 import 'package:flutter/material.dart';
 import 'package:bantuin/bagus/dashboard_helper_screen.dart';
 import 'package:bantuin/bagus/dashboard_user_screen.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -16,6 +17,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final AuthService _authService = AuthService();
+  final _secureStorage = const FlutterSecureStorage();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
@@ -53,6 +55,23 @@ class _LoginScreenState extends State<LoginScreen> {
       if (result != null && result['success'] == true) {
         final String? role = result['role'];
         final Map<String, dynamic> userData = result['user'] ?? {};
+        final String? token = result['token'] ?? userData['token'];
+        final String? userId = userData['id']?.toString();
+        final String? namaUser =
+            userData['username'] ?? userData['nama'] ?? 'User';
+        final String? emailUser = userData['email'] ?? '';
+
+        if (token != null) {
+          await _secureStorage.write(key: 'auth_token', value: token);
+        }
+        if (userId != null) {
+          await _secureStorage.write(key: 'id_users', value: userId);
+        }
+        await _secureStorage.write(key: 'nama_user', value: namaUser);
+        await _secureStorage.write(key: 'email_user', value: emailUser);
+        print(
+          "DEBUG LOGIN: Token dan ID_Users berhasil disimpan di Secure Storage!",
+        );
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -79,7 +98,6 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _navigateBasedOnRole(String? role, Map<String, dynamic> userData) {
-    
     final String? token = userData['token'] ?? '';
 
     switch (role) {
@@ -87,10 +105,8 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => DashboardHelperScreen(
-              userData: userData,
-              token: token,
-            ),
+            builder: (context) =>
+                DashboardHelperScreen(userData: userData, token: token),
           ),
         );
         break;
