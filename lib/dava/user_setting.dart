@@ -1,6 +1,4 @@
-import 'package:bantuin/ida/auth/auth_service.dart';
 import 'package:bantuin/ida/screen/login_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bantuin/ida/screen/ubah_katasandi.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,6 +10,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class UserSetting extends StatefulWidget {
   const UserSetting({super.key});
@@ -22,6 +21,30 @@ class UserSetting extends StatefulWidget {
 
 class _UserSettingState extends State<UserSetting> {
   bool isNotificationOn = true;
+  int currentUserId = 1;
+
+  // Inisialisasi Secure Storage
+  final _secureStorage = const FlutterSecureStorage();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    String? idString = await _secureStorage.read(key: 'id_users');
+    String? notifString = await _secureStorage.read(key: 'notifikasi_on');
+
+    setState(() {
+      if (idString != null) {
+        currentUserId = int.tryParse(idString) ?? 1;
+      }
+      if (notifString != null) {
+        isNotificationOn = notifString == 'true';
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -173,10 +196,18 @@ class _UserSettingState extends State<UserSetting> {
                     child: Switch(
                       value: isNotificationOn,
                       activeThumbColor: Theme.of(context).colorScheme.primary,
-                      onChanged: (bool value) {
+                      onChanged: (bool value) async {
                         setState(() {
                           isNotificationOn = value;
                         });
+
+                        // Menyimpan pilihan status ke device local
+                        await _secureStorage.write(
+                          key: 'notifikasi_on',
+                          value: value.toString(),
+                        );
+
+                        // Update ke database (ngrok) mengikuti akun yang aktif
                         _updatePreferensiBackend(value);
                       },
                     ),
@@ -226,51 +257,11 @@ class _UserSettingState extends State<UserSetting> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () async {
-                  bool konfirmasi =
-                      await showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: const Text('Keluar Akun'),
-                          content: const Text(
-                            'Apakah kamu yakin ingin keluar dari aplikasi?',
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(context, false),
-                              child: const Text('Batal'),
-                            ),
-                            TextButton(
-                              onPressed: () => Navigator.pop(context, true),
-                              child: const Text(
-                                'Ya, Keluar',
-                                style: TextStyle(color: Colors.red),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ) ??
-                      false;
-
-                  if (konfirmasi) {
-                    try {
-                      final authService = AuthService();
-                      await authService.logout();
-
-                      if (context.mounted) {
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const LoginScreen(),
-                          ),
-                          (route) =>
-                              false,
-                        );
-                      }
-                    } catch (e) {
-                      print("Error saat logout: $e");
-                    }
-                  }
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => LoginScreen()),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFB71C1C),
@@ -512,7 +503,7 @@ class _UserSettingState extends State<UserSetting> {
 
   Future<void> _updatePreferensiBackend(bool notif) async {
     final url = Uri.parse(
-      'https://lyricism-conch-sheath.ngrok-free.dev/api/users/1/preferensi',
+      'https://https://prowess-gumminess-comfy.ngrok-free.dev/api/users/$currentUserId/preferensi',
     );
     try {
       await http.put(
@@ -527,15 +518,19 @@ class _UserSettingState extends State<UserSetting> {
 
   Future<void> _hapusAkunBackend() async {
     final url = Uri.parse(
-      'https://lyricism-conch-sheath.ngrok-free.dev/api/users/1/hapus',
+      'https://https://prowess-gumminess-comfy.ngrok-free.dev/api/users/$currentUserId/hapus',
     );
     try {
       final response = await http.delete(url);
       if (response.statusCode == 200) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => LoginScreen()),
-        );
+        await _secureStorage.deleteAll();
+
+        if (context.mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => LoginScreen()),
+          );
+        }
       }
     } catch (e) {
       print("Gagal hapus akun: $e");
