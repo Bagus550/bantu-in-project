@@ -225,7 +225,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
       case 0:
         return _buildDashboardHome();
       case 1:
-        return NotifikasiRequester();
+        return NotifikasiRequester(idUser: int.parse(idUserLogin),);
       case 2:
         return MessageList();
       case 3:

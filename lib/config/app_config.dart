@@ -17,4 +17,6 @@ class AppConfig {
   static const String ambilTugas    = "$baseUrl/api/tasks/take";
 
   static const String chat          = "$baseUrl/api/chat";
+
+  static const String Notif  = "$baseUrl/api/notifikasi";
 }
