@@ -1,8 +1,8 @@
 import 'package:bantuin/alen/admin.dart';
-import 'package:bantuin/ida/lupa_katasandi.dart';
-import 'package:bantuin/ida/register.dart';
+import 'package:bantuin/ida/auth/auth_service.dart';
+import 'package:bantuin/ida/screen/lupa_katasandi.dart';
+import 'package:bantuin/ida/screen/register.dart';
 import 'package:flutter/material.dart';
-import 'package:bantuin/data_akun.dart';
 import 'package:bantuin/bagus/dashboard_helper_screen.dart';
 import 'package:bantuin/bagus/dashboard_user_screen.dart';
 
@@ -15,10 +15,12 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
+  final AuthService _authService = AuthService();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
   bool _isPasswordVisible = false;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -27,52 +29,77 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _handleLogin() {
+  void _handleLogin() async {
     if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+
       final inputEmail = _emailController.text.trim();
       final inputPassword = _passwordController.text;
 
-      try {
-        final matchingAccount = akun.firstWhere(
-          (user) =>
-              user['email'] == inputEmail && user['password'] == inputPassword,
-        );
+      Map<String, dynamic>? result = await _authService.login(
+        inputEmail,
+        inputPassword,
+      );
 
-        final String? role = matchingAccount['role'];
+      setState(() {
+        _isLoading = false;
+      });
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Login Berhasil sebagai $role!'),
-            backgroundColor: Theme.of(context).colorScheme.secondary,
-          ),
-        );
+      print("--- DEBUG DI LOGIN SCREEN ---");
+      print("Hasil result dari AuthService: $result");
 
-        _navigateBasedOnRole(role);
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Email atau Kata Sandi Salah'),
-            backgroundColor: Colors.red,
-          ),
-        );
+      if (result != null && result['success'] == true) {
+        final String? role = result['role'];
+        final Map<String, dynamic> userData = result['user'] ?? {};
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Login Berhasil sebagai $role!'),
+              backgroundColor: Theme.of(context).colorScheme.secondary,
+            ),
+          );
+          _navigateBasedOnRole(role, userData);
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Email atau Kata Sandi Salah / Gagal Terhubung Server',
+              ),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     }
   }
 
-  void _navigateBasedOnRole(String? role) {
+  void _navigateBasedOnRole(String? role, Map<String, dynamic> userData) {
+    
+    final String? token = userData['token'] ?? '';
+
     switch (role) {
-      case 'helper1':
-      case 'helper2':
+      case 'helper':
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => DashboardHelperScreen()),
+          MaterialPageRoute(
+            builder: (context) => DashboardHelperScreen(
+              userData: userData,
+              token: token,
+            ),
+          ),
         );
         break;
-      case 'requester1':
-      case 'requester2':
+      case 'requester':
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => DashboardUserScreen()),
+          MaterialPageRoute(
+            builder: (context) => DashboardUserScreen(userData: userData),
+          ),
         );
         break;
       case 'admin':
@@ -192,7 +219,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       TextButton(
                         onPressed: () {
-                          Navigator.pushReplacement(
+                          Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) => LupaKatasandi(),
@@ -211,25 +238,27 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(height: 20),
                   Column(
                     children: [
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(
-                            context,
-                          ).colorScheme.primary,
-                          foregroundColor: Colors.white,
-                          minimumSize: Size(double.infinity, 50),
-                        ),
-                        onPressed: () {
-                          _handleLogin();
-                        },
-                        child: Text(
-                          "Login",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
-                        ),
-                      ),
+                      _isLoading
+                          ? CircularProgressIndicator()
+                          : ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.primary,
+                                foregroundColor: Colors.white,
+                                minimumSize: Size(double.infinity, 50),
+                              ),
+                              onPressed: () {
+                                _handleLogin();
+                              },
+                              child: Text(
+                                "Login",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                ),
+                              ),
+                            ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [

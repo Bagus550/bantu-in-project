@@ -1,23 +1,24 @@
-import 'dart:convert';
+// ignore_for_file: empty_catches, use_build_context_synchronously
 
-import 'package:bantuin/bagus/detail_task_user.dart';
+import 'dart:convert';
 import 'package:bantuin/bagus/history_helper.dart';
 import 'package:bantuin/bagus/tugas_aktif_helper.dart';
-import 'package:bantuin/bagus/tugas_aktif_screen.dart';
 import 'package:bantuin/bagus/upload_bukti.dart';
 import 'package:bantuin/danela/detail_task_helper.dart';
-// import 'package:bantuin/data_tugas.dart';
-import 'package:bantuin/dava/helper_setting.dart';
 import 'package:bantuin/danela/message_list.dart';
-import 'package:bantuin/ida/profile.dart';
-import 'package:bantuin/ida/profile_tab.dart';
+import 'package:bantuin/ida/screen/profile.dart';
+import 'package:bantuin/ida/screen/profile_tab.dart';
+import 'package:bantuin/dava/helper_setting.dart';
 import 'package:bantuin/yuliana/Faq_Helper.dart';
 import 'package:flutter/material.dart';
 import 'package:bantuin/config/app_config.dart';
 import 'package:http/http.dart' as http;
 
 class DashboardHelperScreen extends StatefulWidget {
-  const DashboardHelperScreen({super.key});
+  final Map<String, dynamic>? userData;
+  final String? token;
+
+  const DashboardHelperScreen({super.key, this.userData, this.token});
 
   @override
   State<DashboardHelperScreen> createState() => _DashboardHelperScreenState();
@@ -31,6 +32,8 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
 
   Future<List<dynamic>>? _futureTasks;
 
+  Map<String, dynamic> _tugasAktifSaya = {};
+
   @override
   void initState() {
     super.initState();
@@ -38,18 +41,31 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
   }
 
   Future<List<dynamic>> fetchTasksForHelper() async {
-    try {
-      final response = await http.get(Uri.parse(apiUrl));
+    final String idHelperLogin = widget.userData?['id']?.toString() ?? '2';
+    final String urlWithParam =
+        "${AppConfig.taskFeed}?id_helper=$idHelperLogin";
 
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> responsData = json.decode(response.body);
+    final response = await http.get(Uri.parse(urlWithParam));
 
-        return responsData['data'];
-      } else {
-        throw Exception('Gagal memuat tugas (Status: ${response.statusCode})');
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> jsonResponse = json.decode(response.body);
+
+      if (mounted) {
+        setState(() {
+          if (jsonResponse['tugas_aktif'] != null &&
+              jsonResponse['tugas_aktif'] is Map) {
+            _tugasAktifSaya = Map<String, dynamic>.from(
+              jsonResponse['tugas_aktif'],
+            );
+          } else {
+            _tugasAktifSaya = {};
+          }
+        });
       }
-    } catch (e) {
-      throw Exception('Terjadi kesalahan jaringan: $e');
+
+      return jsonResponse['feed'] ?? [];
+    } else {
+      throw Exception('Gagal memuat data dari server');
     }
   }
 
@@ -60,26 +76,32 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
   }
 
   Widget _dapatkanHalaman(int index, List<dynamic>? apiTasksData) {
+    final listFeedBeranda = apiTasksData ?? [];
+
     switch (index) {
       case 0:
-        return _buildDashboardHelper(apiTasksData ?? []);
+        return _buildDashboardHelper(listFeedBeranda);
       case 1:
         return TugasAktifHelper(
-          detailTugas: (apiTasksData != null && apiTasksData.isNotEmpty)
-              ? apiTasksData[0]
-              : {},
+          detailTugas: _tugasAktifSaya.isEmpty ? {} : _tugasAktifSaya,
         );
       case 2:
-        return MessageListTab();
+        return MessageList();
       case 3:
         return ProfileTab();
       default:
-        return _buildDashboardHelper(apiTasksData ?? []);
+        return _buildDashboardHelper(listFeedBeranda);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final String namaHelper =
+        widget.userData?['username'] ??
+        widget.userData?['nama'] ??
+        'Mitra Helper';
+    final String emailHelper = widget.userData?['email'] ?? '';
+
     return FutureBuilder(
       future: _futureTasks,
       builder: (context, snapshot) {
@@ -147,13 +169,21 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                       ),
                       SizedBox(height: 10),
                       Text(
-                        "Halo, Mitra Helper!",
+                        "Halo, $namaHelper!",
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
                       ),
+                      if (emailHelper.isNotEmpty)
+                        Text(
+                          emailHelper,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.white70,
+                          ),
+                        ),
                     ],
                   ),
                 ),
@@ -161,9 +191,11 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                   leading: Icon(Icons.history, color: Colors.black87),
                   title: Text("History Tugas"),
                   onTap: () {
+                    final String idHelperLogin = widget.userData?['id']?.toString() ?? '2';
+
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => History()),
+                      MaterialPageRoute(builder: (context) => History(idHelper: idHelperLogin)),
                     );
                   },
                 ),
@@ -317,14 +349,27 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                         margin: EdgeInsets.only(bottom: 16),
                         clipBehavior: Clip.antiAlias,
                         child: InkWell(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    DetailTugasHelper(taskData: tugas),
-                              ),
-                            );
+                          onTap: () async {
+                            final apakahBerhasilAmbil = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DetailTugasHelper(
+          taskData: tugas,
+          userData: widget.userData,
+          token: widget.token,
+          adaTugasAktif: _tugasAktifSaya.isNotEmpty && _tugasAktifSaya['id_task'] != null,
+        ),
+      ),
+    );
+
+    if (apakahBerhasilAmbil == true) {
+      _refreshData();
+      if (mounted) {
+        setState(() {
+          _currentIndex = 1; // Otomatis pindah ke tab Tugas Aktif
+        });
+      }
+    }
                           },
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -459,6 +504,22 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                                     ),
                                     ElevatedButton(
                                       onPressed: () async {
+                                        if (_tugasAktifSaya.isNotEmpty &&
+                                            _tugasAktifSaya['id_task'] !=
+                                                null) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                "Selesaikan dulu tugas aktifmu saat ini sebelum mengambil tugas baru!",
+                                              ),
+                                              backgroundColor: Colors.orange,
+                                              duration: Duration(seconds: 3),
+                                            ),
+                                          );
+                                          return;
+                                        }
                                         bool konfirmasi =
                                             await showDialog(
                                               context: context,
@@ -492,19 +553,28 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                                             false;
 
                                         if (!konfirmasi) return;
-
                                         try {
                                           final String takeTaskUrl =
                                               AppConfig.ambilTugas;
 
+                                          final String idHelperLogin =
+                                              widget.userData?['id']
+                                                  ?.toString() ??
+                                              '1';
+
                                           final respon = await http.post(
                                             Uri.parse(takeTaskUrl),
+                                            headers: {
+                                              'Authorization':
+                                                  'Bearer ${widget.token}',
+                                            },
                                             body: {
                                               'id_task': tugas['id_task']
                                                   .toString(),
-                                              'id_helper': '1',
+                                              'id_helper': idHelperLogin,
                                             },
                                           );
+
                                           if (respon.statusCode == 200) {
                                             final jsonRespon = json.decode(
                                               respon.body,
@@ -522,15 +592,11 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                                             );
                                             _refreshData();
 
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    TugasAktifScreen(
-                                                      detailTugas: tugas,
-                                                    ),
-                                              ),
-                                            );
+                                            if (mounted) {
+                                              setState(() {
+                                                _currentIndex = 1;
+                                              });
+                                            }
                                           } else {
                                             final jsonRespon = json.decode(
                                               respon.body,
@@ -541,6 +607,8 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                                             );
                                           }
                                         } catch (e) {
+                                          if (!mounted) return;
+
                                           showDialog(
                                             context: context,
                                             builder: (context) => AlertDialog(
@@ -651,10 +719,16 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
     final bool isActive = _currentIndex == index;
 
     return GestureDetector(
-      onTap: () {
+      onTap: () async {
         setState(() {
-          _currentIndex = index; // Ganti halaman aktif saat diklik
+          _currentIndex = index;
         });
+        if (index == 1) {
+          try {
+            await fetchTasksForHelper();
+          } catch (e) {
+          }
+        }
       },
       child: AnimatedContainer(
         duration: Duration(milliseconds: 200),
@@ -688,14 +762,34 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
 
   Widget _buildPostButton() {
     return GestureDetector(
-      onTap: () {
-        Navigator.push(
+      onTap: () async {
+        if (_tugasAktifSaya.isEmpty || _tugasAktifSaya['id_task'] == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                "Kamu tidak memiliki tugas aktif yang perlu dikirim buktinya!",
+              ),
+              backgroundColor: Colors.amber,
+            ),
+          );
+          return;
+        }
+
+        final String idTaskDinamis = _tugasAktifSaya['id_task'].toString();
+
+        final isSuksesUpload = await Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) =>
-                UploadBuktiTab(idTask: '12', kodeReferensi: ''),
+            builder: (context) => UploadBuktiTab(idTask: idTaskDinamis),
           ),
         );
+
+        if (isSuksesUpload == true) {
+          try {
+            await fetchTasksForHelper();
+          } catch (e) {
+          }
+        }
       },
       child: Column(
         mainAxisSize: MainAxisSize.min,

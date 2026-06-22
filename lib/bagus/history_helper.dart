@@ -5,7 +5,8 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
 class History extends StatefulWidget {
-  const History({super.key});
+  final String idHelper;
+  const History({super.key, required this.idHelper});
 
   @override
   State<History> createState() => _HistoryState();
@@ -15,8 +16,6 @@ class _HistoryState extends State<History> {
   List<dynamic> listHistoryAPI = [];
   bool isLoading = true;
   String errorPesan = '';
-
-  String idHelperLogin = "5";
 
   @override
   void initState() {
@@ -31,22 +30,18 @@ class _HistoryState extends State<History> {
     });
 
     try {
-      idHelperLogin = "5";
-      final url = "${AppConfig.taskFeed}?id_helper=$idHelperLogin";
+      final url = "${AppConfig.taskHistory}?id_helper=${widget.idHelper}";
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
-        final List<dynamic> semuaTugas = responseData['data'] ?? [];
+        
+
+        final List<dynamic> semuaTugasSelesai = responseData['data'] ?? [];
 
         setState(() {
-          listHistoryAPI = semuaTugas.where((item) {
-            String status = (item['status_task'] ?? '')
-                .toString()
-                .trim()
-                .toLowerCase();
-            return status == 'selesai' || status == 'dibatalkan';
-          }).toList();
+          listHistoryAPI = semuaTugasSelesai;
+
 
           isLoading = false;
         });
@@ -122,7 +117,7 @@ class _HistoryState extends State<History> {
         return const Color.fromARGB(255, 255, 158, 79);
       case 'berjalan':
         return const Color(0xFF283593);
-      case 'menunggu validasi':
+      case 'menunggu_validasi':
         return Colors.teal.shade800;
       case 'selesai':
         return Colors.green.shade800;
@@ -190,114 +185,117 @@ class _HistoryState extends State<History> {
         // Menggunakan 'status_task' secara konsisten sesuai filter API
         final String statusTask = histori['status_task'] ?? 'Dibatalkan';
 
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-          child: Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade300),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Icon Kategori
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: const Color(0XFFDFDDF5),
-                        ),
-                        child: Icon(
-                          ambilIconBantuan(histori['kategori_layanan']),
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-
-                      // Detail Tugas (Judul & Tanggal)
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              histori['judul_tugas'] ?? '-',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              formatTanggal(histori['created_at']),
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-
-                      // Nominal Pembayaran
-                      Text(
-                        "Rp ${histori['nominal_pembayaran'] ?? '0'}",
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 8),
-                  Divider(color: Colors.grey.shade200, thickness: 1),
-                  const SizedBox(height: 4),
-
-                  // Footer (Nama Helper & Status)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        histori['nama_helper'] ?? 'Belum ada helper',
-                        style: TextStyle(
-                          color: histori['nama_helper'] == null
-                              ? Colors.grey
-                              : Colors.black87,
-                          fontSize: 13,
-                        ),
-                      ),
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          color: ambilWarnaStatus(statusTask),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 4,
-                          horizontal: 10,
-                        ),
-                        child: Text(
-                          statusTask,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
+        return RefreshIndicator(
+          onRefresh: fetchHistory,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+            child: Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey.shade300),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Icon Kategori
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: const Color(0XFFDFDDF5),
+                          ),
+                          child: Icon(
+                            ambilIconBantuan(histori['kategori_layanan']),
+                            color: Theme.of(context).colorScheme.primary,
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                        const SizedBox(width: 12),
+          
+                        // Detail Tugas (Judul & Tanggal)
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                histori['judul_tugas'] ?? '-',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                formatTanggal(histori['created_at']),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+          
+                        // Nominal Pembayaran
+                        Text(
+                          "Rp ${histori['nominal_pembayaran'] ?? '0'}",
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+          
+                    const SizedBox(height: 8),
+                    Divider(color: Colors.grey.shade200, thickness: 1),
+                    const SizedBox(height: 4),
+          
+                    // Footer (Nama Helper & Status)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          histori['nama_helper'] ?? 'Belum ada helper',
+                          style: TextStyle(
+                            color: histori['nama_helper'] == null
+                                ? Colors.grey
+                                : Colors.black87,
+                            fontSize: 13,
+                          ),
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            color: ambilWarnaStatus(statusTask),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 4,
+                            horizontal: 10,
+                          ),
+                          child: Text(
+                            statusTask,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

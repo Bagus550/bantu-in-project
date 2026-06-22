@@ -1,7 +1,7 @@
 import 'package:bantuin/alen/paypage.dart';
 import 'package:bantuin/alen/registhelper.dart';
-//import 'package:bantuin/data_tugas.dart';
-import 'package:bantuin/ida/login_screen.dart';
+import 'package:bantuin/data_tugas.dart';
+import 'package:bantuin/ida/screen/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:bantuin/config/app_config.dart';
