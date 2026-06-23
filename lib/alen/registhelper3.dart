@@ -2,9 +2,22 @@ import 'package:bantuin/alen/admin.dart';
 import 'package:bantuin/alen/paypage.dart';
 import 'package:bantuin/alen/registhelper.dart';
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
+import 'package:bantuin/config/app_config.dart';
 
 class RegistPage3 extends StatefulWidget {
-  const RegistPage3({super.key});
+  final String fullName;
+  final String email;
+  final String password;
+  final String whatsapp;
+
+  const RegistPage3({
+    super.key,
+    required this.fullName,
+    required this.email,
+    required this.password,
+    required this.whatsapp,
+  });
 
   @override
   State<RegistPage3> createState() => _RegistPage3State();
@@ -12,6 +25,67 @@ class RegistPage3 extends StatefulWidget {
 
 class _RegistPage3State extends State<RegistPage3> {
   int _currentIndex = 1;
+  bool _isLoading = false;
+
+  final TextEditingController _bankNameController = TextEditingController();
+  final TextEditingController _accNumberController = TextEditingController();
+
+  @override
+  void dispose() {
+    _bankNameController.dispose();
+    _accNumberController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submitRegistration() async {
+    if (_bankNameController.text.trim().isEmpty || _accNumberController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Harap lengkapi data bank!')),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      var response = await Dio().post(
+        '${AppConfig.baseUrl}/api/auth/register',
+        data: {
+          'nama_lengkap': widget.fullName,
+          'email': widget.email,
+          'password': widget.password,
+          'whatsapp_number': widget.whatsapp,
+          'nama_bank': _bankNameController.text.trim(),
+          'nomor_rekening': _accNumberController.text.trim(),
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Registrasi Berhasil! Silakan Login.')),
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const RegistPage()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal mendaftar: ${response.data}')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error jaringan: $e')));
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,14 +112,6 @@ class _RegistPage3State extends State<RegistPage3> {
                 ),
               ),
               SizedBox(width: 12),
-              IconButton(
-                onPressed: () {},
-                icon: Icon(
-                  Icons.account_circle,
-                  color: Theme.of(context).colorScheme.primary,
-                  size: 30,
-                ),
-              ),
             ],
           ),
         ],
@@ -89,8 +155,9 @@ class _RegistPage3State extends State<RegistPage3> {
                     ),
                     SizedBox(height: 8),
                     TextField(
+                      controller: _bankNameController,
                       decoration: InputDecoration(
-                        hintText: "Select your bank",
+                        hintText: "ex. BCA, BNI, Mandiri",
                         suffixIcon: Icon(
                           Icons.keyboard_arrow_down,
                         ), // Ikon panah bawah
@@ -109,6 +176,7 @@ class _RegistPage3State extends State<RegistPage3> {
                     ),
                     SizedBox(height: 8),
                     TextField(
+                      controller: _accNumberController,
                       keyboardType:
                           TextInputType.number, // Munculin keyboard angka
                       decoration: InputDecoration(
@@ -164,7 +232,7 @@ class _RegistPage3State extends State<RegistPage3> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: _isLoading ? null : _submitRegistration,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color.fromARGB(255, 88, 26, 246),
                     foregroundColor: Colors.white,
@@ -173,23 +241,29 @@ class _RegistPage3State extends State<RegistPage3> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Finish Registration",
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
+                  child: _isLoading
+                      ? SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(color: Colors.white),
+                        )
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Finish Registration",
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(width: 8),
+                            Icon(
+                              Icons.check_circle_outline,
+                              size: 20,
+                            ), // Ikon centang
+                          ],
                         ),
-                      ),
-                      SizedBox(width: 8),
-                      Icon(
-                        Icons.check_circle_outline,
-                        size: 20,
-                      ), // Ikon centang
-                    ],
-                  ),
                 ),
               ),
               SizedBox(height: 16),
@@ -239,7 +313,7 @@ class _RegistPage3State extends State<RegistPage3> {
         },
         backgroundColor: Colors.white,
         indicatorColor: Colors.deepPurpleAccent,
-        destinations: [
+        destinations: const [
           NavigationDestination(
             icon: Icon(Icons.people_outline, color: Colors.black),
             selectedIcon: Icon(Icons.people, color: Colors.black),
@@ -252,10 +326,6 @@ class _RegistPage3State extends State<RegistPage3> {
           NavigationDestination(
             icon: Icon(Icons.payment_outlined, color: Colors.black),
             label: "Payments",
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline, color: Colors.black),
-            label: "Profile",
           ),
         ],
       ),
