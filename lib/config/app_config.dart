@@ -1,6 +1,5 @@
 class AppConfig {
-  static const String baseUrl =
-      "https://prowess-gumminess-comfy.ngrok-free.dev";
+  static const String baseUrl = "https://lyricism-conch-sheath.ngrok-free.dev";
 
   static const String taskFeed = "$baseUrl/api/tasks/feed";
   static const String taskRequester = "$baseUrl/api/tasks/requester";
@@ -8,6 +7,7 @@ class AppConfig {
   static const String taskHistory = "$baseUrl/api/taskHistory";
   static const String historyUser = "$baseUrl/api/historyUser";
   static const String updateStatus = "$baseUrl/api/tasks/update-status";
+  static const String historyHelper = "$baseUrl/api/taskHistory";
 
   static const String login = "$baseUrl/api/auth/login";
   static const String register = "$baseUrl/api/auth/register";
@@ -19,4 +19,6 @@ class AppConfig {
   static const String ambilTugas = "$baseUrl/api/tasks/take";
 
   static const String chat = "$baseUrl/api/chat";
+
+  static const String notif = "$baseUrl/api/notifikasi";
 }
