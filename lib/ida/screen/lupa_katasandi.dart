@@ -87,7 +87,9 @@ class _LupaKatasandiState extends State<LupaKatasandi> {
         );
 
         await Future.delayed(const Duration(seconds: 2));
-        if (mounted) Navigator.pop(context);
+        if (mounted) {
+          Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+        }
       } else {
         _showSnackbar(
           data['messages']?['error'] ??

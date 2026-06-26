@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:bantuin/utils/currency_extension.dart';
 import 'package:flutter/material.dart';
 import '../../config/app_config.dart';
 import 'package:http/http.dart' as http;
@@ -45,9 +46,6 @@ class _HistoryUserState extends State<HistoryUser> {
   }
 
   Future<void> fetchHistory({required bool isFirstLoad}) async {
-    print("DEBUG LAZY LOAD: Menembak API...");
-    print("DEBUG ID REQUESTER: ${widget.idRequester}");
-    print("DEBUG CURRENT PAGE: $currentPage");
     if (isFirstLoad) {
       setState(() {
         isLoading = true;
@@ -75,8 +73,6 @@ class _HistoryUserState extends State<HistoryUser> {
           'per_page': perPage.toString(),
         },
       );
-
-      print("DEBUG URL RUNNING: $urlDenganParam");
 
       final response = await http.get(urlDenganParam);
 
@@ -184,7 +180,7 @@ class _HistoryUserState extends State<HistoryUser> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("HistoryUser"),
+        title: const Text("History"),
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
         toolbarHeight: 80,
@@ -252,7 +248,6 @@ class _HistoryUserState extends State<HistoryUser> {
               itemCount: listHistoryAPI.length,
               itemBuilder: (context, index) {
                 final histori = listHistoryAPI[index];
-                // Menggunakan 'status_task' secara konsisten sesuai filter API
                 final String statusTask =
                     histori['status_task'] ?? 'Dibatalkan';
 
@@ -319,7 +314,7 @@ class _HistoryUserState extends State<HistoryUser> {
 
                               // Nominal Pembayaran
                               Text(
-                                "Rp ${histori['nominal_pembayaran'] ?? '0'}",
+                                histori['nominal_pembayaran'].toString().toRupiah(),
                                 style: TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.bold,
