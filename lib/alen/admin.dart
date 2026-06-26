@@ -3,7 +3,8 @@ import 'package:bantuin/alen/registhelper.dart';
 import 'package:bantuin/data_tugas.dart';
 import 'package:bantuin/ida/screen/login_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:bantuin/config/app_config.dart';
 
 class MyAdmin extends StatefulWidget {
@@ -25,7 +26,6 @@ class _MyAdminState extends State<MyAdmin> {
 
   int jumlahHelperTerdaftar = 0;
   int jumlahHelperAktif = 0;
-  int validasi = 0;
 
   @override
   void initState() {
@@ -41,18 +41,20 @@ class _MyAdminState extends State<MyAdmin> {
                 (h['nama'] ?? '').toLowerCase().contains(query.toLowerCase()),
           )
           .toList();
+      currentPage = 1;
     });
   }
 
   Future<void> fetchData() async {
     try {
-      var response = await Dio().get(
-        '${AppConfig.baseUrl}/api/admin/dashboard',
+      var response = await http.get(
+        Uri.parse('${AppConfig.baseUrl}/api/admin/dashboard'),
       );
 
       if (response.statusCode == 200) {
+        var data = jsonDecode(response.body);
         setState(() {
-          helpersList = response.data['data']['helpers'];
+          helpersList = data['data']['helpers'] ?? [];
           filteredHelpers = helpersList;
           jumlahHelperTerdaftar = helpersList.length;
           jumlahHelperAktif = helpersList
@@ -60,7 +62,6 @@ class _MyAdminState extends State<MyAdmin> {
                 (h) => h['status_aktif'] == 1 || h['status_aktif'] == 'ACTIVE',
               )
               .length;
-          validasi = response.data['data']['pending_validasi'] ?? 0;
           isLoading = false;
         });
       }
@@ -74,8 +75,14 @@ class _MyAdminState extends State<MyAdmin> {
 
   Future<void> _updateHelperStatus(int id, String action) async {
     try {
-      await Dio().post('${AppConfig.baseUrl}/api/admin/helper/$action/$id');
-      fetchData();
+      var response = await http.post(
+        Uri.parse('${AppConfig.baseUrl}/api/admin/helper/$action/$id'),
+      );
+      if (response.statusCode == 200) {
+        fetchData();
+      } else {
+        throw Exception('Failed to update status');
+      }
     } catch (e) {
       ScaffoldMessenger.of(
         context,
@@ -102,15 +109,6 @@ class _MyAdminState extends State<MyAdmin> {
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
-                onPressed: () {},
-                icon: Icon(
-                  Icons.notifications_none,
-                  color: Theme.of(context).colorScheme.primary,
-                  size: 25,
-                ),
-              ),
-              SizedBox(width: 12),
-              IconButton(
                 onPressed: () {
                   Navigator.pushReplacement(
                     context,
@@ -119,10 +117,11 @@ class _MyAdminState extends State<MyAdmin> {
                 },
                 icon: Icon(
                   Icons.logout,
-                  color: Theme.of(context).colorScheme.primary,
-                  size: 30,
+                  color: Colors.red,
+                  size: 28,
                 ),
               ),
+              SizedBox(width: 16),
             ],
           ),
         ],
@@ -135,17 +134,6 @@ class _MyAdminState extends State<MyAdmin> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    TextField(
-                      controller: _searchController,
-                      onChanged: _filterHelpers,
-                      decoration: InputDecoration(
-                        labelText: "Search Helpers",
-                        prefixIcon: Icon(Icons.search),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    ),
                     Text(
                       "Helper Management",
                       style: TextStyle(
@@ -155,9 +143,12 @@ class _MyAdminState extends State<MyAdmin> {
                     ),
                     SizedBox(height: 12),
                     TextField(
+                      controller: _searchController,
+                      onChanged: _filterHelpers,
                       decoration: InputDecoration(
                         labelText: "Search Helpers",
                         prefixIcon: Icon(Icons.search),
+                        filled: true,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -181,12 +172,6 @@ class _MyAdminState extends State<MyAdmin> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 16),
-                    _buildWideCard(
-                      title: "Pending Approval",
-                      value: validasi.toString(),
-                      subtitle: "Action Required",
-                    ),
                     SizedBox(height: 32),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -199,68 +184,6 @@ class _MyAdminState extends State<MyAdmin> {
                             color: Colors.black,
                           ),
                         ),
-                        Row(
-                          children: [
-                            OutlinedButton.icon(
-                              onPressed: () {},
-                              icon: Icon(
-                                Icons.filter_list,
-                                size: 18,
-                                color: Colors.black,
-                              ),
-                              label: Text(
-                                "Filter",
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              style: OutlinedButton.styleFrom(
-                                side: BorderSide(color: Colors.grey),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadiusGeometry.circular(
-                                    8,
-                                  ),
-                                ),
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 0,
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: 8),
-                            OutlinedButton.icon(
-                              onPressed: () {},
-                              icon: Icon(
-                                Icons.download_rounded,
-                                size: 18,
-                                color: Colors.black,
-                              ),
-                              label: Text(
-                                "Export",
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              style: OutlinedButton.styleFrom(
-                                side: BorderSide(
-                                  color: Colors.grey,
-                                  width: 1.5,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadiusGeometry.circular(
-                                    8,
-                                  ),
-                                ),
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 0,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
                       ],
                     ),
                     SizedBox(height: 16),
@@ -272,7 +195,7 @@ class _MyAdminState extends State<MyAdmin> {
                       ),
                       child: Column(
                         children: () {
-                          if (helpersList.isEmpty) {
+                          if (filteredHelpers.isEmpty) {
                             return [
                               const Padding(
                                 padding: EdgeInsets.all(16),
@@ -406,7 +329,7 @@ class _MyAdminState extends State<MyAdmin> {
     String? subtitle,
   }) {
     return Container(
-      height: 125,
+      height: 100,
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -442,56 +365,8 @@ class _MyAdminState extends State<MyAdmin> {
     );
   }
 
-  Widget _buildWideCard({
-    required String title,
-    required String value,
-    required String subtitle,
-  }) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(vertical: 20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
-          SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
-          SizedBox(height: 8),
-          Text(
-            subtitle,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey,
-              fontStyle: FontStyle.italic,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildHelperItem(Map<String, dynamic> data) {
     var statusAktif = data['status_aktif'] ?? 1;
-
     int jumlahTugasDiambil = data['total_tasks'] ?? 0;
 
     return Padding(
@@ -520,7 +395,7 @@ class _MyAdminState extends State<MyAdmin> {
                       ),
                     ),
                     Text(
-                      data['email'] ?? '-',
+                      "Helper Bantu.In",
                       style: TextStyle(color: Colors.grey, fontSize: 13),
                     ),
                   ],
@@ -536,55 +411,10 @@ class _MyAdminState extends State<MyAdmin> {
             style: TextStyle(fontSize: 14, color: Colors.black),
           ),
 
-          SizedBox(height: 12),
-
+          SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              if (statusAktif == 1 || statusAktif == 'ACTIVE')
-                _buildBtn(
-                  "Suspend Akun",
-                  Colors.red,
-                  () => _updateHelperStatus(data['id_helper'], 'suspend'),
-                )
-              else ...[
-                _buildBtn(
-                  "Buka Suspend",
-                  Colors.blue,
-                  () => _updateHelperStatus(data['id_helper'], 'activate'),
-                ),
-                SizedBox(width: 8),
-                _buildBtn(
-                  "Hapus Akun",
-                  Colors.red,
-                  () => _updateHelperStatus(data['id_helper'], 'delete'),
-                ),
-              ],
-            ],
-          ),
-
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              if (data['status_aktif'] == 1 || data['status_aktif'] == 'ACTIVE')
-                ElevatedButton(
-                  onPressed: () =>
-                      _updateHelperStatus(data['id_helper'], 'suspend'),
-                  child: Text("Suspend"),
-                )
-              else ...[
-                ElevatedButton(
-                  onPressed: () =>
-                      _updateHelperStatus(data['id_helper'], 'activate'),
-                  child: Text("Buka Suspend"),
-                ),
-                ElevatedButton(
-                  onPressed: () =>
-                      _updateHelperStatus(data['id_helper'], 'delete'),
-                  child: Text("Hapus"),
-                ),
-              ],
-            ],
+            children: _buildActionButtons(statusAktif, data['id_helper']),
           ),
         ],
       ),
@@ -620,29 +450,45 @@ class _MyAdminState extends State<MyAdmin> {
     );
   }
 
-  List<Widget> _buildActionButtons(dynamic statusAktif) {
+  List<Widget> _buildActionButtons(dynamic statusAktif, dynamic idHelper) {
     if (statusAktif == 1 || statusAktif == "ACTIVE") {
-      return [_buildElevatedButton(label: "Suspend Akun", isDanger: true)];
+      return [
+        _buildElevatedButton(
+          label: "Suspend Akun",
+          color: Colors.red,
+          onPressed: () => _updateHelperStatus(idHelper, 'suspend'),
+          ),
+        ];
     } else {
       return [
-        _buildElevatedButton(label: "Buka Suspend", isDanger: false),
+        _buildElevatedButton(
+          label: "Buka Suspend",
+          color: Colors.blue,
+          onPressed: () => _updateHelperStatus(idHelper, 'activate'),
+          ),
         const SizedBox(width: 8),
-        _buildElevatedButton(label: "Hapus Akun", isDanger: true),
+        _buildElevatedButton(
+          label: "Hapus Akun",
+          color: Colors.red,
+          onPressed: () => _updateHelperStatus(idHelper, 'delete'),
+        ),
       ];
     }
   }
 
-  Widget _buildElevatedButton({required String label, required bool isDanger}) {
+  Widget _buildElevatedButton({required String label, required Color color, required VoidCallback onPressed,
+  }) {
     return ElevatedButton(
-      onPressed: () {},
+      onPressed: onPressed,
       style: ElevatedButton.styleFrom(
-        backgroundColor: isDanger ? Colors.red : Colors.blue,
+        backgroundColor: color,
         foregroundColor: Colors.white,
         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadiusGeometry.circular(6),
         ),
-        minimumSize: Size(0, 36),
+        minimumSize: Size(0, 32),
+        elevation: 0,
       ),
       child: Text(
         label,
@@ -656,17 +502,6 @@ class _MyAdminState extends State<MyAdmin> {
       padding: EdgeInsets.all(4),
       decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
       child: Icon(icon, size: 20, color: Colors.grey),
-    );
-  }
-
-  Widget _buildBtn(String label, Color color, VoidCallback onPressed) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        foregroundColor: Colors.white,
-      ),
-      child: Text(label, style: TextStyle(fontSize: 12)),
     );
   }
 }
