@@ -5,7 +5,8 @@ import 'admin.dart';
 import 'registhelper.dart';
 
 class RegistPage2 extends StatefulWidget {
-  const RegistPage2({super.key});
+  final String fullName;
+  const RegistPage2({super.key, required this.fullName});
 
   @override
   State<RegistPage2> createState() => _RegistPage2State();
@@ -13,6 +14,24 @@ class RegistPage2 extends StatefulWidget {
 
 class _RegistPage2State extends State<RegistPage2> {
   int _currentIndex = 1;
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _waController = TextEditingController();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _waController.dispose();
+    super.dispose();
+  }
+
+  bool _isValidEmail(String email) {
+    return RegExp(
+      r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
+    ).hasMatch(email);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,29 +45,7 @@ class _RegistPage2State extends State<RegistPage2> {
           ),
         ),
         elevation: 3,
-        actions: [
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                onPressed: () {},
-                icon: Icon(
-                  Icons.notifications_none,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-              SizedBox(width: 12),
-              IconButton(
-                onPressed: () {},
-                icon: Icon(
-                  Icons.account_circle,
-                  color: Theme.of(context).colorScheme.primary,
-                  size: 30,
-                ),
-              ),
-            ],
-          ),
-        ],
+        automaticallyImplyLeading: false,
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -76,6 +73,8 @@ class _RegistPage2State extends State<RegistPage2> {
               ),
               SizedBox(height: 8),
               TextField(
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
                   hintText: "name@example.com",
                   prefixIcon: Icon(Icons.email_outlined),
@@ -91,6 +90,7 @@ class _RegistPage2State extends State<RegistPage2> {
               ),
               SizedBox(height: 8),
               TextField(
+                controller: _passwordController,
                 obscureText: true,
                 decoration: InputDecoration(
                   hintText: "Min. 8 characters",
@@ -108,6 +108,7 @@ class _RegistPage2State extends State<RegistPage2> {
               ),
               SizedBox(height: 8),
               TextField(
+                controller: _waController,
                 keyboardType: TextInputType.phone,
                 decoration: InputDecoration(
                   hintText: "+62 812 3456 789",
@@ -131,11 +132,46 @@ class _RegistPage2State extends State<RegistPage2> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
+                    if (_emailController.text.isEmpty ||
+                        _passwordController.text.isEmpty ||
+                        _waController.text.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Harap isi semua kolom!')),
+                      );
+                      return;
+                    }
+
+                    if (!_isValidEmail(_emailController.text.trim())) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Format email kaga valid cik!'),
+                        ),
+                      );
+                      return;
+                    }
+
+                    if (_passwordController.text.length < 8) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Password minimal 8 karakter!'),
+                        ),
+                      );
+                      return;
+                    }
+
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => RegistPage3()),
+                      MaterialPageRoute(
+                        builder: (context) => RegistPage3(
+                          fullName: widget.fullName,
+                          email: _emailController.text.trim(),
+                          password: _passwordController.text,
+                          whatsapp: _waController.text.trim(),
+                        ),
+                      ),
                     );
                   },
+                  
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color.fromARGB(255, 88, 26, 246),
                     foregroundColor: Colors.white,
@@ -245,7 +281,7 @@ class _RegistPage2State extends State<RegistPage2> {
         },
         backgroundColor: Colors.white,
         indicatorColor: Colors.deepPurpleAccent,
-        destinations: [
+        destinations: const [
           NavigationDestination(
             icon: Icon(Icons.people_outline, color: Colors.black),
             selectedIcon: Icon(Icons.people, color: Colors.black),
@@ -258,10 +294,6 @@ class _RegistPage2State extends State<RegistPage2> {
           NavigationDestination(
             icon: Icon(Icons.payment_outlined, color: Colors.black),
             label: "Payments",
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline, color: Colors.black),
-            label: "Profile",
           ),
         ],
       ),

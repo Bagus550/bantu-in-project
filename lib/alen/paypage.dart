@@ -1,6 +1,10 @@
 import 'package:bantuin/alen/admin.dart';
 import 'package:bantuin/alen/registhelper.dart';
 import 'package:flutter/material.dart';
+import 'package:bantuin/alen/validasipay.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:bantuin/config/app_config.dart';
 
 class PayPage extends StatefulWidget {
   const PayPage({super.key});
@@ -11,12 +15,56 @@ class PayPage extends StatefulWidget {
 
 class _PayPageState extends State<PayPage> {
   int _currentIndex = 2;
-  List<Map<String, String>> paymentRequests = [
-    {"name": "Aditya Pratama", "time": "2 mins ago", "amount": "Rp 450.000"},
-    {"name": "Siti Aminah", "time": "15 mins ago", "amount": "Rp 1.250.000"},
-    {"name": "Budi Santoso", "time": "22 mins ago", "amount": "Rp 85.000"},
-    {"name": "Dewi Lestari", "time": "45 mins ago", "amount": "Rp 300.000"},
-  ];
+  int _pendingCount = 0;
+  int _approvedCount = 0;
+  List<dynamic> _payments = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchPayments();
+  }
+
+  Future<void> _fetchPayments() async {
+    try {
+      final response = await http.get(
+        Uri.parse('${AppConfig.baseUrl}/api/payment'),
+        headers: {'Accept': 'application/json'},
+      );
+
+      if (!mounted) return;
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        setState(() {
+          _payments = data['incoming_requests'] ?? [];
+
+          _pendingCount = data['stats']['total_pending'] ?? 0;
+
+          _approvedCount = data['stats']['total_approved'] ?? 0;
+
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal narik data: ${response.statusCode}')),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error jaringan: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +125,7 @@ class _PayPageState extends State<PayPage> {
                           ),
                           SizedBox(height: 8),
                           Text(
-                            "24",
+                            "$_pendingCount",
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -106,7 +154,7 @@ class _PayPageState extends State<PayPage> {
                           ),
                           SizedBox(height: 8),
                           Text(
-                            "12",
+                            "$_approvedCount",
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -121,7 +169,7 @@ class _PayPageState extends State<PayPage> {
               ),
               SizedBox(height: 24),
               Text(
-                "Incoming Request",
+                "Incoming Requests",
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -129,116 +177,95 @@ class _PayPageState extends State<PayPage> {
                 ),
               ),
               SizedBox(height: 16),
-              ListView.builder(
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                itemCount: paymentRequests.length,
-                itemBuilder: (context, index) {
-                  var data = paymentRequests[index];
-                  return Container(
-                    padding: EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 50,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            color: Colors.grey,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Icon(Icons.receipt_long, color: Colors.grey),
-                        ),
-                        SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                data["name"]!,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
+              _isLoading
+                  ? Center(child: CircularProgressIndicator())
+                  : ListView.builder(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      itemCount: _payments.length,
+                      itemBuilder: (context, index) {
+                        var data = _payments[index];
+                        if (data['status_validasi'] != 'pending')
+                          return SizedBox.shrink();
+
+                        return InkWell(
+                          onTap: () async {
+                            final result = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ValidPage(
+                                  name: "User Task ${data['id_task']}",
+                                  amount: "Rp. xxx",
+                                  transactionId: data['id_payment'].toString(),
                                 ),
                               ),
-                              SizedBox(height: 4),
-                              Text(
-                                data["time"]!,
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              data["amount"]!,
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                              ),
+                            );
+                            if (result == true) {
+                              _fetchPayments();
+                            }
+                          },
+
+                          child: Container(
+                            margin: EdgeInsets.only(bottom: 12),
+                            padding: EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.grey),
                             ),
-                            SizedBox(height: 6),
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.primary,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                "Pending Review",
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: Colors.grey[600],
-                                  fontWeight: FontWeight.bold,
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 50,
+                                  height: 50,
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Icon(
+                                    Icons.receipt_long,
+                                    color: Colors.white,
+                                  ),
                                 ),
-                              ),
+                                SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "Task ID: ${data['id_task']}",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      SizedBox(height: 4),
+                                      Text(
+                                        "Ref: ${data['kode_referensi']}",
+                                        style: TextStyle(
+                                          color: Colors.grey[600],
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Icon(Icons.chevron_right, color: Colors.grey),
+                              ],
                             ),
-                          ],
-                        ),
-                      ],
+                          ),
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
-              SizedBox(height: 16),
-              Center(
-                child: OutlinedButton(
-                  onPressed: () {},
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Theme.of(context).colorScheme.primary,
-                    side: BorderSide(
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: Text(
-                    "Load More Request",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
               SizedBox(height: 80),
             ],
           ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          _fetchPayments();
+        },
         backgroundColor: Theme.of(context).colorScheme.primary,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: Icon(Icons.done_all, color: Colors.white),
@@ -282,10 +309,6 @@ class _PayPageState extends State<PayPage> {
           NavigationDestination(
             icon: Icon(Icons.payment_outlined, color: Colors.black),
             label: "Payments",
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline, color: Colors.black),
-            label: "Profile",
           ),
         ],
       ),
