@@ -1,6 +1,5 @@
 import 'package:bantuin/alen/paypage.dart';
 import 'package:bantuin/alen/registhelper.dart';
-import 'package:bantuin/data_tugas.dart';
 import 'package:bantuin/ida/screen/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -49,6 +48,7 @@ class _MyAdminState extends State<MyAdmin> {
     try {
       var response = await http.get(
         Uri.parse('${AppConfig.baseUrl}/api/admin/dashboard'),
+        headers: {"ngrok-skip-browser-warning": "69420"},
       );
 
       if (response.statusCode == 200) {
@@ -59,35 +59,203 @@ class _MyAdminState extends State<MyAdmin> {
           jumlahHelperTerdaftar = helpersList.length;
           jumlahHelperAktif = helpersList
               .where(
-                (h) => h['status_aktif'] == 1 || h['status_aktif'] == 'ACTIVE',
+                (h) =>
+                    h['status_aktif'] == 1 ||
+                    h['status_aktif'] == '1' ||
+                    h['status_aktif'] == true ||
+                    h['status_aktif'] == 'ACTIVE',
               )
               .length;
           isLoading = false;
         });
+      } else {
+        print("Gagal mengambil data. Status Code: ${response.statusCode}");
+        print("Response Body: ${response.body}");
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         isLoading = false;
       });
       print("Error fetching data: $e");
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
   }
 
-  Future<void> _updateHelperStatus(int id, String action) async {
+  Future<void> _updateHelperStatus(dynamic id, String action) async {
+    String targetUrl = (action == 'delete')
+        ? '${AppConfig.baseUrl}/api/admin/delete-helper'
+        : '${AppConfig.baseUrl}/api/admin/toggle-helper-status';
+
+    Map<String, String> requestBody = {'id_helper': id.toString()};
+
+    if (action != 'delete') {
+      requestBody['status_aktif'] = (action == 'activate') ? '1' : '0';
+    }
+
     try {
       var response = await http.post(
-        Uri.parse('${AppConfig.baseUrl}/api/admin/helper/$action/$id'),
+        Uri.parse(targetUrl),
+        body: requestBody,
+        headers: {"ngrok-skip-browser-warning": "69420"},
       );
+
+      var data = jsonDecode(response.body);
+
       if (response.statusCode == 200) {
         fetchData();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(data['message'] ?? 'Berhasil $action akun helper'),
+            backgroundColor: Colors.green,
+          ),
+        );
       } else {
-        throw Exception('Failed to update status');
+        // Tampilkan pesan error dari backend (misal: gagal hapus karena ada tugas)
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              data['messages']?['message'] ?? 'Gagal memproses aksi',
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     } catch (e) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Gagal $action helper')));
+      ).showSnackBar(SnackBar(content: Text('Terjadi kesalahan koneksi!')));
     }
+  }
+
+  Future<void> _showConfirmationDialog({
+    required String title,
+    required String content,
+    required VoidCallback onConfirm,
+    required Color confirmColor,
+  }) async {
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title, style: TextStyle(fontWeight: FontWeight.bold)),
+          content: Text(content),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Batal', style: TextStyle(color: Colors.grey)),
+              onPressed: () {
+                Navigator.of(context).pop(); // Tutup dialog
+              },
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: confirmColor,
+                foregroundColor: Colors.white,
+                elevation: 0,
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+                onConfirm();
+              },
+              child: const Text('Ya, Lanjutkan'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showHelperDetail(Map<String, dynamic> helper) {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: EdgeInsets.only(bottom: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              Text(
+                "Informasi Lengkap",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 20),
+
+              // Widget untuk menampilkan tiap baris detail
+              _buildDetailRow(
+                Icons.phone,
+                "No. WhatsApp",
+                helper['no_hp'] ?? '-',
+              ),
+              _buildDetailRow(
+                Icons.account_balance,
+                "Nama Bank",
+                helper['nama_bank'] ?? '-',
+              ),
+              _buildDetailRow(
+                Icons.credit_card,
+                "Nomor Rekening",
+                helper['nomor_rekening'] ?? '-',
+              ),
+
+              SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text("Tutup"),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildDetailRow(IconData icon, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.deepPurpleAccent, size: 22),
+          SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: TextStyle(fontSize: 12, color: Colors.grey)),
+              Text(
+                value,
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -115,11 +283,7 @@ class _MyAdminState extends State<MyAdmin> {
                     MaterialPageRoute(builder: (context) => LoginScreen()),
                   );
                 },
-                icon: Icon(
-                  Icons.logout,
-                  color: Colors.red,
-                  size: 28,
-                ),
+                icon: Icon(Icons.logout, color: Colors.red, size: 28),
               ),
               SizedBox(width: 16),
             ],
@@ -367,56 +531,59 @@ class _MyAdminState extends State<MyAdmin> {
 
   Widget _buildHelperItem(Map<String, dynamic> data) {
     var statusAktif = data['status_aktif'] ?? 1;
-    int jumlahTugasDiambil = data['total_tasks'] ?? 0;
+    int jumlahTugasDiambil = int.tryParse(data['total_tasks'].toString()) ?? 0;
 
-    return Padding(
-      padding: EdgeInsetsGeometry.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              CircleAvatar(
-                radius: 24,
-                backgroundColor: const Color.fromARGB(255, 205, 205, 205),
-                child: Icon(Icons.person, size: 30),
-              ),
-              SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      data['nama'] ?? 'anonim',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
-                      ),
-                    ),
-                    Text(
-                      "Helper Bantu.In",
-                      style: TextStyle(color: Colors.grey, fontSize: 13),
-                    ),
-                  ],
+    return InkWell(
+      onTap: () => _showHelperDetail(data),
+      child: Padding(
+        padding: EdgeInsetsGeometry.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CircleAvatar(
+                  radius: 24,
+                  backgroundColor: const Color.fromARGB(255, 205, 205, 205),
+                  child: Icon(Icons.person, size: 30),
                 ),
-              ),
-              _buildStatusBadge(statusAktif),
-            ],
-          ),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        data['nama'] ?? 'anonim',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
+                      Text(
+                        "Helper Bantu.In",
+                        style: TextStyle(color: Colors.grey, fontSize: 13),
+                      ),
+                    ],
+                  ),
+                ),
+                _buildStatusBadge(statusAktif),
+              ],
+            ),
 
-          SizedBox(height: 12),
-          Text(
-            "Tasks: $jumlahTugasDiambil Tugas Diambil",
-            style: TextStyle(fontSize: 14, color: Colors.black),
-          ),
+            SizedBox(height: 12),
+            Text(
+              "Tasks: $jumlahTugasDiambil Tugas Diambil",
+              style: TextStyle(fontSize: 14, color: Colors.black),
+            ),
 
-          SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: _buildActionButtons(statusAktif, data['id_helper']),
-          ),
-        ],
+            SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: _buildActionButtons(statusAktif, data['id_helper']),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -425,7 +592,10 @@ class _MyAdminState extends State<MyAdmin> {
     Color bgColor;
     String textStatus;
 
-    if (statusAktif == 1 || statusAktif == "ACTIVE") {
+    if (statusAktif == 1 ||
+        statusAktif == '1' ||
+        statusAktif == true ||
+        statusAktif == "ACTIVE") {
       bgColor = Colors.green;
       textStatus = "ACTIVE";
     } else {
@@ -451,32 +621,64 @@ class _MyAdminState extends State<MyAdmin> {
   }
 
   List<Widget> _buildActionButtons(dynamic statusAktif, dynamic idHelper) {
-    if (statusAktif == 1 || statusAktif == "ACTIVE") {
+    int safeId = int.tryParse(idHelper.toString()) ?? 0;
+
+    if (statusAktif == 1 ||
+        statusAktif == '1' ||
+        statusAktif == true ||
+        statusAktif == "ACTIVE") {
       return [
         _buildElevatedButton(
           label: "Suspend Akun",
           color: Colors.red,
-          onPressed: () => _updateHelperStatus(idHelper, 'suspend'),
-          ),
-        ];
+          onPressed: () {
+            _showConfirmationDialog(
+              title: "Suspend Akun?",
+              content:
+                  "Helper ini tidak akan bisa menerima tugas baru. Anda yakin?",
+              confirmColor: Colors.red,
+              onConfirm: () => _updateHelperStatus(safeId, 'suspend'),
+            );
+          },
+        ),
+      ];
     } else {
       return [
         _buildElevatedButton(
           label: "Buka Suspend",
           color: Colors.blue,
-          onPressed: () => _updateHelperStatus(idHelper, 'activate'),
-          ),
+          onPressed: () {
+            _showConfirmationDialog(
+              title: "Aktifkan Akun?",
+              content:
+                  "Helper ini akan dapat menerima tugas kembali. Anda yakin?",
+              confirmColor: Colors.blue,
+              onConfirm: () => _updateHelperStatus(safeId, 'activate'),
+            );
+          },
+        ),
         const SizedBox(width: 8),
         _buildElevatedButton(
           label: "Hapus Akun",
           color: Colors.red,
-          onPressed: () => _updateHelperStatus(idHelper, 'delete'),
+          onPressed: () {
+            _showConfirmationDialog(
+              title: "Hapus Permanen?",
+              content:
+                  "Akun ini akan dihapus permanen dari database. Data yang hilang tidak dapat dikembalikan. Yakin?",
+              confirmColor: Colors.red.shade900,
+              onConfirm: () => _updateHelperStatus(safeId, 'delete'),
+            );
+          },
         ),
       ];
     }
   }
 
-  Widget _buildElevatedButton({required String label, required Color color, required VoidCallback onPressed,
+  Widget _buildElevatedButton({
+    required String label,
+    required Color color,
+    required VoidCallback onPressed,
   }) {
     return ElevatedButton(
       onPressed: onPressed,

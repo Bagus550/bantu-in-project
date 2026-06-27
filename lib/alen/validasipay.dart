@@ -1,7 +1,11 @@
-import 'package:bantuin/config/app_config.dart';
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+import 'package:bantuin/config/app_config.dart';
+import 'package:bantuin/ida/auth/auth_service.dart';
+import 'package:bantuin/utils/currency_extension.dart';
+import 'package:flutter/material.dart';
+import 'package:bantuin/ida/auth/auth_service.dart';
+import 'package:http/http.dart' as http;
 
 class ValidPage extends StatefulWidget {
   final String name;
@@ -22,7 +26,38 @@ class ValidPage extends StatefulWidget {
 class _ValidPageState extends State<ValidPage> {
   String _statusValidasi = '';
   final TextEditingController _catatanController = TextEditingController();
-  bool _isLoading = false;
+  bool _isLoading = true;
+  Map<String, dynamic>? _paymentDetail;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchDetail();
+  }
+
+  Future<void> _fetchDetail() async {
+    try {
+      final response = await http.get(
+        Uri.parse(
+          '${AppConfig.baseUrl}/api/admin/payment-detail/${widget.transactionId}',
+        ),
+        headers: {"ngrok-skip-browser-warning": "69420"},
+      );
+
+      if (!mounted) return;
+
+      if (response.statusCode == 200) {
+        setState(() {
+          _paymentDetail = jsonDecode(response.body)['data'];
+          _isLoading = false;
+        });
+      } else {
+        setState(() => _isLoading = false);
+      }
+    } catch (e) {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
   Future<void> submitValidation() async {
     if (_statusValidasi.isEmpty) {
@@ -45,27 +80,32 @@ class _ValidPageState extends State<ValidPage> {
     });
 
     try {
+      final authService = AuthService();
+      String? adminId = await authService.getUserId() ?? '1';
+
       final url = Uri.parse(
-        '${AppConfig.baseUrl}/api/payment/${widget.transactionId}',
+        '${AppConfig.baseUrl}/api/admin/verifikasi-pembayaran',
       );
 
-      final response = await http.put(
+      final response = await http.post(
         url,
         headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
+          "ngrok-skip-browser-warning": "69420",
+          "Content-Type": "application/x-www-form-urlencoded", 
         },
 
-        body: jsonEncode({
+        body: {
+          'id_payment': widget.transactionId.toString(),
+          'id_admin': adminId,
           'status_validasi': _statusValidasi,
-          'id_admin_verifikator': '1',
           'catatan_admin': _statusValidasi == 'tidak_valid'
               ? _catatanController.text
               : '',
-        }),
+        },
       );
 
       if (!mounted) return;
+
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Status berhasil diperbarui!')),
@@ -82,10 +122,11 @@ class _ValidPageState extends State<ValidPage> {
         context,
       ).showSnackBar(SnackBar(content: Text('Error: $e')));
     } finally {
-      if (!mounted) false;
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -159,7 +200,8 @@ class _ValidPageState extends State<ValidPage> {
                             ),
                             SizedBox(height: 4),
                             Text(
-                              widget.name,
+                              _paymentDetail?['nama_requester'] ??
+                                  "Loading user...",
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
@@ -179,7 +221,11 @@ class _ValidPageState extends State<ValidPage> {
                             ),
                             SizedBox(height: 4),
                             Text(
-                              widget.amount,
+                              (_paymentDetail?['nominal_pembayaran'] != null)
+                                  ? _paymentDetail!['nominal_pembayaran']
+                                        .toString()
+                                        .toRupiah()
+                                  : "Rp 0",
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
@@ -207,11 +253,17 @@ class _ValidPageState extends State<ValidPage> {
                 width: double.infinity,
                 height: 300,
                 decoration: BoxDecoration(
-                  color: Colors.deepPurpleAccent,
+                  color: Colors.grey[300],
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: Colors.grey),
                   image: DecorationImage(
-                    image: NetworkImage("https://picsum.photos/400/600"),
+                    image:
+                        (_paymentDetail != null &&
+                            _paymentDetail!['bukti_pembayaran'] != null)
+                        ? NetworkImage(
+                            "${AppConfig.baseUrl}/uploads/bukti/${_paymentDetail!['bukti_pembayaran']}",
+                          )
+                        : NetworkImage("https://via.placeholder.com/400x600"),
                     fit: BoxFit.cover,
                   ),
                 ),

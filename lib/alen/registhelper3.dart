@@ -1,6 +1,7 @@
 import 'package:bantuin/alen/admin.dart';
 import 'package:bantuin/alen/paypage.dart';
 import 'package:bantuin/alen/registhelper.dart';
+import 'package:bantuin/ida/auth/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -39,7 +40,8 @@ class _RegistPage3State extends State<RegistPage3> {
   }
 
   Future<void> _submitRegistration() async {
-    if (_bankNameController.text.trim().isEmpty || _accNumberController.text.trim().isEmpty) {
+    if (_bankNameController.text.trim().isEmpty ||
+        _accNumberController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Harap lengkapi data bank!')),
       );
@@ -51,20 +53,39 @@ class _RegistPage3State extends State<RegistPage3> {
     });
 
     try {
+      final authService = AuthService();
+      String? adminId = await authService.getUserId();
+
+      if (adminId == null || adminId.isEmpty) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Sesi login tidak ditemukan. Silakan login ulang sebagai Admin.',
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+
       var response = await http.post(
         Uri.parse('${AppConfig.baseUrl}/api/admin/register-helper'),
         headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
+          "ngrok-skip-browser-warning": "69420",
         },
-        body: jsonEncode({
-          'nama_lengkap': widget.fullName,
+        body: {
+          'id_admin_pendaftar': adminId,
+          'nama': widget.fullName,
           'email': widget.email,
           'password': widget.password,
-          'whatsapp_number': widget.whatsapp,
+          'no_hp': widget.whatsapp,
           'nama_bank': _bankNameController.text.trim(),
           'nomor_rekening': _accNumberController.text.trim(),
-        }),
+        },
       );
 
       if (!mounted) return;
@@ -79,13 +100,21 @@ class _RegistPage3State extends State<RegistPage3> {
         );
       } else {
         var errorData = jsonDecode(response.body);
+        String errorMessage = "Gagal mendaftar";
+
+        if (errorData['messages'] != null) {
+          errorMessage = errorData['messages'].toString();
+        } else if (errorData['message'] != null) {
+          errorMessage = errorData['message'];
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal mendaftar: ${errorData['message'] ?? response.statusCode}')),
+          SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
         );
       }
     } catch (e) {
       if (!mounted) return;
-      
+
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Error jaringan: $e')));
@@ -153,8 +182,8 @@ class _RegistPage3State extends State<RegistPage3> {
                       controller: _bankNameController,
                       decoration: InputDecoration(
                         hintText: "ex. BCA, BNI, Mandiri",
-                        suffixIcon: Icon(
-                          Icons.keyboard_arrow_down,
+                        prefixIcon: Icon(
+                          Icons.account_balance_outlined,
                         ), // Ikon panah bawah
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -173,11 +202,11 @@ class _RegistPage3State extends State<RegistPage3> {
                     TextField(
                       controller: _accNumberController,
                       keyboardType:
-                          TextInputType.number, // Munculin keyboard angka
+                          TextInputType.number,
                       decoration: InputDecoration(
                         hintText: "e.g. 1234567890",
-                        suffixIcon: Icon(
-                          Icons.account_balance,
+                        prefixIcon: Icon(
+                          Icons.credit_card_outlined, color: Colors.grey,
                         ), // Ikon gedung bank
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
