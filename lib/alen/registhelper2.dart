@@ -45,21 +45,7 @@ class _RegistPage2State extends State<RegistPage2> {
           ),
         ),
         elevation: 3,
-        actions: [
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                onPressed: () {},
-                icon: Icon(
-                  Icons.notifications_none,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-              SizedBox(width: 12),
-            ],
-          ),
-        ],
+        automaticallyImplyLeading: false,
       ),
       body: SingleChildScrollView(
         child: Padding(

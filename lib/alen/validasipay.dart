@@ -1,14 +1,15 @@
 import 'package:bantuin/config/app_config.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:config/config.dart';
+import 'dart:convert';
 
 class ValidPage extends StatefulWidget {
   final String name;
   final String amount;
   final String transactionId;
 
-  ValidPage({
+  const ValidPage({
+    super.key,
     required this.name,
     required this.amount,
     required this.transactionId,
@@ -20,7 +21,7 @@ class ValidPage extends StatefulWidget {
 
 class _ValidPageState extends State<ValidPage> {
   String _statusValidasi = '';
-  TextEditingController _catatanController = TextEditingController();
+  final TextEditingController _catatanController = TextEditingController();
   bool _isLoading = false;
 
   Future<void> submitValidation() async {
@@ -45,20 +46,26 @@ class _ValidPageState extends State<ValidPage> {
 
     try {
       final url = Uri.parse(
-        '${AppConfig.verifyPayment}/${widget.transactionId}',
+        '${AppConfig.baseUrl}/api/payment/${widget.transactionId}',
       );
 
       final response = await http.put(
         url,
-        body: {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+
+        body: jsonEncode({
           'status_validasi': _statusValidasi,
           'id_admin_verifikator': '1',
           'catatan_admin': _statusValidasi == 'tidak_valid'
               ? _catatanController.text
               : '',
-        },
+        }),
       );
 
+      if (!mounted) return;
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Status berhasil diperbarui!')),
@@ -70,10 +77,12 @@ class _ValidPageState extends State<ValidPage> {
         );
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Error: $e')));
     } finally {
+      if (!mounted) false;
       setState(() {
         _isLoading = false;
       });
@@ -202,7 +211,7 @@ class _ValidPageState extends State<ValidPage> {
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: Colors.grey),
                   image: DecorationImage(
-                    image: NetworkImage("https://picsum.photos/200"),
+                    image: NetworkImage("https://picsum.photos/400/600"),
                     fit: BoxFit.cover,
                   ),
                 ),

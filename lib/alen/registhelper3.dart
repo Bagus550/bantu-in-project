@@ -2,7 +2,8 @@ import 'package:bantuin/alen/admin.dart';
 import 'package:bantuin/alen/paypage.dart';
 import 'package:bantuin/alen/registhelper.dart';
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:bantuin/config/app_config.dart';
 
 class RegistPage3 extends StatefulWidget {
@@ -50,17 +51,23 @@ class _RegistPage3State extends State<RegistPage3> {
     });
 
     try {
-      var response = await Dio().post(
-        '${AppConfig.baseUrl}/api/auth/register',
-        data: {
+      var response = await http.post(
+        Uri.parse('${AppConfig.baseUrl}/api/admin/register-helper'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode({
           'nama_lengkap': widget.fullName,
           'email': widget.email,
           'password': widget.password,
           'whatsapp_number': widget.whatsapp,
           'nama_bank': _bankNameController.text.trim(),
           'nomor_rekening': _accNumberController.text.trim(),
-        },
+        }),
       );
+
+      if (!mounted) return;
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -71,11 +78,14 @@ class _RegistPage3State extends State<RegistPage3> {
           MaterialPageRoute(builder: (context) => const RegistPage()),
         );
       } else {
+        var errorData = jsonDecode(response.body);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal mendaftar: ${response.data}')),
+          SnackBar(content: Text('Gagal mendaftar: ${errorData['message'] ?? response.statusCode}')),
         );
       }
     } catch (e) {
+      if (!mounted) return;
+      
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Error jaringan: $e')));
@@ -100,21 +110,6 @@ class _RegistPage3State extends State<RegistPage3> {
           ),
         ),
         elevation: 3,
-        actions: [
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                onPressed: () {},
-                icon: Icon(
-                  Icons.notifications_none,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-              SizedBox(width: 12),
-            ],
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         child: Padding(

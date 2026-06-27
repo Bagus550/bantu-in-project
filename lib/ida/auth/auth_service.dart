@@ -25,7 +25,7 @@ class AuthService {
             await _storage.write(key: 'jwt_token', value: data['token']);
             await _storage.write(
               key: 'user_nama',
-              value: data['user']['nama'].toString(),
+              value: data['user']['username'].toString(),
             );
             await _storage.write(
               key: 'user_id',
@@ -74,7 +74,7 @@ class AuthService {
   ) async {
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/auth/register'),
+        Uri.parse(AppConfig.register),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'nama': nama,
@@ -86,6 +86,10 @@ class AuthService {
           'role': 'requester',
         }),
       );
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        print("Pesan Gagal Backend: ${response.body}");
+      }
 
       if (response.statusCode == 201 || response.statusCode == 200) {
         return {'success': true};

@@ -3,7 +3,8 @@ import 'package:bantuin/alen/registhelper.dart';
 import 'package:flutter/material.dart';
 import 'package:bantuin/alen/validasipay.dart';
 import 'dart:convert';
-import 'package:dio/dio.dart';
+import 'package:http/http.dart' as http;
+import 'package:bantuin/config/app_config.dart';
 
 class PayPage extends StatefulWidget {
   const PayPage({super.key});
@@ -27,27 +28,41 @@ class _PayPageState extends State<PayPage> {
 
   Future<void> _fetchPayments() async {
     try {
-      final response = await Dio().get(
-        'https://recreate-jaundice-derby.ngrok-free.dev/api/payment',
+      final response = await http.get(
+        Uri.parse('${AppConfig.baseUrl}/api/payment'),
+        headers: {'Accept': 'application/json'},
       );
+
+      if (!mounted) return;
+
       if (response.statusCode == 200) {
-        final data = response.data;
+        final data = jsonDecode(response.body);
 
         setState(() {
-          _payments = data['incoming_requests'];
+          _payments = data['incoming_requests'] ?? [];
 
-          _pendingCount = data['stats']['total_pending'];
+          _pendingCount = data['stats']['total_pending'] ?? 0;
 
-          _approvedCount = data['stats']['total_approved'];
+          _approvedCount = data['stats']['total_approved'] ?? 0;
 
           _isLoading = false;
         });
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal narik data: ${response.statusCode}')),
+        );
       }
     } catch (e) {
-      print("Error fetching payments: $e");
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
       });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error jaringan: $e')),
+      );
     }
   }
 
@@ -248,7 +263,9 @@ class _PayPageState extends State<PayPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          _fetchPayments();
+        },
         backgroundColor: Theme.of(context).colorScheme.primary,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: Icon(Icons.done_all, color: Colors.white),
@@ -292,10 +309,6 @@ class _PayPageState extends State<PayPage> {
           NavigationDestination(
             icon: Icon(Icons.payment_outlined, color: Colors.black),
             label: "Payments",
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline, color: Colors.black),
-            label: "Profile",
           ),
         ],
       ),

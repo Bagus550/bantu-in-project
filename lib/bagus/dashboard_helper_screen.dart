@@ -1,7 +1,7 @@
 // ignore_for_file: empty_catches, use_build_context_synchronously
 
 import 'dart:convert';
-import 'package:bantuin/bagus/history_helper.dart';
+import 'package:bantuin/yuliana/history_helper.dart';
 import 'package:bantuin/bagus/tugas_aktif_helper.dart';
 import 'package:bantuin/bagus/upload_bukti.dart';
 import 'package:bantuin/danela/detail_task_helper.dart';
@@ -9,6 +9,7 @@ import 'package:bantuin/danela/message_list.dart';
 import 'package:bantuin/ida/screen/profile.dart';
 import 'package:bantuin/ida/screen/profile_tab.dart';
 import 'package:bantuin/dava/helper_setting.dart';
+import 'package:bantuin/utils/currency_extension.dart';
 import 'package:bantuin/yuliana/Faq_Helper.dart';
 import 'package:flutter/material.dart';
 import 'package:bantuin/config/app_config.dart';
@@ -404,7 +405,7 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                                       ),
                                     ),
                                     Text(
-                                      "Rp ${tugas['nominal_pembayaran'].toString()}",
+                                      tugas['nominal_pembayaran'] ?.toString().toRupiah() ?? 'Rp 0',
                                       style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
