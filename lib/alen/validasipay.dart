@@ -4,7 +4,6 @@ import 'package:bantuin/config/app_config.dart';
 import 'package:bantuin/ida/auth/auth_service.dart';
 import 'package:bantuin/utils/currency_extension.dart';
 import 'package:flutter/material.dart';
-import 'package:bantuin/ida/auth/auth_service.dart';
 import 'package:http/http.dart' as http;
 
 class ValidPage extends StatefulWidget {
