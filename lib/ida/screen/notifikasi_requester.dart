@@ -31,6 +31,8 @@ class _NotifikasiRequesterState extends State<NotifikasiRequester> {
     try {
       final response = await http.get(Uri.parse('$apiUrl/${widget.idUser}'));
 
+      if (!mounted) return;
+
       if (response.statusCode == 200) {
         setState(() {
           listNotifikasi = json.decode(response.body);
@@ -40,6 +42,7 @@ class _NotifikasiRequesterState extends State<NotifikasiRequester> {
         throw Exception("Gagal mengambil data");
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         isLoading = false;
       });

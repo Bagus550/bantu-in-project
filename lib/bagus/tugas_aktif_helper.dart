@@ -18,14 +18,18 @@ class TugasAktifHelper extends StatefulWidget {
 
 class _TugasAktifHelperState extends State<TugasAktifHelper> {
   bool _isLoading = false;
-  String _currentStatusTask = "Berjalan";
+  String _currentStatusTask = "berjalan";
 
   @override
   void initState() {
     super.initState();
     if (widget.detailTugas.containsKey('status_task') &&
         widget.detailTugas['status_task'] != null) {
-      _currentStatusTask = widget.detailTugas['status_task'].toString();
+      _currentStatusTask = widget.detailTugas['status_task']
+          .toString()
+          .trim()
+          .toLowerCase()
+          .replaceAll(' ', '_');
     }
   }
 
@@ -89,6 +93,77 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
     }
   }
 
+  void _tampilkanModalCatatanAdmin(BuildContext context, String catatan) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.warning_amber_rounded, color: Colors.red),
+                  const SizedBox(width: 10),
+                  Text(
+                    "Alasan Validasi Ditolak",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.red.shade900,
+                    ),
+                  ),
+                ],
+              ),
+              const Divider(height: 20, thickness: 1),
+              const Text(
+                "Catatan dari Admin:",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  catatan,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    height: 1.4,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Colors.white,
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Saya Paham, Tutup"),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (widget.detailTugas.isEmpty) {
@@ -118,8 +193,23 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
         widget.detailTugas['judul_tugas'] ?? 'Detail Tugas';
     final String idTugas = widget.detailTugas.toProfessionalId();
 
-    bool isBerjalan = _currentStatusTask == 'berjalan';
-    bool isMenungguValidasi = _currentStatusTask == 'menunggu_validasi';
+    String statusValidasiPembayaran =
+        (widget.detailTugas['status_validasi'] ?? '')
+            .toString()
+            .trim()
+            .toLowerCase()
+            .replaceAll(' ', '_');
+    bool isTidakValid =
+        _currentStatusTask == 'tidak_valid' ||
+        statusValidasiPembayaran == 'tidak_valid';
+
+    String catatanAdmin =
+        widget.detailTugas['catatan_admin'] ??
+        'Tidak ada catatan khusus dari admin.';
+
+    bool isBerjalan = _currentStatusTask == 'berjalan' && !isTidakValid;
+    bool isMenungguValidasi =
+        _currentStatusTask == 'menunggu_validasi' && !isTidakValid;
     bool isSelesai = _currentStatusTask == 'selesai';
 
     return SafeArea(
@@ -135,9 +225,14 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
                       child: Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(12),
-                          color: const Color(0xFFDEDCFF),
+                          // ignore: use_full_hex_values_for_flutter_colors
+                          color: isTidakValid
+                              ? const Color(0XFFFFF5F5)
+                              : const Color(0xFFDEDCFF),
                           border: Border.all(
-                            color: const Color(0xFF4D49E9),
+                            color: isTidakValid
+                                ? Colors.red.shade300
+                                : const Color(0xFF4D49E9),
                             width: 1,
                           ),
                         ),
@@ -162,10 +257,10 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
                                     shape: BoxShape.circle,
                                   ),
                                   child: Icon(
-                                    isBerjalan
-                                        ? Icons.refresh
-                                        : (_currentStatusTask == 'selesai_kerja'
-                                              ? Icons.payments_outlined
+                                    isTidakValid
+                                        ? Icons.gpp_bad_outlined
+                                        : (isBerjalan
+                                              ? Icons.refresh
                                               : Icons
                                                     .admin_panel_settings_outlined),
                                     color: const Color(0xFF4D49E9),
@@ -179,11 +274,10 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      isBerjalan
-                                          ? "Tugas Berlangsung"
-                                          : (_currentStatusTask ==
-                                                    'selesai_kerja'
-                                                ? "Pekerjaan Selesai (Konfirmasi Upah)"
+                                      isTidakValid
+                                          ? "Validasi Ditolak Admin"
+                                          : (isBerjalan
+                                                ? "Tugas Berlangsung"
                                                 : "Menunggu Validasi Admin"),
                                       style: const TextStyle(
                                         fontSize: 15,
@@ -193,11 +287,10 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      isBerjalan
-                                          ? "Kerjakan tugas sesuai jenis layanan dan konfirmasi selesai jika pekerjaan sudah selesai."
-                                          : (_currentStatusTask ==
-                                                    'selesai_kerja'
-                                                ? "Kamu telah menyelesaikan pekerjaan! Pastikan upah dari requester sudah kamu terima dengan aman, lalu klik tombol di bawah untuk kirim bukti ke admin."
+                                      isTidakValid
+                                          ? "Bukti yang dikirim sebelumnya dinyatakan TIDAK VALID oleh admin. Harap baca catatan penolakan di bawah dan unggah ulang bukti."
+                                          : (isBerjalan
+                                                ? "Kerjakan tugas sesuai jenis layanan dan konfirmasi selesai jika pekerjaan sudah selesai."
                                                 : "Bukti pembayaran/transfer sudah dikirim ke server. Harap tunggu admin memvalidasi transaksi Anda untuk menutup tugas."),
                                       style: TextStyle(
                                         color: Colors.grey.shade800,
@@ -453,6 +546,36 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
                     padding: const EdgeInsets.all(12),
                     child: Column(
                       children: [
+                        if (isTidakValid)
+                          Container(
+                            width: double.infinity,
+                            margin: EdgeInsets.only(bottom: 12),
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.red.shade50,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.red.shade300),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.cancel_outlined,
+                                  color: Colors.red.shade700,
+                                ),
+                                const SizedBox(width: 10),
+                                const Expanded(
+                                  child: Text(
+                                    "Validasi Ditolak Admin! Silakan upload ulang bukti yang benar.",
+                                    style: TextStyle(
+                                      color: Color(0xFFCD2528),
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         SizedBox(
                           width: double.infinity,
                           height: 48,
@@ -461,22 +584,19 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              backgroundColor: isBerjalan
-                                  ? Theme.of(context).colorScheme.primary
-                                  : (_currentStatusTask == 'selesai_kerja'
-                                        ? Colors.orange.shade700
+                              backgroundColor: isTidakValid
+                                  ? Colors.red.shade700
+                                  : (isBerjalan
+                                        ? Theme.of(context).colorScheme.primary
                                         : Colors.grey.shade400),
                               foregroundColor: Colors.white,
                             ),
-                            onPressed: (_isLoading || isMenungguValidasi)
+                            onPressed:
+                                (_isLoading ||
+                                    (isMenungguValidasi && !isTidakValid))
                                 ? null
                                 : () async {
-                                    if (isBerjalan) {
-                                      await _updateStatusTaskBackend(
-                                        'selesai_kerja',
-                                      );
-                                    } else if (_currentStatusTask ==
-                                        'selesai_kerja') {
+                                    if (isBerjalan || isTidakValid) {
                                       final bool? berhasilUpload =
                                           await Navigator.push(
                                             context,
@@ -491,10 +611,9 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
                                           );
 
                                       if (berhasilUpload == true) {
-                                        setState(() {
-                                          _currentStatusTask =
-                                              'menunggu_validasi';
-                                        });
+                                        await _updateStatusTaskBackend(
+                                          'menunggu_validasi',
+                                        );
                                       }
                                     }
                                   },
@@ -508,10 +627,10 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
                                     ),
                                   )
                                 : Text(
-                                    isBerjalan
-                                        ? "Konfirmasi Tugas Selesai"
-                                        : (_currentStatusTask == 'selesai_kerja'
-                                              ? "Konfirmasi Upah Diterima"
+                                    isTidakValid
+                                        ? "Upload Ulang Bukti Transaksi"
+                                        : (isBerjalan
+                                              ? "Konfirmasi Tugas Selesai & Upload Bukti"
                                               : "Menunggu Validasi Admin"),
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
@@ -520,21 +639,46 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
                                   ),
                           ),
                         ),
-                        const SizedBox(height: 12),
-                        Center(
-                          child: Text(
-                            isBerjalan
-                                ? "Gunakan fitur chat di atas untuk koordinasi lapangan dengan pemesan."
-                                : (_currentStatusTask == 'selesai_kerja'
-                                      ? "Pekerjaan ditandai selesai! Pastikan upah sudah aman, lalu klik tombol di atas untuk upload bukti ke admin."
-                                      : "Bukti transfer telah dikirim. Menunggu admin memverifikasi pekerjaan Anda."),
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey,
+                        if (isTidakValid) ...[
+                          const SizedBox(height: 10),
+                          SizedBox(
+                            width: double.infinity,
+                            child: TextButton.icon(
+                              onPressed: () {
+                                _tampilkanModalCatatanAdmin(
+                                  context,
+                                  catatanAdmin,
+                                );
+                              },
+                              icon: const Icon(
+                                Icons.info_outline,
+                                color: Colors.orange,
+                              ),
+                              label: Text(
+                                "Lihat Catatan Penolakan Admin",
+                                style: TextStyle(
+                                  color: Colors.orange,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
+                          const SizedBox(height: 12),
+                          Center(
+                            child: Text(
+                              isTidakValid
+                                  ? "Periksa catatan admin di atas sebelum mengunggah kembali."
+                                  : (isBerjalan
+                                        ? "Pastikan pekerjaan selesai dan upah sudah diterima sebelum mengunggah bukti."
+                                        : "Bukti transfer telah dikirim. Menunggu admin memverifikasi pekerjaan Anda."),
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
