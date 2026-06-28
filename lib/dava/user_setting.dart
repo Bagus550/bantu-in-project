@@ -1,15 +1,14 @@
 import 'package:bantuin/ida/screen/login_screen.dart';
 import 'package:bantuin/ida/screen/ubah_katasandi.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:bantuin/dava/edit_profile.dart';
+import 'package:bantuin/config/app_config.dart';
 import 'package:bantuin/ida/screen/profile.dart';
 import 'package:bantuin/yuliana/about_User.dart';
 import 'package:bantuin/yuliana/faq_user.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class UserSetting extends StatefulWidget {
@@ -307,17 +306,18 @@ class _UserSettingState extends State<UserSetting> {
 
   Future<void> _hapusAkunBackend() async {
     final url = Uri.parse(
-      'https://prowess-gumminess-comfy.ngrok-free.dev/api/users/$currentUserId/hapus',
+      '${AppConfig.baseUrl}/api/users/$currentUserId/hapus',
     );
     try {
       final response = await http.delete(url);
       if (response.statusCode == 200) {
         await _secureStorage.deleteAll();
-        if (context.mounted)
+        if (context.mounted) {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => LoginScreen()),
           );
+        }
       }
     } catch (e) {
       print("Gagal: $e");

@@ -129,7 +129,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
     switch (status) {
       case 'mencari helper':
         return const Color.fromARGB(255, 255, 158, 79);
-      case 'merjalan':
+      case 'berjalan':
         return Color(0xFF283593);
       case 'menunggu validasi':
         return Colors.teal.shade800;
@@ -225,7 +225,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
       case 0:
         return _buildDashboardHome();
       case 1:
-        return NotifikasiRequester(idUser: int.parse(idUserLogin),);
+        return NotifikasiRequester(idUser: int.parse(idUserLogin));
       case 2:
         return MessageList();
       case 3:
@@ -372,9 +372,11 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
 
   Widget _buildDashboardHome() {
     final listTugasAktif = listTugasDariApi.where((item) {
-      return item['status'] == 'Mencari helper' ||
-          item['status'] == 'Berjalan' ||
-          item['status'] == 'Menunggu validasi';
+      final status = item['status_task']?.toString().toLowerCase().trim() ?? '';
+
+      return status == 'mencari_helper' ||
+          status == 'berjalan' ||
+          status == 'menunggu_validasi';
     }).toList();
 
     // final listTugasSelesai = listTugasDariApi.where((item) {

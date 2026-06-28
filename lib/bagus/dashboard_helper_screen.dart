@@ -192,11 +192,14 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                   leading: Icon(Icons.history, color: Colors.black87),
                   title: Text("History Tugas"),
                   onTap: () {
-                    final String idHelperLogin = widget.userData?['id']?.toString() ?? '2';
+                    final String idHelperLogin =
+                        widget.userData?['id']?.toString() ?? '2';
 
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => History(idHelper: idHelperLogin)),
+                      MaterialPageRoute(
+                        builder: (context) => History(idHelper: idHelperLogin),
+                      ),
                     );
                   },
                 ),
@@ -352,25 +355,28 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                         child: InkWell(
                           onTap: () async {
                             final apakahBerhasilAmbil = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => DetailTugasHelper(
-          taskData: tugas,
-          userData: widget.userData,
-          token: widget.token,
-          adaTugasAktif: _tugasAktifSaya.isNotEmpty && _tugasAktifSaya['id_task'] != null,
-        ),
-      ),
-    );
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => DetailTugasHelper(
+                                  taskData: tugas,
+                                  userData: widget.userData,
+                                  token: widget.token,
+                                  adaTugasAktif:
+                                      _tugasAktifSaya.isNotEmpty &&
+                                      _tugasAktifSaya['id_task'] != null,
+                                ),
+                              ),
+                            );
 
-    if (apakahBerhasilAmbil == true) {
-      _refreshData();
-      if (mounted) {
-        setState(() {
-          _currentIndex = 1; // Otomatis pindah ke tab Tugas Aktif
-        });
-      }
-    }
+                            if (apakahBerhasilAmbil == true) {
+                              _refreshData();
+                              if (mounted) {
+                                setState(() {
+                                  _currentIndex =
+                                      1; // Otomatis pindah ke tab Tugas Aktif
+                                });
+                              }
+                            }
                           },
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -405,7 +411,10 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                                       ),
                                     ),
                                     Text(
-                                      tugas['nominal_pembayaran'] ?.toString().toRupiah() ?? 'Rp 0',
+                                      tugas['nominal_pembayaran']
+                                              ?.toString()
+                                              .toRupiah() ??
+                                          'Rp 0',
                                       style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
@@ -727,8 +736,7 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
         if (index == 1) {
           try {
             await fetchTasksForHelper();
-          } catch (e) {
-          }
+          } catch (e) {}
         }
       },
       child: AnimatedContainer(
@@ -788,8 +796,7 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
         if (isSuksesUpload == true) {
           try {
             await fetchTasksForHelper();
-          } catch (e) {
-          }
+          } catch (e) {}
         }
       },
       child: Column(
