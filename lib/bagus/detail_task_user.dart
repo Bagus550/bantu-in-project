@@ -27,6 +27,9 @@ class _DetailTugasState extends State<DetailTugas> {
         return Color(0XFF9E9D9A);
       case 'Selesai':
         return Color(0XFF25CD25);
+      case 'Dibatalkan':
+      case 'tidak_valid':
+        return Color(0XFFCD2525);
       default:
         return Color(0XFF9E9D9A);
     }
@@ -81,6 +84,8 @@ class _DetailTugasState extends State<DetailTugas> {
         return Icons.clear;
       case 'Selesai':
         return Icons.check;
+      case 'tidak_valid':
+        return Icons.cancel;
       default:
         return Icons.help_outline_rounded;
     }
