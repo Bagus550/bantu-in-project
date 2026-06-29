@@ -1,192 +1,171 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:bantuin/ida/screen/login_screen.dart';
 
-class ProfileTab extends StatelessWidget {
+class ProfileTab extends StatefulWidget {
   const ProfileTab({super.key});
+
+  @override
+  State<ProfileTab> createState() => _ProfileTabState();
+}
+
+class _ProfileTabState extends State<ProfileTab> {
+  final _secureStorage = const FlutterSecureStorage();
+
+  String _nama = "Memuat...";
+  String _email = "Memuat...";
+  String _noHp = "Memuat...";
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfileData();
+  }
+
+  Future<void> _loadProfileData() async {
+    // Membaca data dari storage
+    String? savedNama = await _secureStorage.read(key: 'nama_user');
+    String? savedEmail = await _secureStorage.read(key: 'email_user');
+    String? savedNoHp = await _secureStorage.read(key: 'no_hp');
+
+    if (mounted) {
+      setState(() {
+        _nama = savedNama ?? "User";
+        _email = savedEmail ?? "Email tidak tersedia";
+        _noHp = savedNoHp ?? "Tidak tersedia";
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Column(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(25),
+              child: Column(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.all(25),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade400),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
                       children: [
-                        Container(
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey.shade400),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(10.0),
-                                child: CircleAvatar(
-                                  radius: 30,
-                                  child: Icon(Icons.person, size: 40),
-                                ),
-                              ),
-                              SizedBox(width: 15),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 10),
-                                    child: Text("Nama"),
-                                  ),
-                                  Text("nama@gmail.com"),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 15,
-                                    ),
-                                    child: Text(
-                                      "Pengguna Aktif - Terverifikasi",
-                                      style: TextStyle(color: Colors.blue),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
+                        const CircleAvatar(
+                          radius: 30,
+                          child: Icon(Icons.person, size: 40),
                         ),
-                        SizedBox(height: 20),
-
-                        Text(
-                          "Data Akun",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
-                        ),
-                        Row(
-                          children: [
-                            Icon(Icons.person_2_outlined, size: 30),
-                            SizedBox(width: 10),
-                            Text(
-                              "Username: ",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            Text("Nama"),
-                          ],
-                        ),
-                        Divider(color: Colors.grey.shade400),
-                        SizedBox(height: 10),
-                        Text(
-                          "Data Alamat",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
-                        ),
-                        Row(
-                          children: [
-                            Icon(Icons.location_on_outlined),
-                            SizedBox(width: 10),
-                            Text(
-                              "Alamat Utama: ",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            Text("Alamat Palsoe"),
-                          ],
-                        ),
-                        Divider(color: Colors.grey.shade400),
-                        SizedBox(height: 10),
-                        Text(
-                          "Kontak",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
-                        ),
-                        Row(
-                          children: [
-                            Icon(Icons.mail_outline),
-                            SizedBox(width: 10),
-                            Text(
-                              "Email: ",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            Text("nama@gmail.com"),
-                          ],
-                        ),
-                        SizedBox(height: 5),
-                        Row(
-                          children: [
-                            Icon(Icons.call_outlined),
-                            SizedBox(width: 10),
-                            Text(
-                              "Nomor Telepon: ",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            Text("0812********"),
-                          ],
-                        ),
-                        Divider(color: Colors.grey.shade400),
-                        SizedBox(height: 10),
-                        Text(
-                          "Data Tambahan",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
-                        ),
-
-                        Row(
-                          children: [
-                            Icon(Icons.date_range_outlined),
-                            SizedBox(width: 10),
-                            Text(
-                              "Tanggal Lahir: ",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            Text("**-**-****"),
-                          ],
-                        ),
-                        Divider(color: Colors.grey.shade400),
-                        SizedBox(height: 10),
-
+                        const SizedBox(width: 15),
                         Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            SizedBox(
-                              width: double.infinity,
-                              height: 60,
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color.fromARGB(
-                                    255,
-                                    243,
-                                    19,
-                                    3,
-                                  ),
-                                ),
-                                onPressed: () {},
-                                child: Text(
-                                  "Keluar",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 20,
-                                  ),
-                                ),
+                            Text(
+                              _nama,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
                               ),
                             ),
+                            Text(_email),
                           ],
                         ),
                       ],
                     ),
                   ),
+                  const SizedBox(height: 20),
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "Data Akun",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      const Icon(Icons.person_2_outlined, size: 30),
+                      const SizedBox(width: 10),
+                      const Text(
+                        "Username: ",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text(_nama), // Data dinamis, tanpa const
+                    ],
+                  ),
+                  const Divider(color: Colors.grey),
+                  const SizedBox(height: 10),
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "Kontak",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      const Icon(Icons.mail_outline, size: 30),
+                      const SizedBox(width: 10),
+                      const Text(
+                        "Email: ",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text(_email), // Data dinamis, tanpa const
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      const Icon(Icons.call_outlined, size: 30),
+                      const SizedBox(width: 10),
+                      const Text(
+                        "No Telepon: ",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text(_noHp), // Data dinamis, tanpa const
+                    ],
+                  ),
+                  const Divider(color: Colors.grey),
+                  const SizedBox(height: 30),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 60,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                      ),
+                      onPressed: () async {
+                        await _secureStorage.deleteAll();
+                        if (!mounted) return;
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const LoginScreen(),
+                          ),
+                        );
+                      },
+                      child: const Text(
+                        "Keluar",
+                        style: TextStyle(color: Colors.white, fontSize: 20),
+                      ),
+                    ),
+                  ),
                 ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

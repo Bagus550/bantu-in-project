@@ -69,8 +69,9 @@ class _LoginScreenState extends State<LoginScreen> {
         }
         await _secureStorage.write(key: 'nama_user', value: namaUser);
         await _secureStorage.write(key: 'email_user', value: emailUser);
-        print(
-          "DEBUG LOGIN: Token dan ID_Users berhasil disimpan di Secure Storage!",
+        await _secureStorage.write(
+          key: 'no_hp',
+          value: result['user']['no_hp'].toString(),
         );
 
         if (mounted) {
