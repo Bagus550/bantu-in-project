@@ -125,17 +125,6 @@ class _PayPageState extends State<PayPage> {
             ),
           ],
         ),
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: Icon(Icons.search, color: Colors.black),
-          ),
-          IconButton(
-            onPressed: () {},
-            icon: Icon(Icons.filter_list, color: Colors.black),
-          ),
-          SizedBox(width: 8),
-        ],
       ),
       body: RefreshIndicator(
         onRefresh: _fetchPayments,
@@ -160,7 +149,10 @@ class _PayPageState extends State<PayPage> {
                           children: [
                             Text(
                               "Total Pending",
-                              style: TextStyle(fontSize: 12, color: Colors.black),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.black,
+                              ),
                             ),
                             SizedBox(height: 8),
                             Text(
@@ -189,7 +181,10 @@ class _PayPageState extends State<PayPage> {
                           children: [
                             Text(
                               "Approved",
-                              style: TextStyle(fontSize: 12, color: Colors.black),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.black,
+                              ),
                             ),
                             SizedBox(height: 8),
                             Text(
@@ -228,7 +223,7 @@ class _PayPageState extends State<PayPage> {
                                 var data = _payments[index];
                                 if (data['status_validasi'] != 'pending')
                                   return SizedBox.shrink();
-        
+
                                 return InkWell(
                                   onTap: () async {
                                     final result = await Navigator.push(
@@ -246,7 +241,7 @@ class _PayPageState extends State<PayPage> {
                                       _fetchPayments();
                                     }
                                   },
-        
+
                                   child: Container(
                                     margin: EdgeInsets.only(bottom: 12),
                                     padding: EdgeInsets.all(12),

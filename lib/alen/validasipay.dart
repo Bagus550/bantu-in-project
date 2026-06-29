@@ -90,7 +90,7 @@ class _ValidPageState extends State<ValidPage> {
         url,
         headers: {
           "ngrok-skip-browser-warning": "69420",
-          "Content-Type": "application/x-www-form-urlencoded", 
+          "Content-Type": "application/x-www-form-urlencoded",
         },
 
         body: {
@@ -278,12 +278,7 @@ class _ValidPageState extends State<ValidPage> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _statusValidasi = 'valid';
-                      _catatanController.clear();
-                    });
-                  },
+                  onPressed: () {},
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).colorScheme.primary,
                     foregroundColor: Colors.white,
@@ -312,19 +307,10 @@ class _ValidPageState extends State<ValidPage> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _statusValidasi = 'tidak_valid';
-                    });
-                  },
+                  onPressed: () {},
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _statusValidasi == 'tidak_valid'
-                        ? Colors.red
-                        : Colors.white,
-                    foregroundColor: _statusValidasi == 'tidak_valid'
-                        ? Colors.white
-                        : Colors.red,
-                    side: BorderSide(color: Colors.red, width: 1.5),
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.white,
                     padding: EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -344,61 +330,6 @@ class _ValidPageState extends State<ValidPage> {
                       ),
                     ],
                   ),
-                ),
-              ),
-              if (_statusValidasi == 'tidak_valid') ...[
-                SizedBox(height: 24),
-                Text(
-                  "Catatan Penolakan",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-                ),
-                SizedBox(height: 12),
-                TextField(
-                  controller: _catatanController,
-                  maxLines: 3,
-                  decoration: InputDecoration(
-                    hintText: "Alasan penolakan...",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-              ],
-
-              SizedBox(height: 32),
-
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : submitValidation,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    padding: EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: _isLoading
-                      ? SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : Text(
-                          "Kirim Validasi",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
                 ),
               ),
             ],

@@ -74,9 +74,7 @@ class _RegistPage3State extends State<RegistPage3> {
 
       var response = await http.post(
         Uri.parse('${AppConfig.baseUrl}/api/admin/register-helper'),
-        headers: {
-          "ngrok-skip-browser-warning": "69420",
-        },
+        headers: {"ngrok-skip-browser-warning": "69420"},
         body: {
           'id_admin_pendaftar': adminId,
           'nama': widget.fullName,
@@ -201,12 +199,12 @@ class _RegistPage3State extends State<RegistPage3> {
                     SizedBox(height: 8),
                     TextField(
                       controller: _accNumberController,
-                      keyboardType:
-                          TextInputType.number,
+                      keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         hintText: "e.g. 1234567890",
                         prefixIcon: Icon(
-                          Icons.credit_card_outlined, color: Colors.grey,
+                          Icons.credit_card_outlined,
+                          color: Colors.grey,
                         ), // Ikon gedung bank
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),

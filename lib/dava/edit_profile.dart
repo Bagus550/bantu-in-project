@@ -28,7 +28,7 @@ class _EditProfileState extends State<EditProfile> {
       int currentUserId = int.tryParse(idUser ?? '2') ?? 2;
 
       final url = Uri.parse(
-        'https://prowess-gumminess-comfy.ngrok-free.dev/api/users/$currentUserId/profil',
+        'https://serve.bagusdevstudio.xyz/api/users/$currentUserId/profil',
       );
 
       Map<String, dynamic> requestBody = {};
