@@ -1,14 +1,17 @@
-import 'package:bantuin/dava/edit_profile.dart';
 import 'package:bantuin/ida/auth/auth_service.dart';
 import 'package:bantuin/ida/screen/login_screen.dart';
 import 'package:bantuin/ida/screen/ubah_katasandi.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/services.dart'; // Mencegah error Clipboard
+import 'package:bantuin/dava/edit_profile.dart';
+import 'package:bantuin/config/app_config.dart';
 import 'package:bantuin/ida/screen/profile.dart';
 import 'package:bantuin/yuliana/about_helper.dart';
 import 'package:bantuin/yuliana/Faq_Helper.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class HelperSetting extends StatefulWidget {
   const HelperSetting({super.key});
@@ -18,8 +21,35 @@ class HelperSetting extends StatefulWidget {
 }
 
 class _HelperSettingState extends State<HelperSetting> {
-  bool isNotificationOn = true;
-  bool isSuaraOn = true;
+  int currentUserId = 1;
+
+  String _namaUser = "Memuat...";
+  String _emailUser = "Memuat...";
+
+  final _secureStorage = const FlutterSecureStorage();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    String? idString = await _secureStorage.read(key: 'id_users');
+    String? savedNama = await _secureStorage.read(key: 'nama_user');
+    String? savedEmail = await _secureStorage.read(key: 'email_user');
+
+    if (mounted) {
+      setState(() {
+        if (idString != null) {
+          currentUserId = int.tryParse(idString) ?? 1;
+        }
+        _namaUser = savedNama ?? "Helper Bantu.in";
+        _emailUser = savedEmail ?? "Email tidak tersedia";
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,10 +58,8 @@ class _HelperSettingState extends State<HelperSetting> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: Icon(Icons.arrow_back_ios, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
         ),
         title: const Text(
           'Pengaturan',
@@ -47,6 +75,7 @@ class _HelperSettingState extends State<HelperSetting> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Profil Section Dinamis
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -57,14 +86,10 @@ class _HelperSettingState extends State<HelperSetting> {
               child: Row(
                 children: [
                   InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const Profile(),
-                        ),
-                      );
-                    },
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const Profile()),
+                    ),
                     child: const CircleAvatar(
                       radius: 28,
                       backgroundColor: Colors.grey,
@@ -76,16 +101,16 @@ class _HelperSettingState extends State<HelperSetting> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Nama',
-                          style: TextStyle(
+                        Text(
+                          _namaUser,
+                          style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                           ),
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          'Nama@Gmail.com',
+                          _emailUser,
                           style: TextStyle(
                             color: Colors.grey.shade600,
                             fontSize: 13,
@@ -93,14 +118,12 @@ class _HelperSettingState extends State<HelperSetting> {
                         ),
                         const SizedBox(height: 4),
                         GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const EditProfile(),
-                              ),
-                            );
-                          },
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const EditProfile(),
+                            ),
+                          ),
                           child: const Text(
                             'Edit Profil',
                             style: TextStyle(
@@ -117,125 +140,54 @@ class _HelperSettingState extends State<HelperSetting> {
               ),
             ),
             const SizedBox(height: 28),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Akun & Keamanan',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                ),
-                const SizedBox(height: 8),
-                _buildMenuItem(
-                  Icons.lock_outline,
-                  'Ubah Kata Sandi',
-                  true,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const UbahKatasandi(),
-                      ),
-                    );
-                  },
-                ),
-                const Divider(height: 24, thickness: 1),
 
-                const Text(
-                  'Preferensi Aplikasi',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                ),
-                const SizedBox(height: 8),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  visualDensity: const VisualDensity(vertical: -2),
-                  leading: const Icon(
-                    Icons.notifications_none,
-                    color: Colors.black87,
-                    size: 26,
-                  ),
-                  title: const Text(
-                    'Notifikasi Pesanan',
-                    style: TextStyle(fontSize: 14, color: Colors.black87),
-                  ),
-                  trailing: Transform.scale(
-                    scale: 0.75,
-                    child: Switch(
-                      value: isNotificationOn,
-                      activeThumbColor: Theme.of(context).colorScheme.primary,
-                      onChanged: (bool value) {
-                        setState(() {
-                          isNotificationOn = value;
-                        });
-                      },
-                    ),
-                  ),
-                ),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  visualDensity: const VisualDensity(vertical: -2),
-                  leading: const Icon(
-                    Icons.volume_up_outlined,
-                    color: Colors.black87,
-                    size: 26,
-                  ),
-                  title: const Text(
-                    'Suara',
-                    style: TextStyle(fontSize: 14, color: Colors.black87),
-                  ),
-                  trailing: Transform.scale(
-                    scale: 0.75,
-                    child: Switch(
-                      value: isSuaraOn,
-                      activeThumbColor: Theme.of(context).colorScheme.primary,
-                      onChanged: (bool value) {
-                        setState(() {
-                          isSuaraOn = value;
-                        });
-                      },
-                    ),
-                  ),
-                ),
-
-                const Text(
-                  'Bantuan & Legalitas',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                ),
-                const SizedBox(height: 8),
-                _buildMenuItem(
-                  Icons.info_outline,
-                  'Tentang Kami',
-                  true,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => AboutHelper()),
-                    );
-                  },
-                ),
-                _buildMenuItem(
-                  Icons.headset_mic_outlined,
-                  'Hubungi Kami',
-                  true,
-                  onTap: () {
-                    _showContactBottomSheet(context);
-                  },
-                ),
-                _buildMenuItem(
-                  Icons.help_outline,
-                  'Pusat Bantuan (FAQ)',
-                  true,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const FaqHelper(),
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 36),
-              ],
+            const Text(
+              'Akun & Keamanan',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
             ),
+            const SizedBox(height: 8),
+            _buildMenuItem(
+              Icons.lock_outline,
+              'Ubah Kata Sandi',
+              true,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const UbahKatasandi()),
+              ),
+            ),
+            const Divider(height: 24, thickness: 1),
+
+            const Text(
+              'Bantuan & Legalitas',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+            ),
+            const SizedBox(height: 8),
+            _buildMenuItem(
+              Icons.info_outline,
+              'Tentang Kami',
+              true,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AboutHelper()),
+              ),
+            ),
+            _buildMenuItem(
+              Icons.headset_mic_outlined,
+              'Hubungi Kami',
+              true,
+              onTap: () => _showContactBottomSheet(context),
+            ),
+            _buildMenuItem(
+              Icons.help_outline,
+              'Pusat Bantuan (FAQ)',
+              true,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const FaqHelper()),
+              ),
+            ),
+
+            const SizedBox(height: 36),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -269,6 +221,7 @@ class _HelperSettingState extends State<HelperSetting> {
                     try {
                       final authService = AuthService();
                       await authService.logout();
+                      await _secureStorage.deleteAll();
 
                       if (context.mounted) {
                         Navigator.pushAndRemoveUntil(
@@ -276,8 +229,7 @@ class _HelperSettingState extends State<HelperSetting> {
                           MaterialPageRoute(
                             builder: (context) => const LoginScreen(),
                           ),
-                          (route) =>
-                              false,
+                          (route) => false,
                         );
                       }
                     } catch (e) {
@@ -302,11 +254,34 @@ class _HelperSettingState extends State<HelperSetting> {
               ),
             ),
             const SizedBox(height: 12),
-
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () => showDialog(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: const Text("Hapus Akun"),
+                    content: const Text(
+                      "Apakah Anda yakin ingin menghapus akun ini?",
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        child: const Text("Batal"),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(ctx);
+                          _hapusAkunBackend();
+                        },
+                        child: const Text(
+                          "Ya, Hapus",
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.grey.shade300,
                   elevation: 0,
@@ -340,7 +315,7 @@ class _HelperSettingState extends State<HelperSetting> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (BuildContext context) {
+      builder: (context) {
         return Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(
@@ -357,7 +332,6 @@ class _HelperSettingState extends State<HelperSetting> {
                 style: TextStyle(fontSize: 14, color: Colors.grey),
               ),
               const SizedBox(height: 24),
-
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
@@ -372,7 +346,7 @@ class _HelperSettingState extends State<HelperSetting> {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: Text('Tidak dapat membuka WhatApp'),
+                            content: Text('Tidak dapat membuka WhatsApp'),
                           ),
                         );
                       }
@@ -383,7 +357,7 @@ class _HelperSettingState extends State<HelperSetting> {
                     color: Colors.white,
                   ),
                   label: const Text(
-                    'Hubungi via WhatApp',
+                    'Hubungi via WhatsApp',
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -393,13 +367,12 @@ class _HelperSettingState extends State<HelperSetting> {
                     backgroundColor: Colors.green.shade700,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadiusGeometry.circular(8),
+                      borderRadius: BorderRadius.circular(8),
                     ),
                   ),
                 ),
               ),
               const SizedBox(height: 12),
-
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
@@ -424,7 +397,7 @@ class _HelperSettingState extends State<HelperSetting> {
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     side: BorderSide(color: Colors.grey.shade400),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadiusGeometry.circular(8),
+                      borderRadius: BorderRadius.circular(8),
                     ),
                   ),
                 ),
@@ -435,6 +408,26 @@ class _HelperSettingState extends State<HelperSetting> {
         );
       },
     );
+  }
+
+  Future<void> _hapusAkunBackend() async {
+    final url = Uri.parse(
+      '${AppConfig.baseUrl}/api/users/$currentUserId/hapus',
+    );
+    try {
+      final response = await http.delete(url);
+      if (response.statusCode == 200) {
+        await _secureStorage.deleteAll();
+        if (context.mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginScreen()),
+          );
+        }
+      }
+    } catch (e) {
+      print("Gagal: $e");
+    }
   }
 
   Widget _buildMenuItem(
