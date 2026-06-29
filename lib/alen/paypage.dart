@@ -125,17 +125,6 @@ class _PayPageState extends State<PayPage> {
             ),
           ],
         ),
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: Icon(Icons.search, color: Colors.black),
-          ),
-          IconButton(
-            onPressed: () {},
-            icon: Icon(Icons.filter_list, color: Colors.black),
-          ),
-          SizedBox(width: 8),
-        ],
       ),
       body: RefreshIndicator(
         onRefresh: _fetchPayments,

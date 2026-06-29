@@ -8,7 +8,18 @@ import 'dart:convert';
 import 'package:bantuin/config/app_config.dart';
 
 class RegistPage3 extends StatefulWidget {
-  const RegistPage3({super.key});
+  final String fullName;
+  final String email;
+  final String password;
+  final String whatsapp;
+
+  const RegistPage3({
+    super.key,
+    required this.fullName,
+    required this.email,
+    required this.password,
+    required this.whatsapp,
+  });
 
   @override
   State<RegistPage3> createState() => _RegistPage3State();
@@ -166,6 +177,7 @@ class _RegistPage3State extends State<RegistPage3> {
                     ),
                     SizedBox(height: 8),
                     TextField(
+                      controller: _bankNameController,
                       decoration: InputDecoration(
                         hintText: "ex. BCA, BNI, Mandiri",
                         prefixIcon: Icon(
@@ -186,6 +198,7 @@ class _RegistPage3State extends State<RegistPage3> {
                     ),
                     SizedBox(height: 8),
                     TextField(
+                      controller: _accNumberController,
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         hintText: "e.g. 1234567890",
@@ -241,7 +254,7 @@ class _RegistPage3State extends State<RegistPage3> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: _isLoading ? null : _submitRegistration,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color.fromARGB(255, 88, 26, 246),
                     foregroundColor: Colors.white,
@@ -250,23 +263,29 @@ class _RegistPage3State extends State<RegistPage3> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Finish Registration",
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
+                  child: _isLoading
+                      ? SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(color: Colors.white),
+                        )
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Finish Registration",
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(width: 8),
+                            Icon(
+                              Icons.check_circle_outline,
+                              size: 20,
+                            ), // Ikon centang
+                          ],
                         ),
-                      ),
-                      SizedBox(width: 8),
-                      Icon(
-                        Icons.check_circle_outline,
-                        size: 20,
-                      ), // Ikon centang
-                    ],
-                  ),
                 ),
               ),
               SizedBox(height: 16),
@@ -316,7 +335,7 @@ class _RegistPage3State extends State<RegistPage3> {
         },
         backgroundColor: Colors.white,
         indicatorColor: Colors.deepPurpleAccent,
-        destinations: [
+        destinations: const [
           NavigationDestination(
             icon: Icon(Icons.people_outline, color: Colors.black),
             selectedIcon: Icon(Icons.people, color: Colors.black),
@@ -329,10 +348,6 @@ class _RegistPage3State extends State<RegistPage3> {
           NavigationDestination(
             icon: Icon(Icons.payment_outlined, color: Colors.black),
             label: "Payments",
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline, color: Colors.black),
-            label: "Profile",
           ),
         ],
       ),

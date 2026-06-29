@@ -12,6 +12,13 @@ class RegistPage extends StatefulWidget {
 
 class _RegistPageState extends State<RegistPage> {
   int _currentIndex = 1;
+  final TextEditingController _nameController = TextEditingController();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -112,85 +119,91 @@ class _RegistPageState extends State<RegistPage> {
             icon: Icon(Icons.payment_outlined, color: Colors.black),
             label: "Payments",
           ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline, color: Colors.black),
-            label: "Profile",
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFormCard(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Tell us a bit about yourself to get started. Your privacy is our priority.",
+            style: TextStyle(color: Colors.grey, fontSize: 13),
+          ),
+          SizedBox(height: 20),
+          Text(
+            "Full Name (Nama)",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+              color: Colors.black,
+            ),
+          ),
+          SizedBox(height: 8),
+          TextField(
+            controller: _nameController,
+            decoration: InputDecoration(
+              hintText: "Enter Your Full Name",
+              hintStyle: TextStyle(color: Colors.grey, fontSize: 14),
+              prefixIcon: Icon(Icons.badge_outlined, color: Colors.grey),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.grey),
+              ),
+            ),
+          ),
+          SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                if (_nameController.text.trim().isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Nama Minimal 1 Karakter')),
+                  );
+                  return;
+                }
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        RegistPage2(fullName: _nameController.text.trim()),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color.fromARGB(255, 88, 26, 246),
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadiusGeometry.circular(8),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "Next",
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(width: 8),
+                  Icon(Icons.arrow_forward, size: 20),
+                ],
+              ),
+            ),
           ),
         ],
       ),
     );
   }
-}
-
-Widget _buildFormCard(BuildContext context) {
-  return Container(
-    padding: EdgeInsets.all(20),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: Colors.grey),
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          "Tell us a bit about yourself to get started. Your privacy is our priority.",
-          style: TextStyle(color: Colors.grey, fontSize: 13),
-        ),
-        SizedBox(height: 20),
-        Text(
-          "Full Name (Nama)",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
-            color: Colors.black,
-          ),
-        ),
-        SizedBox(height: 8),
-        TextField(
-          decoration: InputDecoration(
-            hintText: "Enter Your Full Name",
-            hintStyle: TextStyle(color: Colors.grey, fontSize: 14),
-            icon: Icon(Icons.badge_outlined, color: Colors.grey),
-            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Colors.grey),
-            ),
-          ),
-        ),
-        SizedBox(height: 24),
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => RegistPage2()),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Color.fromARGB(255, 88, 26, 246),
-              foregroundColor: Colors.white,
-              padding: EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadiusGeometry.circular(8),
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  "Next",
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(width: 8),
-                Icon(Icons.arrow_forward, size: 20),
-              ],
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
 }

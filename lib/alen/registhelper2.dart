@@ -5,7 +5,8 @@ import 'admin.dart';
 import 'registhelper.dart';
 
 class RegistPage2 extends StatefulWidget {
-  const RegistPage2({super.key});
+  final String fullName;
+  const RegistPage2({super.key, required this.fullName});
 
   @override
   State<RegistPage2> createState() => _RegistPage2State();
@@ -78,6 +79,8 @@ class _RegistPage2State extends State<RegistPage2> {
               ),
               SizedBox(height: 8),
               TextField(
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
                   hintText: "name@example.com",
                   prefixIcon: Icon(Icons.email_outlined),
@@ -152,6 +155,7 @@ class _RegistPage2State extends State<RegistPage2> {
               ),
               SizedBox(height: 8),
               TextField(
+                controller: _waController,
                 keyboardType: TextInputType.phone,
                 decoration: InputDecoration(
                   hintText: "+62 812 3456 789",
@@ -205,9 +209,17 @@ class _RegistPage2State extends State<RegistPage2> {
 
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => RegistPage3()),
+                      MaterialPageRoute(
+                        builder: (context) => RegistPage3(
+                          fullName: widget.fullName,
+                          email: _emailController.text.trim(),
+                          password: _passwordController.text,
+                          whatsapp: _waController.text.trim(),
+                        ),
+                      ),
                     );
                   },
+
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color.fromARGB(255, 88, 26, 246),
                     foregroundColor: Colors.white,
@@ -317,7 +329,7 @@ class _RegistPage2State extends State<RegistPage2> {
         },
         backgroundColor: Colors.white,
         indicatorColor: Colors.deepPurpleAccent,
-        destinations: [
+        destinations: const [
           NavigationDestination(
             icon: Icon(Icons.people_outline, color: Colors.black),
             selectedIcon: Icon(Icons.people, color: Colors.black),
@@ -330,10 +342,6 @@ class _RegistPage2State extends State<RegistPage2> {
           NavigationDestination(
             icon: Icon(Icons.payment_outlined, color: Colors.black),
             label: "Payments",
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline, color: Colors.black),
-            label: "Profile",
           ),
         ],
       ),
