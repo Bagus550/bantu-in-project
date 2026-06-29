@@ -27,21 +27,7 @@ class _RegistPageState extends State<RegistPage> {
         ),
         elevation: 3,
         toolbarHeight: 80,
-        actions: [
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                onPressed: () {},
-                icon: Icon(
-                  Icons.notifications_none,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-              SizedBox(width: 12),
-            ],
-          ),
-        ],
+        automaticallyImplyLeading: false,
       ),
       body: SingleChildScrollView(
         child: Padding(

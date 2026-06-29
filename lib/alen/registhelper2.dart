@@ -13,6 +13,30 @@ class RegistPage2 extends StatefulWidget {
 
 class _RegistPage2State extends State<RegistPage2> {
   int _currentIndex = 1;
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
+  final TextEditingController _waController = TextEditingController();
+
+  bool _isObscure = true;
+  bool _isObscureConfirm = true;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    _waController.dispose();
+    super.dispose();
+  }
+
+  bool _isValidEmail(String email) {
+    return RegExp(
+      r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
+    ).hasMatch(email);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,29 +50,7 @@ class _RegistPage2State extends State<RegistPage2> {
           ),
         ),
         elevation: 3,
-        actions: [
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                onPressed: () {},
-                icon: Icon(
-                  Icons.notifications_none,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-              SizedBox(width: 12),
-              IconButton(
-                onPressed: () {},
-                icon: Icon(
-                  Icons.account_circle,
-                  color: Theme.of(context).colorScheme.primary,
-                  size: 30,
-                ),
-              ),
-            ],
-          ),
-        ],
+        automaticallyImplyLeading: false,
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -91,17 +93,59 @@ class _RegistPage2State extends State<RegistPage2> {
               ),
               SizedBox(height: 8),
               TextField(
-                obscureText: true,
+                controller: _passwordController,
+                obscureText: _isObscure,
                 decoration: InputDecoration(
                   hintText: "Min. 8 characters",
                   prefixIcon: Icon(Icons.lock_outline),
-                  suffixIcon: Icon(Icons.visibility_outlined),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _isObscure
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _isObscure = !_isObscure;
+                      });
+                    },
+                  ),
                   border: OutlineInputBorder(),
                   fillColor: Colors.white,
                   filled: true,
                 ),
               ),
               SizedBox(height: 16),
+              Text(
+                "Confirm Password",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+              ),
+              SizedBox(height: 8),
+              TextField(
+                controller: _confirmPasswordController,
+                obscureText: _isObscureConfirm,
+                decoration: InputDecoration(
+                  hintText: "Re-enter your password",
+                  prefixIcon: Icon(Icons.lock_reset_outlined),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _isObscureConfirm
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _isObscureConfirm = !_isObscureConfirm;
+                      });
+                    },
+                  ),
+                  border: OutlineInputBorder(),
+                  fillColor: Colors.white,
+                  filled: true,
+                ),
+              ),
+              SizedBox(height: 16),
+
               Text(
                 "WhatsApp Number",
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
@@ -131,6 +175,34 @@ class _RegistPage2State extends State<RegistPage2> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
+                    if (_emailController.text.isEmpty ||
+                        _passwordController.text.isEmpty ||
+                        _confirmPasswordController.text.isEmpty ||
+                        _waController.text.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Harap isi semua kolom!')),
+                      );
+                      return;
+                    }
+
+                    if (!_isValidEmail(_emailController.text.trim())) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Format email tidak valid!'),
+                        ),
+                      );
+                      return;
+                    }
+
+                    if (_passwordController.text.length < 8) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Password minimal 8 karakter!'),
+                        ),
+                      );
+                      return;
+                    }
+
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => RegistPage3()),
