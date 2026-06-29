@@ -199,7 +199,7 @@ class _LupaKatasandiState extends State<LupaKatasandi> {
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor:
-                      Colors.green, // Ganti warna hijau tanda konfirmasi
+                      Colors.green, 
                   foregroundColor: Colors.white,
                   minimumSize: const Size(double.infinity, 50),
                 ),
