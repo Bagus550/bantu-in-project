@@ -207,6 +207,14 @@ class _RegistPage2State extends State<RegistPage2> {
                       return;
                     }
 
+                    if (_passwordController.text !=
+                        _confirmPasswordController.text) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Password tidak sesuai')),
+                      );
+                      return;
+                    }
+
                     Navigator.push(
                       context,
                       MaterialPageRoute(
