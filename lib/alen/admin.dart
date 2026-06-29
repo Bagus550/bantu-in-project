@@ -48,7 +48,6 @@ class _MyAdminState extends State<MyAdmin> {
     try {
       var response = await http.get(
         Uri.parse('${AppConfig.baseUrl}/api/admin/dashboard'),
-        headers: {"ngrok-skip-browser-warning": "69420"},
       );
 
       if (response.statusCode == 200) {
@@ -369,7 +368,7 @@ class _MyAdminState extends State<MyAdmin> {
                           }
 
                           int startIndex = (currentPage - 1) * itemsPerPage;
-                          List<dynamic> pagedHelpers = helpersList
+                          List<dynamic> pagedHelpers = filteredHelpers
                               .skip(startIndex)
                               .take(itemsPerPage)
                               .toList();
