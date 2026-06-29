@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-
 class FaqHelper extends StatelessWidget {
   const FaqHelper({super.key});
 
@@ -86,7 +85,7 @@ class FaqHelper extends StatelessWidget {
                     child: Divider(color: Colors.grey.shade300, thickness: 2),
                   ),
                   Text(
-                    "Bagaimana cara memesan jasa?",
+                    "Bagaimana cara mengerjakan tugas jasa?",
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   Padding(
@@ -105,9 +104,7 @@ class FaqHelper extends StatelessWidget {
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 15),
-                    child: Text(
-                      "Perbaikan, Pembersihan, Belanja, Pendidikan.",
-                    ),
+                    child: Text("Perbaikan, Pembersihan, Belanja, Pendidikan."),
                   ),
                   SizedBox(height: 20),
                   SizedBox(
@@ -136,7 +133,7 @@ class FaqHelper extends StatelessWidget {
     );
   }
 
-    void _showContactBottomSheet(BuildContext context) {
+  void _showContactBottomSheet(BuildContext context) {
     final String whatsappUrl = "https://wa.me/6285955035351";
 
     showModalBottomSheet(

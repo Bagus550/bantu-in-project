@@ -7,6 +7,7 @@ import 'package:bantuin/utils/currency_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:bantuin/utils/task_extension.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
 class TugasAktifHelper extends StatefulWidget {
   final Map<String, dynamic> detailTugas;
@@ -30,6 +31,41 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
           .trim()
           .toLowerCase()
           .replaceAll(' ', '_');
+    }
+  }
+
+  String formatTanggalWaktu(String? tanggalRaw) {
+    if (tanggalRaw == null || tanggalRaw.toString().isEmpty) return '-';
+
+    try {
+      DateTime waktuTugas = DateTime.parse(tanggalRaw.toString()).toLocal();
+      DateTime sekarang = DateTime.now();
+
+      String jamMenit = DateFormat('HH.mm').format(waktuTugas);
+
+      DateTime tanggalTugas = DateTime(
+        waktuTugas.year,
+        waktuTugas.month,
+        waktuTugas.day,
+      );
+      DateTime tanggalSekarang = DateTime(
+        sekarang.year,
+        sekarang.month,
+        sekarang.day,
+      );
+
+      int selisihHari = tanggalSekarang.difference(tanggalTugas).inDays;
+
+      if (selisihHari == 0) {
+        return "Hari ini, $jamMenit WIB";
+      } else if (selisihHari == 1) {
+        return "Kemarin, $jamMenit WIB";
+      } else {
+        String tanggalLengkap = DateFormat('d MMM yyyy', 'id').format(waktuTugas);
+        return "$tanggalLengkap, $jamMenit WIB";
+      }
+    } catch (e) {
+      return '-';
     }
   }
 
@@ -164,6 +200,41 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
     );
   }
 
+  void _showImageModal(BuildContext context, String imagePath) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                child: Image.asset(imagePath, fit: BoxFit.contain),
+              ),
+
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text(
+                  'Tutup',
+                  style: TextStyle(
+                    color: Colors.blue,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (widget.detailTugas.isEmpty) {
@@ -192,6 +263,10 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
     final String judulTugas =
         widget.detailTugas['judul_tugas'] ?? 'Detail Tugas';
     final String idTugas = widget.detailTugas.toProfessionalId();
+    final String tanggalDatabase = widget.detailTugas['created_at'] ??
+      widget.detailTugas['waktu'] ??
+      widget.detailTugas['tanggal'] ??
+      '';
 
     String statusValidasiPembayaran =
         (widget.detailTugas['status_validasi'] ?? '')
@@ -516,7 +591,7 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
                             color: Theme.of(context).colorScheme.primary,
                           ),
                           const SizedBox(width: 10),
-                          const Text("24 Okt 2023, 14.30 WIB"),
+                          Text(formatTanggalWaktu(tanggalDatabase)),
                         ],
                       ),
                       const SizedBox(height: 10),
@@ -529,6 +604,54 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
                           const SizedBox(width: 10),
                           Expanded(child: Text(lokasi)),
                         ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 25),
+              Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "PEMBAYARAN",
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            _showImageModal(context, 'assets/logo/QRIS.jpeg');
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: const Color(0xFF1E3A8A),
+                            side: const BorderSide(
+                              color: Color(0xFF1E3A8A),
+                              width: 1.5,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                8,
+                              ),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: Text("Tampilkan QRIS"),
+                        ),
                       ),
                     ],
                   ),

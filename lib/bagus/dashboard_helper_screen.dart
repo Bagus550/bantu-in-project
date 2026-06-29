@@ -3,7 +3,6 @@
 import 'dart:convert';
 import 'package:bantuin/yuliana/history_helper.dart';
 import 'package:bantuin/bagus/tugas_aktif_helper.dart';
-import 'package:bantuin/bagus/upload_bukti.dart';
 import 'package:bantuin/danela/detail_task_helper.dart';
 import 'package:bantuin/danela/message_list.dart';
 import 'package:bantuin/ida/screen/profile.dart';
@@ -234,7 +233,37 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                 )
               : RefreshIndicator(
                   onRefresh: _refreshData,
-                  child: _dapatkanHalaman(_currentIndex, apiTasksData),
+                  child: Builder(
+                    builder: (context) {
+                      if (_currentIndex == 0) {
+                        final listFeedBeranda = apiTasksData ?? [];
+                        final listTerfilter = _kategoriAktif == 'Semua'
+                            ? listFeedBeranda
+                            : listFeedBeranda.where((item) {
+                                final kategori =
+                                    item['kategori_layanan']?.toString().toLowerCase().trim() ?? '';
+                                return kategori == _kategoriAktif.toLowerCase().trim();
+                              }).toList();
+
+                        if (listTerfilter.isEmpty) {
+                          return LayoutBuilder(
+                            builder: (context, constraints) {
+                              final viewportHeight = constraints.maxHeight;
+                              return SingleChildScrollView(
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(minHeight: viewportHeight),
+                                  child: _buildDashboardHelperEmpty(listFeedBeranda),
+                                ),
+                              );
+                            },
+                          );
+                        }
+                      }
+
+                      return _dapatkanHalaman(_currentIndex, apiTasksData);
+                    },
+                  ),
                 ),
           bottomNavigationBar: SafeArea(
             child: Container(
@@ -259,7 +288,7 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                     icon: Icons.task_outlined,
                     label: 'Tugas Aktif',
                   ),
-                  _buildPostButton(),
+                  // _buildPostButton(),
                   _buildNavItem(
                     index: 2,
                     icon: Icons.chat_bubble_outline_rounded,
@@ -677,6 +706,63 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
       ),
     );
   }
+  Widget _buildDashboardHelperEmpty(List<dynamic> realTasks) {
+
+    return Padding(
+      padding: EdgeInsets.only(top: 16, right: 16, left: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("Kategori", style: TextStyle(fontWeight: FontWeight.bold)),
+              TextButton(onPressed: () {}, child: Text("View All")),
+            ],
+          ),
+          SizedBox(
+            height: 100,
+            width: double.infinity,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _buildTombolKategori(nama: 'Semua', icon: Icons.grid_view_rounded),
+                  _buildTombolKategori(nama: 'BantuFix', icon: Icons.business_center_rounded),
+                  _buildTombolKategori(nama: 'BantuClean', icon: Icons.cleaning_services_rounded),
+                  _buildTombolKategori(nama: 'BantuShop', icon: Icons.shopping_bag_rounded),
+                  _buildTombolKategori(nama: 'BantuStudy', icon: Icons.school),
+                ],
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Text(
+              "Bantuan Tersedia",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          // Empty state body (no Expanded/ListView)
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 32.0),
+              child: Column(
+                children: [
+                  Icon(Icons.inbox, size: 64, color: Colors.grey.shade400),
+                  const SizedBox(height: 12),
+                  Text(
+                    "Tidak ada tugas untuk kategori ini",
+                    style: TextStyle(color: Colors.grey, fontSize: 16),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildTombolKategori({required String nama, required IconData icon}) {
     final bool isAktif = _kategoriAktif == nama;
@@ -769,58 +855,58 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
     );
   }
 
-  Widget _buildPostButton() {
-    return GestureDetector(
-      onTap: () async {
-        if (_tugasAktifSaya.isEmpty || _tugasAktifSaya['id_task'] == null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                "Kamu tidak memiliki tugas aktif yang perlu dikirim buktinya!",
-              ),
-              backgroundColor: Colors.amber,
-            ),
-          );
-          return;
-        }
+  // Widget _buildPostButton() {
+  //   return GestureDetector(
+  //     onTap: () async {
+  //       if (_tugasAktifSaya.isEmpty || _tugasAktifSaya['id_task'] == null) {
+  //         ScaffoldMessenger.of(context).showSnackBar(
+  //           const SnackBar(
+  //             content: Text(
+  //               "Kamu tidak memiliki tugas aktif yang perlu dikirim buktinya!",
+  //             ),
+  //             backgroundColor: Colors.amber,
+  //           ),
+  //         );
+  //         return;
+  //       }
 
-        final String idTaskDinamis = _tugasAktifSaya['id_task'].toString();
+  //       final String idTaskDinamis = _tugasAktifSaya['id_task'].toString();
 
-        final isSuksesUpload = await Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => UploadBuktiTab(idTask: idTaskDinamis),
-          ),
-        );
+  //       final isSuksesUpload = await Navigator.push(
+  //         context,
+  //         MaterialPageRoute(
+  //           builder: (context) => UploadBuktiTab(idTask: idTaskDinamis),
+  //         ),
+  //       );
 
-        if (isSuksesUpload == true) {
-          try {
-            await fetchTasksForHelper();
-          } catch (e) {}
-        }
-      },
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: EdgeInsets.all(8.0),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: Color(0xFF3B82F6), width: 2.0),
-            ),
-            child: Icon(Icons.camera, color: Color(0xFF3B82F6), size: 26.0),
-          ),
-          SizedBox(height: 4.0),
-          Text(
-            'Foto Bukti',
-            style: TextStyle(
-              fontSize: 12.0,
-              fontWeight: FontWeight.w500,
-              color: Colors.black87,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  //       if (isSuksesUpload == true) {
+  //         try {
+  //           await fetchTasksForHelper();
+  //         } catch (e) {}
+  //       }
+  //     },
+  //     child: Column(
+  //       mainAxisSize: MainAxisSize.min,
+  //       children: [
+  //         Container(
+  //           padding: EdgeInsets.all(8.0),
+  //           decoration: BoxDecoration(
+  //             shape: BoxShape.circle,
+  //             border: Border.all(color: Color(0xFF3B82F6), width: 2.0),
+  //           ),
+  //           child: Icon(Icons.camera, color: Color(0xFF3B82F6), size: 26.0),
+  //         ),
+  //         SizedBox(height: 4.0),
+  //         Text(
+  //           'Foto Bukti',
+  //           style: TextStyle(
+  //             fontSize: 12.0,
+  //             fontWeight: FontWeight.w500,
+  //             color: Colors.black87,
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 }
