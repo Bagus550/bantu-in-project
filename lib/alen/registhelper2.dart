@@ -32,10 +32,44 @@ class _RegistPage2State extends State<RegistPage2> {
     super.dispose();
   }
 
-  bool _isValidEmail(String email) {
-    return RegExp(
-      r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
-    ).hasMatch(email);
+  // bool _isValidEmail(String email) {
+  //   return RegExp(
+  //     r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
+  //   ).hasMatch(email);
+  // }
+
+  void _goToNextPage() {
+    String email = _emailController.text;
+    String password = _passwordController.text;
+    String confirmPassword = _confirmPasswordController.text;
+
+    if (password.length < 8) {
+      _showSnackBar("Password minimal 8 karakter");
+      return;
+    }
+
+    if (password != confirmPassword) {
+      _showSnackBar("Konfirmasi password tidak cocok");
+      return;
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => RegistPage3(
+          fullName: widget.fullName,
+          email: email,
+          password: password,
+          whatsapp: _waController.text,
+        ),
+      ),
+    );
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
+    );
   }
 
   @override
@@ -178,47 +212,7 @@ class _RegistPage2State extends State<RegistPage2> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
-                    if (_emailController.text.isEmpty ||
-                        _passwordController.text.isEmpty ||
-                        _confirmPasswordController.text.isEmpty ||
-                        _waController.text.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Harap isi semua kolom!')),
-                      );
-                      return;
-                    }
-
-                    if (!_isValidEmail(_emailController.text.trim())) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Format email tidak valid!'),
-                        ),
-                      );
-                      return;
-                    }
-
-                    if (_passwordController.text.length < 8) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Password minimal 8 karakter!'),
-                        ),
-                      );
-                      return;
-                    }
-
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => RegistPage3(
-                          fullName: widget.fullName,
-                          email: _emailController.text.trim(),
-                          password: _passwordController.text,
-                          whatsapp: _waController.text.trim(),
-                        ),
-                      ),
-                    );
-                  },
+                  onPressed: () {_goToNextPage();},
 
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color.fromARGB(255, 88, 26, 246),

@@ -74,7 +74,6 @@ class _RegistPage3State extends State<RegistPage3> {
 
       var response = await http.post(
         Uri.parse('${AppConfig.baseUrl}/api/admin/register-helper'),
-        headers: {"ngrok-skip-browser-warning": "69420"},
         body: {
           'id_admin_pendaftar': adminId,
           'nama': widget.fullName,
