@@ -73,6 +73,10 @@ class _LoginScreenState extends State<LoginScreen> {
           key: 'no_hp',
           value: result['user']['no_hp'].toString(),
         );
+        await _secureStorage.write(
+          key: 'role',
+          value: result['role'].toString(),
+        );
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

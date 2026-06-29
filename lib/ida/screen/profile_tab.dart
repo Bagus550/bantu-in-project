@@ -23,7 +23,7 @@ class _ProfileTabState extends State<ProfileTab> {
   }
 
   Future<void> _loadProfileData() async {
-    // Membaca data dari storage
+    String? role = await _secureStorage.read(key: 'role');
     String? savedNama = await _secureStorage.read(key: 'nama_user');
     String? savedEmail = await _secureStorage.read(key: 'email_user');
     String? savedNoHp = await _secureStorage.read(key: 'no_hp');
@@ -32,7 +32,9 @@ class _ProfileTabState extends State<ProfileTab> {
       setState(() {
         _nama = savedNama ?? "User";
         _email = savedEmail ?? "Email tidak tersedia";
-        _noHp = savedNoHp ?? "Tidak tersedia";
+        _noHp = (savedNoHp != null && savedNoHp != "null")
+            ? savedNoHp
+            : "Tidak tersedia";
       });
     }
   }
@@ -98,7 +100,7 @@ class _ProfileTabState extends State<ProfileTab> {
                         "Username: ",
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      Text(_nama), // Data dinamis, tanpa const
+                      Text(_nama),
                     ],
                   ),
                   const Divider(color: Colors.grey),
@@ -122,7 +124,7 @@ class _ProfileTabState extends State<ProfileTab> {
                         "Email: ",
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      Text(_email), // Data dinamis, tanpa const
+                      Text(_email),
                     ],
                   ),
                   const SizedBox(height: 10),
@@ -134,7 +136,7 @@ class _ProfileTabState extends State<ProfileTab> {
                         "No Telepon: ",
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      Text(_noHp), // Data dinamis, tanpa const
+                      Text(_noHp),
                     ],
                   ),
                   const Divider(color: Colors.grey),

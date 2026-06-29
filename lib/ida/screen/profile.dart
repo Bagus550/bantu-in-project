@@ -30,6 +30,8 @@ class _ProfileState extends State<Profile> {
               onPressed: () async {
                 String? role = await _secureStorage.read(key: 'role');
 
+                print("DEBUG ROLE SAAT INI: $role");
+
                 if (!mounted) return;
 
                 if (role == 'helper') {
