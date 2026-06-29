@@ -369,7 +369,7 @@ class _MyAdminState extends State<MyAdmin> {
                           }
 
                           int startIndex = (currentPage - 1) * itemsPerPage;
-                          List<dynamic> pagedHelpers = helpersList
+                          List<dynamic> pagedHelpers = filteredHelpers
                               .skip(startIndex)
                               .take(itemsPerPage)
                               .toList();
