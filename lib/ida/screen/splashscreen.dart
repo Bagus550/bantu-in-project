@@ -14,7 +14,6 @@ class _IdaSplashScreenState extends State<IdaSplashScreen> {
     super.initState();
 
     Timer(const Duration(seconds: 3), () {
-      // Navigasi ke halaman login yang sudah kita perbaiki tadi
       Navigator.pushReplacementNamed(context, '/login');
     });
   }
@@ -46,7 +45,7 @@ class _IdaSplashScreenState extends State<IdaSplashScreen> {
             CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(
                 theme.secondary,
-              ), // Otomatis pakai Biru Terang (#3B82F6)
+              ), 
               strokeWidth: 3,
             ),
           ],
