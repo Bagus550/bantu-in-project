@@ -159,7 +159,7 @@ class _NotifikasiRequesterState extends State<NotifikasiRequester> {
                                     ),
                                     const SizedBox(
                                       width: 10,
-                                    ), // Memberi jarak agar tidak menempel
+                                    ), 
                                     Expanded(
                                       child: Column(
                                         crossAxisAlignment:

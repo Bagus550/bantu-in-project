@@ -42,7 +42,14 @@ class _ValidPageState extends State<ValidPage> {
         ),
         headers: {"ngrok-skip-browser-warning": "69420"},
       );
-
+      if (response.statusCode == 200) {
+        var rawData = jsonDecode(response.body);
+        debugPrint("Response Detail: $rawData");
+        setState(() {
+          _paymentDetail = rawData['data'];
+          _isLoading = false;
+        });
+      }
       if (!mounted) return;
 
       if (response.statusCode == 200) {
@@ -88,10 +95,7 @@ class _ValidPageState extends State<ValidPage> {
 
       final response = await http.post(
         url,
-        headers: {
-          "ngrok-skip-browser-warning": "69420",
-          "Content-Type": "application/x-www-form-urlencoded", 
-        },
+        headers: {"Content-Type": "application/x-www-form-urlencoded"},
 
         body: {
           'id_payment': widget.transactionId.toString(),

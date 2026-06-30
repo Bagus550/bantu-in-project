@@ -163,14 +163,12 @@ class _RegistPageState extends State<RegistPage> {
           ),
           SizedBox(height: 24),
           SizedBox(
-            width: double.infinity, 
+            width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
                 if (_nameController.text.trim().isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Nama Minimal 1 Karakter'),
-                    ),
+                    const SnackBar(content: Text('Nama Minimal 1 Karakter')),
                   );
                   return;
                 }

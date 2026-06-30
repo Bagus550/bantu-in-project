@@ -76,6 +76,8 @@ class _HistoryUserState extends State<HistoryUser> {
 
       final response = await http.get(urlDenganParam);
 
+      if (!mounted) return;
+
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         final List<dynamic> semuaTugasSelesai = responseData['data'] ?? [];
@@ -97,13 +99,18 @@ class _HistoryUserState extends State<HistoryUser> {
       }
     } catch (e) {
       setState(() {
-        errorPesan = "Terjadi kesalahan koneksi: $e";
+        if (!mounted) return;
+        setState(() {
+          errorPesan = "Terjadi kesalahan koneksi: $e";
+        });
       });
     } finally {
+      if (mounted) {
       setState(() {
         isLoading = false;
         isLoadingMore = false;
       });
+    }
     }
   }
 
@@ -314,7 +321,9 @@ class _HistoryUserState extends State<HistoryUser> {
 
                               // Nominal Pembayaran
                               Text(
-                                histori['nominal_pembayaran'].toString().toRupiah(),
+                                histori['nominal_pembayaran']
+                                    .toString()
+                                    .toRupiah(),
                                 style: TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.bold,

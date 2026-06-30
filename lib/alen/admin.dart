@@ -48,7 +48,6 @@ class _MyAdminState extends State<MyAdmin> {
     try {
       var response = await http.get(
         Uri.parse('${AppConfig.baseUrl}/api/admin/dashboard'),
-        headers: {"ngrok-skip-browser-warning": "69420"},
       );
 
       if (response.statusCode == 200) {
