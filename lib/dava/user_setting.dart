@@ -1,3 +1,4 @@
+import 'package:bantuin/ida/auth/auth_service.dart';
 import 'package:bantuin/ida/screen/login_screen.dart';
 import 'package:bantuin/ida/screen/ubah_katasandi.dart';
 import 'package:flutter/material.dart';
@@ -192,10 +193,44 @@ class _UserSettingState extends State<UserSetting> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () => Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => LoginScreen()),
-                ),
+                onPressed: () async {
+                  final konfirmasi = await showDialog<bool>(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      title: const Text('Keluar Akun'),
+                      content: const Text(
+                        'Apakah kamu yakin ingin keluar dari akun ini?',
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx, false),
+                          child: const Text('Batal'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx, true),
+                          child: const Text(
+                            'Ya, Keluar',
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+
+                  if (konfirmasi == true) {
+                    final authService = AuthService();
+                    await authService.logout();
+                    await _secureStorage.deleteAll();
+
+                    if (context.mounted) {
+                      Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        '/login',
+                        (route) => false,
+                      );
+                    }
+                  }
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFB71C1C),
                   shape: RoundedRectangleBorder(

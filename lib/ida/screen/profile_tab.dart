@@ -1,6 +1,6 @@
+import 'package:bantuin/ida/auth/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:bantuin/ida/screen/login_screen.dart';
 
 class ProfileTab extends StatefulWidget {
   const ProfileTab({super.key});
@@ -23,7 +23,6 @@ class _ProfileTabState extends State<ProfileTab> {
   }
 
   Future<void> _loadProfileData() async {
-    String? role = await _secureStorage.read(key: 'role');
     String? savedNama = await _secureStorage.read(key: 'nama_user');
     String? savedEmail = await _secureStorage.read(key: 'email_user');
     String? savedNoHp = await _secureStorage.read(key: 'no_hp');
@@ -149,14 +148,41 @@ class _ProfileTabState extends State<ProfileTab> {
                         backgroundColor: Colors.red,
                       ),
                       onPressed: () async {
-                        await _secureStorage.deleteAll();
-                        if (!mounted) return;
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const LoginScreen(),
+                        final konfirmasi = await showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: const Text('Keluar Akun'),
+                            content: const Text(
+                              'Apakah kamu yakin ingin keluar dari akun ini?',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, false),
+                                child: const Text('Batal'),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, true),
+                                child: const Text(
+                                  'Ya, Keluar',
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ),
+                            ],
                           ),
                         );
+
+                        if (konfirmasi == true) {
+                          final authService = AuthService();
+                          await authService.logout();
+                          await _secureStorage.deleteAll();
+
+                          if (!mounted) return;
+                          Navigator.pushNamedAndRemoveUntil(
+                            context,
+                            '/login',
+                            (route) => false,
+                          );
+                        }
                       },
                       child: const Text(
                         "Keluar",

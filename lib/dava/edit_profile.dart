@@ -15,7 +15,8 @@ class _EditProfileState extends State<EditProfile> {
 
   final TextEditingController _namaController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _jkController = TextEditingController();
+
+  String? _selectedGender;
 
   final _secureStorage = const FlutterSecureStorage();
   bool _isLoading = false;
@@ -32,12 +33,16 @@ class _EditProfileState extends State<EditProfile> {
       );
 
       Map<String, dynamic> requestBody = {};
-      if (_namaController.text.isNotEmpty)
+      if (_namaController.text.isNotEmpty) {
         requestBody["nama"] = _namaController.text;
-      if (_usernameController.text.isNotEmpty)
+      }
+      if (_usernameController.text.isNotEmpty) {
         requestBody["username"] = _usernameController.text;
-      if (_jkController.text.isNotEmpty)
-        requestBody["jenis_kelamin"] = _jkController.text;
+      }
+      // Memeriksa variabel radio button alih-alih controller teks
+      if (_selectedGender != null && _selectedGender!.isNotEmpty) {
+        requestBody["jenis_kelamin"] = _selectedGender;
+      }
 
       final response = await http.put(
         url,
@@ -83,7 +88,6 @@ class _EditProfileState extends State<EditProfile> {
   void dispose() {
     _namaController.dispose();
     _usernameController.dispose();
-    _jkController.dispose();
     super.dispose();
   }
 
@@ -119,10 +123,42 @@ class _EditProfileState extends State<EditProfile> {
               _namaController,
             ),
             _buildTextField('Username', '@usernamebaru', _usernameController),
-            _buildTextField(
+            const Text(
               'Jenis Kelamin',
-              'Laki-Laki / Perempuan',
-              _jkController,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: RadioListTile<String>(
+                    title: const Text(
+                      'Laki-Laki',
+                      style: TextStyle(fontSize: 14),
+                    ),
+                    value: 'Laki-Laki',
+                    activeColor: accentColor,
+                    contentPadding: EdgeInsets.zero,
+                    dense: true,
+                  ),
+                ),
+                Expanded(
+                  child: RadioListTile<String>(
+                    title: const Text(
+                      'Perempuan',
+                      style: TextStyle(fontSize: 14),
+                    ),
+                    value: 'Perempuan',
+                    activeColor: accentColor,
+                    contentPadding: EdgeInsets.zero,
+                    dense: true,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 24),
             SizedBox(
