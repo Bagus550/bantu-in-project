@@ -1,7 +1,8 @@
 import 'package:bantuin/alen/paypage.dart';
 import 'package:bantuin/alen/registhelper.dart';
-import 'package:bantuin/ida/screen/login_screen.dart';
+import 'package:bantuin/ida/auth/auth_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:bantuin/config/app_config.dart';
@@ -276,11 +277,43 @@ class _MyAdminState extends State<MyAdmin> {
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => LoginScreen()),
+                onPressed: () async {
+                  final konfirmasi = await showDialog<bool>(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      title: const Text('Keluar Akun'),
+                      content: const Text(
+                        'Apakah kamu yakin ingin keluar dari akun admin?',
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx, false),
+                          child: const Text('Batal'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx, true),
+                          child: const Text(
+                            'Ya, Keluar',
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        ),
+                      ],
+                    ),
                   );
+
+                  if (konfirmasi == true) {
+                    final authService = AuthService();
+                    await authService.logout();
+                    await const FlutterSecureStorage().deleteAll();
+
+                    if (mounted) {
+                      Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        '/login',
+                        (route) => false,
+                      );
+                    }
+                  }
                 },
                 icon: Icon(Icons.logout, color: Colors.red, size: 28),
               ),

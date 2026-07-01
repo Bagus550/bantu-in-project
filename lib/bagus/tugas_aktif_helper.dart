@@ -4,10 +4,13 @@ import 'package:bantuin/bagus/upload_bukti.dart';
 import 'package:bantuin/danela/roomchat.dart';
 import 'package:bantuin/config/app_config.dart';
 import 'package:bantuin/utils/currency_extension.dart';
+import 'package:bantuin/utils/date_time_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:bantuin/utils/task_extension.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class TugasAktifHelper extends StatefulWidget {
   final Map<String, dynamic> detailTugas;
@@ -38,7 +41,7 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
     if (tanggalRaw == null || tanggalRaw.toString().isEmpty) return '-';
 
     try {
-      DateTime waktuTugas = DateTime.parse(tanggalRaw.toString()).toLocal();
+      DateTime waktuTugas = DateTimeUtils.toLocalDateTime(tanggalRaw.toString());
       DateTime sekarang = DateTime.now();
 
       String jamMenit = DateFormat('HH.mm').format(waktuTugas);
@@ -61,11 +64,74 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
       } else if (selisihHari == 1) {
         return "Kemarin, $jamMenit WIB";
       } else {
-        String tanggalLengkap = DateFormat('d MMM yyyy', 'id').format(waktuTugas);
+        String tanggalLengkap = DateFormat(
+          'd MMM yyyy',
+          'id',
+        ).format(waktuTugas);
         return "$tanggalLengkap, $jamMenit WIB";
       }
     } catch (e) {
       return '-';
+    }
+  }
+
+  Future<void> _salinLokasi(String lokasi) async {
+    if (lokasi.isEmpty) return;
+
+    await Clipboard.setData(ClipboardData(text: lokasi));
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Lokasi berhasil disalin!"),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  Future<void> _bukaGoogleMaps(String lokasi) async {
+    final String lokasiTrim = lokasi.trim();
+    if (lokasiTrim.isEmpty) return;
+
+    try {
+      final Uri? lokasiUri = Uri.tryParse(lokasiTrim);
+      if (lokasiUri != null && lokasiUri.hasScheme) {
+        if (await canLaunchUrl(lokasiUri)) {
+          await launchUrl(lokasiUri, mode: LaunchMode.externalApplication);
+          return;
+        }
+      }
+
+      final Uri? urlTanpaSkema = Uri.tryParse('https://$lokasiTrim');
+      if (urlTanpaSkema != null && urlTanpaSkema.hasAuthority) {
+        if (await canLaunchUrl(urlTanpaSkema)) {
+          await launchUrl(urlTanpaSkema, mode: LaunchMode.externalApplication);
+          return;
+        }
+      }
+
+      final Uri url = Uri.parse(
+        "https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(lokasiTrim)}",
+      );
+
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      } else {
+        throw 'Tidak dapat membuka lokasi';
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "Gagal membuka link. Salin lokasi saja untuk navigasi.",
+            ),
+            backgroundColor: Colors.orange.shade800,
+          ),
+        );
+      }
     }
   }
 
@@ -259,14 +325,19 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
     final String namaRequester =
         widget.detailTugas['nama_requester'] ?? 'Tanpa Nama';
     final String harga = widget.detailTugas['nominal_pembayaran'] ?? 0;
-    final String lokasi = widget.detailTugas['lokasi_tugas'] ?? 'Tanpa Lokasi';
     final String judulTugas =
         widget.detailTugas['judul_tugas'] ?? 'Detail Tugas';
     final String idTugas = widget.detailTugas.toProfessionalId();
-    final String tanggalDatabase = widget.detailTugas['created_at'] ??
-      widget.detailTugas['waktu'] ??
-      widget.detailTugas['tanggal'] ??
-      '';
+    final String tanggalDatabase =
+        widget.detailTugas['created_at'] ??
+        widget.detailTugas['waktu'] ??
+        widget.detailTugas['tanggal'] ??
+        '';
+    final String alamatLokasi = ((widget.detailTugas['lokasi_tugas'] ??
+                widget.detailTugas['lokasi']) ??
+            '')
+        .toString()
+        .trim();
 
     String statusValidasiPembayaran =
         (widget.detailTugas['status_validasi'] ?? '')
@@ -274,17 +345,20 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
             .trim()
             .toLowerCase()
             .replaceAll(' ', '_');
+    bool isMenungguValidasi =
+        _currentStatusTask == 'menunggu_validasi' ||
+        statusValidasiPembayaran == 'menunggu_validasi';
+
     bool isTidakValid =
-        _currentStatusTask == 'tidak_valid' ||
-        statusValidasiPembayaran == 'tidak_valid';
+        (_currentStatusTask == 'tidak_valid' ||
+            statusValidasiPembayaran == 'tidak_valid') &&
+        !isMenungguValidasi;
 
     String catatanAdmin =
         widget.detailTugas['catatan_admin'] ??
         'Tidak ada catatan khusus dari admin.';
 
     bool isBerjalan = _currentStatusTask == 'berjalan' && !isTidakValid;
-    bool isMenungguValidasi =
-        _currentStatusTask == 'menunggu_validasi' && !isTidakValid;
     bool isSelesai = _currentStatusTask == 'selesai';
 
     return SafeArea(
@@ -595,15 +669,47 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
                         ],
                       ),
                       const SizedBox(height: 10),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.location_pin,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(child: Text(lokasi)),
-                        ],
+                      GestureDetector(
+                        onTap: () => _bukaGoogleMaps(alamatLokasi),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.location_on,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                alamatLokasi,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.blue.shade700,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                            ),
+                            if (alamatLokasi.isNotEmpty) ...[
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.copy,
+                                  color: Colors.grey,
+                                  size: 20,
+                                ),
+                                tooltip: "Salin Lokasi",
+                                onPressed: () => _salinLokasi(alamatLokasi),
+                              ),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.map,
+                                  color: Colors.green,
+                                  size: 20,
+                                ),
+                                tooltip: "Buka di Maps",
+                                onPressed: () => _bukaGoogleMaps(alamatLokasi),
+                              ),
+                            ],
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -644,9 +750,7 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
                               width: 1.5,
                             ),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                8,
-                              ),
+                              borderRadius: BorderRadius.circular(8),
                             ),
                             elevation: 0,
                           ),
