@@ -1086,10 +1086,109 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                           deskripsiController.text.isEmpty ||
                           kategoriDipilih == null ||
                           nominalController.text.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Semua kolom harus diisi!"),
-                          ),
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: const Text("Form Belum Lengkap"),
+                              content: const Text(
+                                "Semua kolom harus diisi sebelum memposting bantuan!",
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: const Text("Oke"),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                        return;
+                      }
+
+                      final int nominalInput =
+                          int.tryParse(nominalController.text.trim()) ?? 0;
+                      int minimalUpah = 0;
+                      String deskripsiKategori = "";
+
+                      switch (kategoriDipilih) {
+                        case 'BantuFix':
+                          minimalUpah = 35000;
+                          deskripsiKategori = "BantuFix (Keahlian/Perbaikan)";
+                          break;
+                        case 'BantuClean':
+                          minimalUpah = 25000;
+                          deskripsiKategori =
+                              "BantuClean (Tenaga/Bersih-bersih)";
+                          break;
+                        case 'BantuShop':
+                          minimalUpah = 10000;
+                          deskripsiKategori = "BantuShop (Jasa Titip/Beli)";
+                          break;
+                        case 'BantuStudy':
+                          minimalUpah = 30000;
+                          deskripsiKategori = "BantuStudy (Edukasi/Pendidikan)";
+                          break;
+                      }
+
+                      if (nominalInput < minimalUpah) {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              title: Row(
+                                children: const [
+                                  Icon(
+                                    Icons.warning_amber_rounded,
+                                    color: Colors.orange,
+                                  ),
+                                  SizedBox(width: 10),
+                                  Text(
+                                    "Upah Terlalu Rendah",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Nominal pembayaran untuk layanan $deskripsiKategori belum memenuhi batas minimum.",
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    "Minimal: ${minimalUpah.toString().toRupiah()}",
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      color: Colors.red,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  const Text(
+                                    "Silakan sesuaikan nominal komisi Anda demi menghargai tenaga helper.",
+                                  ),
+                                ],
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: const Text(
+                                    "Ubah Nominal",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
                         );
                         return;
                       }

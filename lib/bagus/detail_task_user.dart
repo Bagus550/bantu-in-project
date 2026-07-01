@@ -6,7 +6,7 @@ import 'package:bantuin/utils/currency_extension.dart';
 import 'package:bantuin/utils/task_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:intl/intl.dart';
+import '../utils/date_time_utils.dart';
 
 class DetailTugas extends StatefulWidget {
   final Map<String, dynamic> taskData;
@@ -92,15 +92,7 @@ class _DetailTugasState extends State<DetailTugas> {
   }
 
   String formatTanggal(String? tanggalRaw) {
-    if (tanggalRaw == null || tanggalRaw.isEmpty) return 'Tanggal tidak valid';
-
-    try {
-      DateTime dateTime = DateTime.parse(tanggalRaw);
-
-      return DateFormat('d MMMM yyyy', 'id').format(dateTime);
-    } catch (e) {
-      return "Format Salah";
-    }
+    return DateTimeUtils.formatDateOnly(tanggalRaw);
   }
 
   bool _isLoadingBatal = false;

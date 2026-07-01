@@ -322,14 +322,8 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text("Kategori", style: TextStyle(fontWeight: FontWeight.bold)),
-              TextButton(onPressed: () {}, child: Text("View All")),
-            ],
-          ),
-          // SizedBox(height: 10),
+          Text("Kategori", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+          SizedBox(height: 18),
           SizedBox(
             height: 100,
             width: double.infinity,
@@ -363,7 +357,7 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
             padding: const EdgeInsets.only(bottom: 10),
             child: Text(
               "Bantuan Tersedia",
-              style: TextStyle(fontWeight: FontWeight.bold),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
             ),
           ),
           Expanded(
