@@ -32,16 +32,21 @@ class _RegistPage2State extends State<RegistPage2> {
     super.dispose();
   }
 
-  // bool _isValidEmail(String email) {
-  //   return RegExp(
-  //     r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
-  //   ).hasMatch(email);
-  // }
+  bool _isValidEmail(String email) {
+    return RegExp(
+      r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
+    ).hasMatch(email);
+  }
 
   void _goToNextPage() {
     String email = _emailController.text;
     String password = _passwordController.text;
     String confirmPassword = _confirmPasswordController.text;
+
+    if (!_isValidEmail(email)) {
+      _showSnackBar("Format email wajib menggunakan @ dan .com");
+      return;
+    }
 
     if (password.length < 8) {
       _showSnackBar("Password minimal 8 karakter");
@@ -212,7 +217,9 @@ class _RegistPage2State extends State<RegistPage2> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {_goToNextPage();},
+                  onPressed: () {
+                    _goToNextPage();
+                  },
 
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color.fromARGB(255, 88, 26, 246),
