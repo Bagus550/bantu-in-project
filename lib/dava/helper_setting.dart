@@ -25,6 +25,7 @@ class _HelperSettingState extends State<HelperSetting> {
 
   String _namaUser = "Memuat...";
   String _emailUser = "Memuat...";
+  String? _fotoProfilUrl;
 
   final _secureStorage = const FlutterSecureStorage();
 
@@ -35,9 +36,10 @@ class _HelperSettingState extends State<HelperSetting> {
   }
 
   Future<void> _loadUserData() async {
-    String? idString = await _secureStorage.read(key: 'id_users');
+    String? idString = await _secureStorage.read(key: 'id_helper') ?? await _secureStorage.read(key: 'id_users');
     String? savedNama = await _secureStorage.read(key: 'nama_user');
     String? savedEmail = await _secureStorage.read(key: 'email_user');
+    String? savedFoto = await _secureStorage.read(key: 'foto_profil_url');
 
     if (mounted) {
       setState(() {
@@ -46,6 +48,7 @@ class _HelperSettingState extends State<HelperSetting> {
         }
         _namaUser = savedNama ?? "Helper Bantu.in";
         _emailUser = savedEmail ?? "Email tidak tersedia";
+        _fotoProfilUrl = savedFoto;
       });
     }
   }
@@ -90,10 +93,11 @@ class _HelperSettingState extends State<HelperSetting> {
                       context,
                       MaterialPageRoute(builder: (context) => const Profile()),
                     ),
-                    child: const CircleAvatar(
+                    child: CircleAvatar(
                       radius: 28,
                       backgroundColor: Colors.grey,
-                      child: Icon(Icons.person, size: 36, color: Colors.white),
+                      backgroundImage: _fotoProfilUrl != null ? NetworkImage(_fotoProfilUrl!) : null,
+                      child: _fotoProfilUrl == null ? const Icon(Icons.person, size: 36, color: Colors.white) : null,
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -118,12 +122,17 @@ class _HelperSettingState extends State<HelperSetting> {
                         ),
                         const SizedBox(height: 4),
                         GestureDetector(
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const EditProfile(),
-                            ),
-                          ),
+                          onTap: () async {
+                            final isUpdated = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const EditProfile(),
+                              ),
+                            );
+                            if (isUpdated == true) {
+                              _loadUserData();
+                            }
+                          },
                           child: const Text(
                             'Edit Profil',
                             style: TextStyle(
@@ -411,8 +420,9 @@ class _HelperSettingState extends State<HelperSetting> {
   }
 
   Future<void> _hapusAkunBackend() async {
+    // 🔥 PERBAIKAN: Hapus Akun Helper pake Endpoint Helper, Jangan User
     final url = Uri.parse(
-      '${AppConfig.baseUrl}/api/users/$currentUserId/hapus',
+      '${AppConfig.baseUrl}/api/helpers/$currentUserId/hapus', 
     );
     try {
       final response = await http.delete(url);

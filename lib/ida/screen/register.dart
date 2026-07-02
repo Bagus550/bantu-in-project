@@ -13,6 +13,9 @@ class _RegisterState extends State<Register> {
   bool _isRememberMe = false;
   bool _isLoading = false;
 
+  bool _isObscurePassword = true;
+  bool _isObscureConfirm = true;
+
   final AuthService _authService = AuthService();
 
   final TextEditingController _namaController = TextEditingController();
@@ -219,20 +222,47 @@ class _RegisterState extends State<Register> {
                               SizedBox(height: 20),
                               TextField(
                                 controller: _passwordController,
+                                obscureText: _isObscurePassword,
                                 decoration: InputDecoration(
                                   label: Text("Kata Sandi"),
                                   border: OutlineInputBorder(
                                     borderSide: BorderSide(color: Colors.black),
+                                  ),
+                                  suffixIcon: IconButton(
+                                    icon: Icon(
+                                      _isObscurePassword
+                                          ? Icons.visibility_off
+                                          : Icons.visibility,
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        _isObscurePassword =
+                                            !_isObscurePassword;
+                                      });
+                                    },
                                   ),
                                 ),
                               ),
                               SizedBox(height: 20),
                               TextField(
                                 controller: _confirmPasswordController,
+                                obscureText: _isObscurePassword,
                                 decoration: InputDecoration(
                                   label: Text("Konfirmasi Kata Sandi"),
                                   border: OutlineInputBorder(
                                     borderSide: BorderSide(color: Colors.black),
+                                  ),
+                                  suffixIcon: IconButton(
+                                    icon: Icon(
+                                      _isObscureConfirm
+                                          ? Icons.visibility_off
+                                          : Icons.visibility,
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        _isObscureConfirm = !_isObscureConfirm;
+                                      });
+                                    },
                                   ),
                                 ),
                               ),

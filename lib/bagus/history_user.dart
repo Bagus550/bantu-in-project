@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:bantuin/utils/currency_extension.dart';
+import 'package:bantuin/utils/date_time_utils.dart';
 import 'package:flutter/material.dart';
 import '../../config/app_config.dart';
 import 'package:http/http.dart' as http;
@@ -117,7 +118,7 @@ class _HistoryUserState extends State<HistoryUser> {
   String formatTanggal(String? tanggalRaw) {
     if (tanggalRaw == null || tanggalRaw.isEmpty) return '-';
     try {
-      DateTime waktuTugas = DateTime.parse(tanggalRaw).toLocal();
+      DateTime waktuTugas = DateTimeUtils.toLocalDateTime(tanggalRaw);
       DateTime sekarang = DateTime.now();
 
       String jamMenit = DateFormat('HH.mm').format(waktuTugas);

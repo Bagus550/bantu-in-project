@@ -17,9 +17,14 @@ class _LupaKatasandiState extends State<LupaKatasandi> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _otpController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   bool _isOtpSent = false;
   bool _isLoading = false;
+
+  bool _isObscurePassword = true;
+  bool _isObscureConfirm = true;
 
   Future<void> _kirimOtp() async {
     if (_emailController.text.trim().isEmpty) {
@@ -60,7 +65,8 @@ class _LupaKatasandiState extends State<LupaKatasandi> {
 
   Future<void> _resetPassword() async {
     if (_otpController.text.trim().isEmpty ||
-        _passwordController.text.trim().isEmpty) {
+        _passwordController.text.trim().isEmpty ||
+        _confirmPasswordController.text.trim().isEmpty) {
       _showSnackbar("Semua kolom wajib diisi", Colors.red);
       return;
     }
@@ -69,6 +75,13 @@ class _LupaKatasandiState extends State<LupaKatasandi> {
       _showSnackbar("Password minimal 6 karakter", Colors.red);
       return;
     }
+
+    if (_passwordController.text.trim() !=
+        _confirmPasswordController.text.trim()) {
+      _showSnackbar("Kata sandi dan konfirmasi tidak cocok!", Colors.red);
+      return;
+    }
+
     setState(() => _isLoading = true);
 
     try {
@@ -88,7 +101,11 @@ class _LupaKatasandiState extends State<LupaKatasandi> {
 
         await Future.delayed(const Duration(seconds: 2));
         if (mounted) {
-          Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/login',
+            (route) => false,
+          );
         }
       } else {
         _showSnackbar(
@@ -120,6 +137,7 @@ class _LupaKatasandiState extends State<LupaKatasandi> {
     _emailController.dispose();
     _otpController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -138,84 +156,119 @@ class _LupaKatasandiState extends State<LupaKatasandi> {
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 50),
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsetsGeometry.only(bottom: 30),
-              child: Text(
-                _isOtpSent ? "Verifikasi & Reset" : "Lupa Kata Sandi",
-                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-              ),
-            ),
-            if (!_isOtpSent) ...[
-              TextField(
-                controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
-                  label: Text("Masukkan Email Anda"),
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.email_outlined),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsetsGeometry.only(bottom: 30),
+                child: Text(
+                  _isOtpSent ? "Verifikasi & Reset" : "Lupa Kata Sandi",
+                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
                 ),
               ),
-              const SizedBox(height: 25),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size(double.infinity, 50),
+              if (!_isOtpSent) ...[
+                TextField(
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: const InputDecoration(
+                    label: Text("Masukkan Email Anda"),
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.email_outlined),
+                  ),
                 ),
-                onPressed: _isLoading ? null : _kirimOtp,
-                child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text("Kirim Kode OTP"),
-              ),
-            ] else ...[
-              const Text(
-                "Silakan periksa kotak masuk email Anda untuk melihat 6-digit kode OTP.",
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _otpController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  label: Text("Masukkan Kode OTP"),
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.lock_clock),
+                const SizedBox(height: 25),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(double.infinity, 50),
+                  ),
+                  onPressed: _isLoading ? null : _kirimOtp,
+                  child: _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text("Kirim Kode OTP"),
                 ),
-              ),
-              const SizedBox(height: 15),
-              TextField(
-                controller: _passwordController,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  label: Text("Masukkan Kata Sandi Baru"),
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.lock_outline),
+              ] else ...[
+                const Text(
+                  "Silakan periksa kotak masuk email Anda untuk melihat 6-digit kode OTP.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.grey),
                 ),
-              ),
-              const SizedBox(height: 25),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      Colors.green, 
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size(double.infinity, 50),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: _otpController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    label: Text("Masukkan Kode OTP"),
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.lock_clock),
+                  ),
                 ),
-                onPressed: _isLoading ? null : _resetPassword,
-                child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text("Simpan Kata Sandi Baru"),
-              ),
-              TextButton(
-                onPressed: () {
-                  setState(() => _isOtpSent = false);
-                },
-                child: const Text("Kembali isi email"),
-              ),
+                const SizedBox(height: 15),
+                TextField(
+                  controller: _passwordController,
+                  obscureText: _isObscurePassword,
+                  decoration: InputDecoration(
+                    label: const Text("Kata Sandi Baru"),
+                    border: const OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.lock_outline),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _isObscurePassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _isObscurePassword = !_isObscurePassword;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 15),
+                TextField(
+                  controller: _confirmPasswordController,
+                  obscureText: _isObscureConfirm,
+                  decoration: InputDecoration(
+                    label: const Text("Konfirmasi Kata Sandi"),
+                    border: const OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.lock_outline),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _isObscureConfirm
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _isObscureConfirm = !_isObscureConfirm;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 25),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(double.infinity, 50),
+                  ),
+                  onPressed: _isLoading ? null : _resetPassword,
+                  child: _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text("Simpan Kata Sandi Baru"),
+                ),
+                TextButton(
+                  onPressed: () {
+                    setState(() => _isOtpSent = false);
+                  },
+                  child: const Text("Kembali isi email"),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
