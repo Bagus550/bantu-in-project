@@ -170,7 +170,7 @@ class _RoomChatPageState extends State<RoomChatPage> {
     final String? namaSession = await _authService.getUserNama();
     final String? roleSession = await _authService.getUserRole();
 
-    currentUser = namaSession ?? "User";
+    currentUser = namaSession ?? "User"; //nullhandler
     currentSenderType = roleSession ?? "requester";
 
     final String requester = widget.namaData['nama_requester'] ?? 'Pelanggan';
