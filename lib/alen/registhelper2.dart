@@ -32,17 +32,28 @@ class _RegistPage2State extends State<RegistPage2> {
     super.dispose();
   }
 
-  // bool _isValidEmail(String email) {
-  //   return RegExp(
-  //     r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
-  //   ).hasMatch(email);
-  // }
+  bool _isValidEmail(String email) {
+    return RegExp(
+      r"^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.\com$",
+    ).hasMatch(email);
+  }
 
   void _goToNextPage() {
     String email = _emailController.text;
     String password = _passwordController.text;
     String confirmPassword = _confirmPasswordController.text;
+    String wa = _waController.text.trim();
 
+    if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty || wa.isEmpty) {
+      _showSnackBar("Harap isi semua kolom");
+      return;
+    }
+    
+    if (!_isValidEmail(email)) {
+      _showSnackBar("Password minimal 8 karakter");
+      return;
+    }
+    
     if (password.length < 8) {
       _showSnackBar("Password minimal 8 karakter");
       return;
