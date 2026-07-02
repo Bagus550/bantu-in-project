@@ -49,9 +49,6 @@ class _LoginScreenState extends State<LoginScreen> {
         _isLoading = false;
       });
 
-      print("--- DEBUG DI LOGIN SCREEN ---");
-      print("Hasil result dari AuthService: $result");
-
       if (result != null && result['success'] == true) {
         final String? role = result['role'];
         final Map<String, dynamic> userData = result['user'] ?? {};
@@ -161,7 +158,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(height: 40),
 
                   Text(
-                    'Selamat Datang Kembali',
+                    'Selamat Datang',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 26,

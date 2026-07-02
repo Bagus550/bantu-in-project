@@ -14,6 +14,7 @@ import 'package:bantuin/pilihan.dart';
 import 'package:bantuin/utils/currency_extension.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class DashboardUserScreen extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -34,6 +35,51 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
   List<dynamic> listTugasDariApi = [];
   List<dynamic> listTugasSelesai = [];
   bool isLoading = true;
+  String? _fotoProfilUrl;
+  final _secureStorage = const FlutterSecureStorage();
+
+  Future<void> _fetchProfile() async {
+    try {
+      final token = await _secureStorage.read(key: 'auth_token') ?? await _secureStorage.read(key: 'jwt_token');
+      final response = await http.get(
+        Uri.parse('${AppConfig.baseUrl}/api/users/$idUserLogin/foto-profil'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        }
+      );
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        
+        String path = '';
+        if (data['data'] is String) {
+          path = data['data'];
+        } else if (data['foto_profil'] != null) {
+          path = data['foto_profil'];
+        } else if (data['data'] != null && data['data'] is Map && data['data']['foto_profil'] != null) {
+          path = data['data']['foto_profil'];
+        }
+
+        if (path.isNotEmpty) {
+          if (!path.startsWith('http')) {
+            if (path.startsWith('/')) {
+              path = path.substring(1);
+            }
+            if (!path.contains('uploads/profiles')) {
+              path = 'uploads/profiles/$path';
+            }
+            path = '${AppConfig.baseUrl}/$path';
+          }
+          await _secureStorage.write(key: 'foto_profil_url', value: path);
+          if (mounted) {
+            setState(() { _fotoProfilUrl = path; });
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Error fetching profile: $e');
+    }
+  }
 
   @override
   void initState() {
@@ -42,6 +88,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
     namaUserLogin = widget.userData['username'] ?? "User";
     emailLogin = widget.userData['email'];
 
+    _fetchProfile();
     fetchTasksByRequester();
   }
 
@@ -253,7 +300,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => Profile()),
-                );
+                ).then((_) => _fetchProfile());
               },
               child: Container(
                 height: 40,
@@ -261,8 +308,16 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.secondary,
                   borderRadius: BorderRadius.circular(50),
+                  image: _fotoProfilUrl != null
+                      ? DecorationImage(
+                          image: NetworkImage(_fotoProfilUrl!),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
                 ),
-                child: Icon(Icons.person, color: Colors.white, size: 30),
+                child: _fotoProfilUrl == null
+                    ? Icon(Icons.person, color: Colors.white, size: 30)
+                    : null,
               ),
             ),
           ),
@@ -283,7 +338,8 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                   CircleAvatar(
                     radius: 30,
                     backgroundColor: Colors.white,
-                    child: Icon(Icons.person, size: 35, color: Colors.grey),
+                    backgroundImage: _fotoProfilUrl != null ? NetworkImage(_fotoProfilUrl!) : null,
+                    child: _fotoProfilUrl == null ? Icon(Icons.person, size: 35, color: Colors.grey) : null,
                   ),
                   SizedBox(height: 10),
                   Text(
@@ -324,7 +380,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => UserSetting()),
-                );
+                ).then((_) => _fetchProfile());
               },
             ),
           ],
@@ -1086,10 +1142,109 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                           deskripsiController.text.isEmpty ||
                           kategoriDipilih == null ||
                           nominalController.text.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Semua kolom harus diisi!"),
-                          ),
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: const Text("Form Belum Lengkap"),
+                              content: const Text(
+                                "Semua kolom harus diisi sebelum memposting bantuan!",
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: const Text("Oke"),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                        return;
+                      }
+
+                      final int nominalInput =
+                          int.tryParse(nominalController.text.trim()) ?? 0;
+                      int minimalUpah = 0;
+                      String deskripsiKategori = "";
+
+                      switch (kategoriDipilih) {
+                        case 'BantuFix':
+                          minimalUpah = 35000;
+                          deskripsiKategori = "BantuFix (Keahlian/Perbaikan)";
+                          break;
+                        case 'BantuClean':
+                          minimalUpah = 25000;
+                          deskripsiKategori =
+                              "BantuClean (Tenaga/Bersih-bersih)";
+                          break;
+                        case 'BantuShop':
+                          minimalUpah = 10000;
+                          deskripsiKategori = "BantuShop (Jasa Titip/Beli)";
+                          break;
+                        case 'BantuStudy':
+                          minimalUpah = 30000;
+                          deskripsiKategori = "BantuStudy (Edukasi/Pendidikan)";
+                          break;
+                      }
+
+                      if (nominalInput < minimalUpah) {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              title: Row(
+                                children: const [
+                                  Icon(
+                                    Icons.warning_amber_rounded,
+                                    color: Colors.orange,
+                                  ),
+                                  SizedBox(width: 10),
+                                  Text(
+                                    "Upah Terlalu Rendah",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Nominal pembayaran untuk layanan $deskripsiKategori belum memenuhi batas minimum.",
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    "Minimal: ${minimalUpah.toString().toRupiah()}",
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      color: Colors.red,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  const Text(
+                                    "Silakan sesuaikan nominal komisi Anda demi menghargai tenaga helper.",
+                                  ),
+                                ],
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: const Text(
+                                    "Ubah Nominal",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
                         );
                         return;
                       }

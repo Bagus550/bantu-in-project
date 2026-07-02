@@ -20,29 +20,42 @@ class AuthService {
       if (data['status'] == 200 ||
           response.statusCode == 200 ||
           response.statusCode == 201) {
-        if (data['token'] != null) {
+        final user = data['user'] ?? data;
+        final token =
+            data['token']?.toString() ??
+            user['token']?.toString() ??
+            data['access_token']?.toString() ??
+            user['access_token']?.toString();
+        final role = (user['role'] ?? data['role'] ?? 'requester').toString();
+        final userId =
+            (user['id_user'] ?? user['id'] ?? data['id_user'] ?? data['id'] ?? '')
+                .toString();
+        final nama = (user['username'] ?? user['nama'] ?? data['username'] ?? '')
+            .toString();
+        final email = (user['email'] ?? data['email'] ?? '').toString();
+        final noHp = (user['no_hp'] ?? user['phone'] ?? data['no_hp'] ?? '')
+            .toString();
+
+        if (token != null && token.isNotEmpty) {
           try {
-            await _storage.write(key: 'jwt_token', value: data['token']);
-            await _storage.write(
-              key: 'user_nama',
-              value: data['user']['username'].toString(),
-            );
-            await _storage.write(
-              key: 'user_id',
-              value: (data['user']['id_user'] ?? data['user']['id'] ?? '')
-                  .toString(),
-            );
-            await _storage.write(
-              key: 'user_role',
-              value: data['user']['role'].toString(),
-            );
+            await _storage.write(key: 'auth_token', value: token);
+            await _storage.write(key: 'jwt_token', value: token);
+            await _storage.write(key: 'role', value: role);
+            await _storage.write(key: 'user_role', value: role);
+            await _storage.write(key: 'id_users', value: userId);
+            await _storage.write(key: 'user_id', value: userId);
+            await _storage.write(key: 'nama_user', value: nama);
+            await _storage.write(key: 'user_nama', value: nama);
+            await _storage.write(key: 'email_user', value: email);
+            await _storage.write(key: 'no_hp', value: noHp);
           } catch (_) {}
         }
 
         return {
           'success': true,
-          'role': data['user']['role'],
-          'user': data['user'],
+          'role': role,
+          'token': token,
+          'user': user,
         };
       } else {
         return {'success': false, 'role': null};
@@ -88,7 +101,7 @@ class AuthService {
       );
 
       if (response.statusCode != 200 && response.statusCode != 201) {
-        print("Pesan Gagal Backend: ${response.body}");
+        // response body tidak dipakai di production
       }
 
       if (response.statusCode == 201 || response.statusCode == 200) {
@@ -121,7 +134,14 @@ class AuthService {
 
   Future<void> logout() async {
     await _storage.delete(key: 'jwt_token');
+    await _storage.delete(key: 'auth_token');
     await _storage.delete(key: 'user_nama');
+    await _storage.delete(key: 'user_id');
     await _storage.delete(key: 'user_role');
+    await _storage.delete(key: 'id_users');
+    await _storage.delete(key: 'nama_user');
+    await _storage.delete(key: 'email_user');
+    await _storage.delete(key: 'role');
+    await _storage.delete(key: 'no_hp');
   }
 }

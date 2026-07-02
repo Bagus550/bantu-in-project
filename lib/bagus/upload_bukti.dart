@@ -29,7 +29,9 @@ class _UploadBuktiTabState extends State<UploadBuktiTab> {
     try {
       final XFile? foto = await _picker.pickImage(
         source: ImageSource.camera,
-        imageQuality: 50,
+        maxWidth: 1200,
+        maxHeight: 1600,
+        imageQuality: 60,
       );
 
       if (foto != null) {
@@ -63,6 +65,7 @@ class _UploadBuktiTabState extends State<UploadBuktiTab> {
       });
 
       request.fields['id_task'] = widget.idTask.toString();
+      request.fields['catatan'] = _catatanController.text;
       request.fields['catatan_tambahan'] = _catatanController.text;
 
       String ekstensi = _gambarBukti!.path.split('.').last.toLowerCase();
@@ -77,12 +80,11 @@ class _UploadBuktiTabState extends State<UploadBuktiTab> {
 
       request.files.add(multipartFile);
 
-      var response = await request.send();
+      var response = await request.send().timeout(
+        const Duration(seconds: 120),
+      );
 
       var responseData = await response.stream.bytesToString();
-      print("=== RAW RESPONSE BACKEND ===");
-      print(responseData);
-      print("=============================");
       var hasilJson = json.decode(responseData);
 
       if (!mounted) return;
@@ -288,22 +290,6 @@ class _UploadBuktiTabState extends State<UploadBuktiTab> {
                             ],
                           ),
                         ),
-                ),
-              ),
-              const SizedBox(height: 30),
-              const Text("Catatan tambahan (Opsional)"),
-              const SizedBox(height: 15),
-              TextField(
-                controller: _catatanController,
-                maxLines: 5,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  hintText:
-                      "Tuliskan pesan atau detail transaksi jika diperlukan",
-                  alignLabelWithHint: true,
                 ),
               ),
               const SizedBox(height: 30),
