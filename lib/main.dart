@@ -19,6 +19,7 @@ class BantuInApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Bantu.In',
       theme: ThemeData(
+        
         useMaterial3: true,
         textTheme: GoogleFonts.openSansTextTheme(Theme.of(context).textTheme),
         colorScheme: ColorScheme.fromSeed(

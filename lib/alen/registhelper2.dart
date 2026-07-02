@@ -42,18 +42,7 @@ class _RegistPage2State extends State<RegistPage2> {
     String email = _emailController.text;
     String password = _passwordController.text;
     String confirmPassword = _confirmPasswordController.text;
-    String wa = _waController.text.trim();
 
-    if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty || wa.isEmpty) {
-      _showSnackBar("Harap isi semua kolom");
-      return;
-    }
-    
-    if (!_isValidEmail(email)) {
-      _showSnackBar("Password minimal 8 karakter");
-      return;
-    }
-    
     if (password.length < 8) {
       _showSnackBar("Password minimal 8 karakter");
       return;
@@ -61,6 +50,11 @@ class _RegistPage2State extends State<RegistPage2> {
 
     if (password != confirmPassword) {
       _showSnackBar("Konfirmasi password tidak cocok");
+      return;
+    }
+    
+    if (wa.length < 9 ) {
+      _showSnackBar("Nomor WhatsApp minimal 9 digit");
       return;
     }
 
@@ -71,7 +65,7 @@ class _RegistPage2State extends State<RegistPage2> {
           fullName: widget.fullName,
           email: email,
           password: password,
-          whatsapp: _waController.text,
+          whatsapp: wa,
         ),
       ),
     );
@@ -223,7 +217,9 @@ class _RegistPage2State extends State<RegistPage2> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {_goToNextPage();},
+                  onPressed: () {
+                    _goToNextPage();
+                  },
 
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color.fromARGB(255, 88, 26, 246),
