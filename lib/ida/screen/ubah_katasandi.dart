@@ -16,6 +16,10 @@ class _UbahKatasandiState extends State<UbahKatasandi> {
   final _secureStorage = const FlutterSecureStorage();
   String? _currentUserId;
 
+  bool _isObscureOld = true;
+  bool _isObscureNew = true;
+  bool _isObscureConfirm = true;
+
   @override
   void initState() {
     super.initState();
@@ -129,31 +133,61 @@ class _UbahKatasandiState extends State<UbahKatasandi> {
           children: [
             TextField(
               controller: _oldPasswordController,
-              obscureText: true,
-              decoration: const InputDecoration(
+              obscureText: _isObscureOld,
+              decoration: InputDecoration(
                 labelText: "Kata Sandi Lama",
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.lock_outline),
+                border: const OutlineInputBorder(),
+                prefixIcon: const Icon(Icons.lock_outline),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _isObscureOld ? Icons.visibility_off : Icons.visibility,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isObscureOld = !_isObscureOld;
+                    });
+                  },
+                ),
               ),
             ),
             const SizedBox(height: 15),
             TextField(
               controller: _newPasswordController,
-              obscureText: true,
-              decoration: const InputDecoration(
+              obscureText: _isObscureNew,
+              decoration: InputDecoration(
                 labelText: "Kata Sandi Baru",
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.lock),
+                border: const OutlineInputBorder(),
+                prefixIcon: const Icon(Icons.lock),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _isObscureNew ? Icons.visibility_off : Icons.visibility,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isObscureNew = !_isObscureNew;
+                    });
+                  },
+                ),
               ),
             ),
             const SizedBox(height: 15),
             TextField(
               controller: _confirmPasswordController,
-              obscureText: true,
-              decoration: const InputDecoration(
+              obscureText: _isObscureConfirm,
+              decoration: InputDecoration(
                 labelText: "Konfirmasi Kata Sandi",
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.lock_person),
+                border: const OutlineInputBorder(),
+                prefixIcon: const Icon(Icons.lock_person),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _isObscureConfirm ? Icons.visibility_off : Icons.visibility,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isObscureConfirm = !_isObscureConfirm;
+                    });
+                  },
+                ),
               ),
             ),
             const SizedBox(height: 25),

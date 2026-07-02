@@ -31,6 +31,7 @@ class _RoomChatPageState extends State<RoomChatPage> {
   String namaLawanChat = "Loading...";
   late int idRoom;
   bool _isInitialized = false;
+  String _fotoLawan = "";
 
   @override
   void initState() {
@@ -49,6 +50,8 @@ class _RoomChatPageState extends State<RoomChatPage> {
     debugPrint(
       "DEBUG: Status Task saat ini: ${widget.namaData['status_task']}",
     );
+
+    _fotoLawan = widget.namaData['foto_lawan'] ?? "";
 
     _initChatUser();
   }
@@ -291,7 +294,8 @@ class _RoomChatPageState extends State<RoomChatPage> {
             CircleAvatar(
               radius: 20,
               backgroundColor: Theme.of(context).colorScheme.primary,
-              backgroundImage: NetworkImage('https://picsum.photos/200'),
+              backgroundImage: _fotoLawan.isNotEmpty ? NetworkImage(_fotoLawan) : null,
+              child: _fotoLawan.isEmpty ? const Icon(Icons.person, color: Colors.white) : null,
             ),
             SizedBox(width: 10),
             Column(
