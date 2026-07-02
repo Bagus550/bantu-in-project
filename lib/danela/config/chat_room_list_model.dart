@@ -7,6 +7,7 @@ class ChatRoomListModel {
   final String? namaRequester;
   final String? namaHelper;
   final String? lastMessage;
+  final String? sentAt;
   final String? statusTask;
   final String? fotoRequester;
   final String? fotoHelper;

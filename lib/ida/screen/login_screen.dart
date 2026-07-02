@@ -158,7 +158,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(height: 40),
 
                   Text(
-                    'Selamat Datang Kembali',
+                    'Selamat Datang',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 26,
