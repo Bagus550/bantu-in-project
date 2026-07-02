@@ -15,6 +15,7 @@ class _ProfileTabState extends State<ProfileTab> {
   String _nama = "Memuat...";
   String _email = "Memuat...";
   String _noHp = "Memuat...";
+  String? _fotoProfilUrl;
 
   @override
   void initState() {
@@ -27,6 +28,8 @@ class _ProfileTabState extends State<ProfileTab> {
     String? savedEmail = await _secureStorage.read(key: 'email_user');
     String? savedNoHp = await _secureStorage.read(key: 'no_hp');
 
+    String? savedFoto = await _secureStorage.read(key: 'foto_profil_url');
+
     if (mounted) {
       setState(() {
         _nama = savedNama ?? "User";
@@ -34,6 +37,7 @@ class _ProfileTabState extends State<ProfileTab> {
         _noHp = (savedNoHp != null && savedNoHp != "null")
             ? savedNoHp
             : "Tidak tersedia";
+        _fotoProfilUrl = savedFoto;
       });
     }
   }
@@ -58,9 +62,11 @@ class _ProfileTabState extends State<ProfileTab> {
                     ),
                     child: Row(
                       children: [
-                        const CircleAvatar(
+                        CircleAvatar(
                           radius: 30,
-                          child: Icon(Icons.person, size: 40),
+                          backgroundColor: Colors.white,
+                          backgroundImage: _fotoProfilUrl != null ? NetworkImage(_fotoProfilUrl!) : null,
+                          child: _fotoProfilUrl == null ? const Icon(Icons.person, size: 40, color: Colors.grey) : null,
                         ),
                         const SizedBox(width: 15),
                         Column(

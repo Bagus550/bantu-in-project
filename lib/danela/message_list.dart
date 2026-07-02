@@ -94,21 +94,36 @@ class _MessageState extends State<MessageList> {
                 final room = _chatRooms[index];
 
                 String namaLawanBicara = "";
+                String fotoLawanBicara = "";
                 if (room.idRequester?.toString() == currentUserId) {
-                  // Jika saya requester, maka lawan bicara saya adalah Helper
                   namaLawanBicara = room.namaHelper ?? 'Helper';
+                  fotoLawanBicara = room.fotoHelper ?? '';
                 } else {
-                  // Jika saya bukan requester (artinya saya helper), lawan bicara saya adalah Requester
                   namaLawanBicara = room.namaRequester ?? 'Pelanggan';
+                  fotoLawanBicara = room.fotoRequester ?? '';
+                }
+
+                String avatarUrl = "";
+                if (fotoLawanBicara.isNotEmpty) {
+                  if (fotoLawanBicara.startsWith('http')) {
+                    avatarUrl = fotoLawanBicara;
+                  } else {
+                    if (fotoLawanBicara.startsWith('/')) {
+                      fotoLawanBicara = fotoLawanBicara.substring(1);
+                    }
+                    if (!fotoLawanBicara.contains('uploads/profiles')) {
+                      fotoLawanBicara = 'uploads/profiles/$fotoLawanBicara';
+                    }
+                    avatarUrl = '${AppConfig.baseUrl}/$fotoLawanBicara';
+                  }
                 }
 
                 return ListTile(
                   leading: CircleAvatar(
                     radius: 25,
                     backgroundColor: Colors.blue.shade900,
-                    backgroundImage: NetworkImage(
-                      'https://picsum.photos/200?random=$index',
-                    ),
+                    backgroundImage: avatarUrl.isNotEmpty ? NetworkImage(avatarUrl) : null,
+                    child: avatarUrl.isEmpty ? const Icon(Icons.person, color: Colors.white) : null,
                   ),
                   title: Text(
                     namaLawanBicara,
@@ -138,6 +153,7 @@ class _MessageState extends State<MessageList> {
                       'nama_helper': room.namaHelper,
                       'nama_lawan': namaLawanBicara,
                       'status_task': room.statusTask,
+                      'foto_lawan': avatarUrl,
                     };
 
                     Navigator.push(

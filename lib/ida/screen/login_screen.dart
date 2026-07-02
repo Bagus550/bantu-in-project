@@ -49,9 +49,6 @@ class _LoginScreenState extends State<LoginScreen> {
         _isLoading = false;
       });
 
-      print("--- DEBUG DI LOGIN SCREEN ---");
-      print("Hasil result dari AuthService: $result");
-
       if (result != null && result['success'] == true) {
         final String? role = result['role'];
         final Map<String, dynamic> userData = result['user'] ?? {};

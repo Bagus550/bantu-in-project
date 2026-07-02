@@ -25,6 +25,7 @@ class _UserSettingState extends State<UserSetting> {
 
   String _namaUser = "Memuat...";
   String _emailUser = "Memuat...";
+  String? _fotoProfilUrl;
 
   final _secureStorage = const FlutterSecureStorage();
 
@@ -39,6 +40,7 @@ class _UserSettingState extends State<UserSetting> {
     String? notifString = await _secureStorage.read(key: 'notifikasi_on');
     String? savedNama = await _secureStorage.read(key: 'nama_user');
     String? savedEmail = await _secureStorage.read(key: 'email_user');
+    String? savedFoto = await _secureStorage.read(key: 'foto_profil_url');
 
     setState(() {
       if (idString != null) {
@@ -49,6 +51,7 @@ class _UserSettingState extends State<UserSetting> {
       }
       _namaUser = savedNama ?? "User Bantu.in";
       _emailUser = savedEmail ?? "Email tidak tersedia";
+      _fotoProfilUrl = savedFoto;
     });
   }
 
@@ -92,10 +95,11 @@ class _UserSettingState extends State<UserSetting> {
                       context,
                       MaterialPageRoute(builder: (context) => const Profile()),
                     ),
-                    child: const CircleAvatar(
+                    child: CircleAvatar(
                       radius: 28,
                       backgroundColor: Colors.grey,
-                      child: Icon(Icons.person, size: 36, color: Colors.white),
+                      backgroundImage: _fotoProfilUrl != null ? NetworkImage(_fotoProfilUrl!) : null,
+                      child: _fotoProfilUrl == null ? const Icon(Icons.person, size: 36, color: Colors.white) : null,
                     ),
                   ),
                   const SizedBox(width: 16),

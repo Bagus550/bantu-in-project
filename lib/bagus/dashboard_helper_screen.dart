@@ -13,6 +13,7 @@ import 'package:bantuin/yuliana/Faq_Helper.dart';
 import 'package:flutter/material.dart';
 import 'package:bantuin/config/app_config.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class DashboardHelperScreen extends StatefulWidget {
   final Map<String, dynamic>? userData;
@@ -33,10 +34,57 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
   Future<List<dynamic>>? _futureTasks;
 
   Map<String, dynamic> _tugasAktifSaya = {};
+  String? _fotoProfilUrl;
+  final _secureStorage = const FlutterSecureStorage();
+
+  Future<void> _fetchProfile() async {
+    final String idHelperLogin = widget.userData?['id']?.toString() ?? '2';
+    try {
+      final token = await _secureStorage.read(key: 'auth_token') ?? await _secureStorage.read(key: 'jwt_token');
+      final response = await http.get(
+        Uri.parse('${AppConfig.baseUrl}/api/helpers/$idHelperLogin/foto-profil'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        }
+      );
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        
+        String path = '';
+        if (data['data'] is String) {
+          path = data['data'];
+        } else if (data['foto_profil'] != null) {
+          path = data['foto_profil'];
+        } else if (data['data'] != null && data['data'] is Map && data['data']['foto_profil'] != null) {
+          path = data['data']['foto_profil'];
+        }
+
+        if (path.isNotEmpty) {
+          if (!path.startsWith('http')) {
+            if (path.startsWith('/')) {
+              path = path.substring(1);
+            }
+            if (!path.contains('uploads/profiles')) {
+              path = 'uploads/profiles/$path';
+            }
+            path = '${AppConfig.baseUrl}/$path';
+          }
+          await _secureStorage.write(key: 'foto_profil_url', value: path);
+          if (mounted) {
+            setState(() { _fotoProfilUrl = path; });
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Error fetching profile: $e');
+    }
+  }
 
   @override
   void initState() {
     super.initState();
+    _fetchProfile();
     _futureTasks = fetchTasksForHelper();
   }
 
@@ -142,9 +190,14 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => Profile()),
-                      );
+                      ).then((_) => _fetchProfile());
                     },
-                    icon: Icon(Icons.person, color: Colors.white),
+                    icon: _fotoProfilUrl == null
+                        ? Icon(Icons.person, color: Colors.white)
+                        : CircleAvatar(
+                            backgroundColor: Colors.transparent,
+                            backgroundImage: NetworkImage(_fotoProfilUrl!),
+                          ),
                   ),
                 ),
               ),
@@ -165,7 +218,8 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                       CircleAvatar(
                         radius: 30,
                         backgroundColor: Colors.white,
-                        child: Icon(Icons.person, size: 35, color: Colors.grey),
+                        backgroundImage: _fotoProfilUrl != null ? NetworkImage(_fotoProfilUrl!) : null,
+                        child: _fotoProfilUrl == null ? Icon(Icons.person, size: 35, color: Colors.grey) : null,
                       ),
                       SizedBox(height: 10),
                       Text(
@@ -209,7 +263,7 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => HelperSetting()),
-                    );
+                    ).then((_) => _fetchProfile());
                   },
                 ),
               ],
