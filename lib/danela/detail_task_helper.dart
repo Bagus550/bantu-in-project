@@ -4,7 +4,7 @@ import 'package:bantuin/config/app_config.dart';
 import 'package:bantuin/utils/currency_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:intl/intl.dart';
+import '../utils/date_time_utils.dart';
 
 class DetailTugasHelper extends StatefulWidget {
   final Map<String, dynamic> taskData;
@@ -28,15 +28,7 @@ class _DetailTugasState extends State<DetailTugasHelper> {
   bool _sedangMemproses = false;
 
   String formatJam(String? tanggalRaw) {
-    if (tanggalRaw == null || tanggalRaw.isEmpty) return "--:--";
-
-    try {
-      DateTime dateTime = DateTime.parse(tanggalRaw);
-
-      return DateFormat("d MMMM yyyy, 'pukul' HH:mm", 'id').format(dateTime);
-    } catch (e) {
-      return "-";
-    }
+    return DateTimeUtils.formatToWIB(tanggalRaw);
   }
 
   Future<void> _eksekusiAmbilTugas() async {
@@ -137,7 +129,10 @@ class _DetailTugasState extends State<DetailTugasHelper> {
   Widget build(BuildContext context) {
     final String judul = widget.taskData['judul_tugas'] ?? 'Tidak ada judul';
     final String harga = widget.taskData['nominal_pembayaran'] ?? 'Rp 0';
-    final String lokasi = widget.taskData['lokasi_tugas'] ?? 'Tidak ada lokasi';
+    final String lokasi =
+        (widget.taskData['lokasi_tugas'] ?? widget.taskData['lokasi'] ?? '')
+            .toString()
+            .trim();
     final String deskripsi =
         widget.taskData['deskripsi'] ?? 'Tidak ada deskripsi';
     final String namaPelanggan = widget.taskData['nama_requester'] ?? 'Anonim';
@@ -229,11 +224,13 @@ class _DetailTugasState extends State<DetailTugasHelper> {
                             size: 18,
                           ),
                           SizedBox(width: 6),
-                          Text(
-                            lokasi,
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
+                          Expanded(
+                            child: Text(
+                              lokasi,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ),
                         ],
