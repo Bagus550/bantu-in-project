@@ -3,6 +3,7 @@
 import 'dart:convert';
 import 'package:bantuin/yuliana/history_helper.dart';
 import 'package:bantuin/bagus/tugas_aktif_helper.dart';
+import 'package:bantuin/bagus/peta_rute_helper.dart';
 import 'package:bantuin/danela/detail_task_helper.dart';
 import 'package:bantuin/danela/message_list.dart';
 import 'package:bantuin/ida/screen/profile.dart';
@@ -40,23 +41,29 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
   Future<void> _fetchProfile() async {
     final String idHelperLogin = widget.userData?['id']?.toString() ?? '2';
     try {
-      final token = await _secureStorage.read(key: 'auth_token') ?? await _secureStorage.read(key: 'jwt_token');
+      final token =
+          await _secureStorage.read(key: 'auth_token') ??
+          await _secureStorage.read(key: 'jwt_token');
       final response = await http.get(
-        Uri.parse('${AppConfig.baseUrl}/api/helpers/$idHelperLogin/foto-profil'),
+        Uri.parse(
+          '${AppConfig.baseUrl}/api/helpers/$idHelperLogin/foto-profil',
+        ),
         headers: {
           'Authorization': 'Bearer $token',
           'Accept': 'application/json',
-        }
+        },
       );
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        
+
         String path = '';
         if (data['data'] is String) {
           path = data['data'];
         } else if (data['foto_profil'] != null) {
           path = data['foto_profil'];
-        } else if (data['data'] != null && data['data'] is Map && data['data']['foto_profil'] != null) {
+        } else if (data['data'] != null &&
+            data['data'] is Map &&
+            data['data']['foto_profil'] != null) {
           path = data['data']['foto_profil'];
         }
 
@@ -72,7 +79,9 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
           }
           await _secureStorage.write(key: 'foto_profil_url', value: path);
           if (mounted) {
-            setState(() { _fotoProfilUrl = path; });
+            setState(() {
+              _fotoProfilUrl = path;
+            });
           }
         }
       }
@@ -134,8 +143,12 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
           detailTugas: _tugasAktifSaya.isEmpty ? {} : _tugasAktifSaya,
         );
       case 2:
-        return MessageList();
+        return _tugasAktifSaya.isEmpty
+            ? const Center(child: Text("Belum ada tugas aktif untuk dipetakan"))
+            : PetaRuteHelper(tugasAktif: _tugasAktifSaya);
       case 3:
+        return MessageList();
+      case 4:
         return ProfileTab();
       default:
         return _buildDashboardHelper(listFeedBeranda);
@@ -218,8 +231,12 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                       CircleAvatar(
                         radius: 30,
                         backgroundColor: Colors.white,
-                        backgroundImage: _fotoProfilUrl != null ? NetworkImage(_fotoProfilUrl!) : null,
-                        child: _fotoProfilUrl == null ? Icon(Icons.person, size: 35, color: Colors.grey) : null,
+                        backgroundImage: _fotoProfilUrl != null
+                            ? NetworkImage(_fotoProfilUrl!)
+                            : null,
+                        child: _fotoProfilUrl == null
+                            ? Icon(Icons.person, size: 35, color: Colors.grey)
+                            : null,
                       ),
                       SizedBox(height: 10),
                       Text(
@@ -295,8 +312,13 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                             ? listFeedBeranda
                             : listFeedBeranda.where((item) {
                                 final kategori =
-                                    item['kategori_layanan']?.toString().toLowerCase().trim() ?? '';
-                                return kategori == _kategoriAktif.toLowerCase().trim();
+                                    item['kategori_layanan']
+                                        ?.toString()
+                                        .toLowerCase()
+                                        .trim() ??
+                                    '';
+                                return kategori ==
+                                    _kategoriAktif.toLowerCase().trim();
                               }).toList();
 
                         if (listTerfilter.isEmpty) {
@@ -306,8 +328,12 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                               return SingleChildScrollView(
                                 physics: const AlwaysScrollableScrollPhysics(),
                                 child: ConstrainedBox(
-                                  constraints: BoxConstraints(minHeight: viewportHeight),
-                                  child: _buildDashboardHelperEmpty(listFeedBeranda),
+                                  constraints: BoxConstraints(
+                                    minHeight: viewportHeight,
+                                  ),
+                                  child: _buildDashboardHelperEmpty(
+                                    listFeedBeranda,
+                                  ),
                                 ),
                               );
                             },
@@ -342,14 +368,19 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                     icon: Icons.task_outlined,
                     label: 'Tugas Aktif',
                   ),
-                  // _buildPostButton(),
                   _buildNavItem(
                     index: 2,
+                    icon: Icons.map_outlined,
+                    label: 'Peta Navigasi',
+                  ),
+                  // _buildPostButton(),
+                  _buildNavItem(
+                    index: 3,
                     icon: Icons.chat_bubble_outline_rounded,
                     label: 'Message',
                   ),
                   _buildNavItem(
-                    index: 3,
+                    index: 4,
                     icon: Icons.person_outline_rounded,
                     label: 'Profil',
                   ),
@@ -376,7 +407,10 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("Kategori", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+          Text(
+            "Kategori",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+          ),
           SizedBox(height: 18),
           SizedBox(
             height: 100,
@@ -754,8 +788,8 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
       ),
     );
   }
-  Widget _buildDashboardHelperEmpty(List<dynamic> realTasks) {
 
+  Widget _buildDashboardHelperEmpty(List<dynamic> realTasks) {
     return Padding(
       padding: EdgeInsets.only(top: 16, right: 16, left: 16),
       child: Column(
@@ -775,10 +809,22 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  _buildTombolKategori(nama: 'Semua', icon: Icons.grid_view_rounded),
-                  _buildTombolKategori(nama: 'BantuFix', icon: Icons.business_center_rounded),
-                  _buildTombolKategori(nama: 'BantuClean', icon: Icons.cleaning_services_rounded),
-                  _buildTombolKategori(nama: 'BantuShop', icon: Icons.shopping_bag_rounded),
+                  _buildTombolKategori(
+                    nama: 'Semua',
+                    icon: Icons.grid_view_rounded,
+                  ),
+                  _buildTombolKategori(
+                    nama: 'BantuFix',
+                    icon: Icons.business_center_rounded,
+                  ),
+                  _buildTombolKategori(
+                    nama: 'BantuClean',
+                    icon: Icons.cleaning_services_rounded,
+                  ),
+                  _buildTombolKategori(
+                    nama: 'BantuShop',
+                    icon: Icons.shopping_bag_rounded,
+                  ),
                   _buildTombolKategori(nama: 'BantuStudy', icon: Icons.school),
                 ],
               ),
@@ -862,39 +908,34 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
   }) {
     final bool isActive = _currentIndex == index;
 
-    return GestureDetector(
-      onTap: () async {
-        setState(() {
-          _currentIndex = index;
-        });
-        if (index == 1) {
-          try {
-            await fetchTasksForHelper();
-          } catch (e) {}
-        }
-      },
-      child: AnimatedContainer(
-        duration: Duration(milliseconds: 200),
-        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-        decoration: BoxDecoration(
-          color: isActive ? Color(0xFF1E3A8A) : Colors.transparent,
-          borderRadius: BorderRadius.circular(16.0),
-        ),
+    return Expanded(
+      child: GestureDetector(
+        onTap: () async {
+          setState(() {
+            _currentIndex = index;
+          });
+          if (index == 1) {
+            try {
+              await fetchTasksForHelper();
+            } catch (e) {}
+          }
+        },
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               icon,
-              color: isActive ? Colors.white : Colors.black87,
-              size: 26.0,
+              color: isActive ? Color(0xFF1E3A8A) : Colors.black54, 
+              size: 24,
             ),
             SizedBox(height: 4.0),
             Text(
               label,
               style: TextStyle(
-                fontSize: 12.0,
+                fontSize: 10,
                 fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-                color: isActive ? Colors.white : Colors.black87,
+                color: isActive ? Color(0xFF1E3A8A) : Colors.black54,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],

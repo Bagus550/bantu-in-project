@@ -1,6 +1,8 @@
 class AppConfig {
   static const String baseUrl         = "https://serve.bagusdevstudio.xyz";
 
+  static const String osrmServer      = "https://osrm.bagusdevstudio.xyz";
+
   static const String taskFeed = "$baseUrl/api/tasks/feed";
   static const String taskRequester = "$baseUrl/api/tasks/requester";
   static const String taskCreate = "$baseUrl/api/tasks/create";

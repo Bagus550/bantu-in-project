@@ -1,6 +1,7 @@
 import 'package:bantuin/bagus/detail_task_user.dart';
 import 'package:bantuin/bagus/history_user.dart';
 import 'package:bantuin/bagus/service/task_service.dart';
+import 'package:bantuin/bagus/pilih_lokasi_peta.dart';
 import 'package:bantuin/config/app_config.dart';
 import 'package:bantuin/danela/message_list.dart';
 import 'package:bantuin/danela/roomchat.dart';
@@ -15,6 +16,7 @@ import 'package:bantuin/utils/currency_extension.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:latlong2/latlong.dart';
 
 class DashboardUserScreen extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -40,23 +42,27 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
 
   Future<void> _fetchProfile() async {
     try {
-      final token = await _secureStorage.read(key: 'auth_token') ?? await _secureStorage.read(key: 'jwt_token');
+      final token =
+          await _secureStorage.read(key: 'auth_token') ??
+          await _secureStorage.read(key: 'jwt_token');
       final response = await http.get(
         Uri.parse('${AppConfig.baseUrl}/api/users/$idUserLogin/foto-profil'),
         headers: {
           'Authorization': 'Bearer $token',
           'Accept': 'application/json',
-        }
+        },
       );
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        
+
         String path = '';
         if (data['data'] is String) {
           path = data['data'];
         } else if (data['foto_profil'] != null) {
           path = data['foto_profil'];
-        } else if (data['data'] != null && data['data'] is Map && data['data']['foto_profil'] != null) {
+        } else if (data['data'] != null &&
+            data['data'] is Map &&
+            data['data']['foto_profil'] != null) {
           path = data['data']['foto_profil'];
         }
 
@@ -72,7 +78,9 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
           }
           await _secureStorage.write(key: 'foto_profil_url', value: path);
           if (mounted) {
-            setState(() { _fotoProfilUrl = path; });
+            setState(() {
+              _fotoProfilUrl = path;
+            });
           }
         }
       }
@@ -338,8 +346,12 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                   CircleAvatar(
                     radius: 30,
                     backgroundColor: Colors.white,
-                    backgroundImage: _fotoProfilUrl != null ? NetworkImage(_fotoProfilUrl!) : null,
-                    child: _fotoProfilUrl == null ? Icon(Icons.person, size: 35, color: Colors.grey) : null,
+                    backgroundImage: _fotoProfilUrl != null
+                        ? NetworkImage(_fotoProfilUrl!)
+                        : null,
+                    child: _fotoProfilUrl == null
+                        ? Icon(Icons.person, size: 35, color: Colors.grey)
+                        : null,
                   ),
                   SizedBox(height: 10),
                   Text(
@@ -1029,62 +1041,83 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
     final TextEditingController judulController = TextEditingController();
     final TextEditingController deskripsiController = TextEditingController();
     final TextEditingController nominalController = TextEditingController();
-    final TextEditingController lokasiController = TextEditingController();
+    final TextEditingController detailLokasiController =
+        TextEditingController(); // Untuk patokan alamat
 
     String? kategoriDipilih = initialKategori;
+
+    // Variabel untuk menyimpan titik koordinat
+    double? latitudeTugas;
+    double? longitudeTugas;
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
       ),
       builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            top: 20,
-            left: 20,
-            right: 20,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Text(
-                    "Tambah Bantuan Baru",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setModalState) {
+            // Fungsi internal untuk tarik GPS
+            Future<void> bukaPetaPemilih() async {
+              final LatLng? lokasiTerpilih = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const PilihLokasiPeta(),
                 ),
+              );
+              if (lokasiTerpilih != null) {
+                setModalState(() {
+                  latitudeTugas = lokasiTerpilih.latitude;
+                  longitudeTugas = lokasiTerpilih.longitude;
+                });
+              }
+            }
 
-                SizedBox(height: 20),
+            return Padding(
+              padding: EdgeInsets.only(
+                top: 20,
+                left: 20,
+                right: 20,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Center(
+                      child: Text(
+                        "Tambah Bantuan Baru",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
 
-                TextField(
-                  controller: judulController,
-                  decoration: const InputDecoration(
-                    labelText: 'Judul Tugas',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
+                    TextField(
+                      controller: judulController,
+                      decoration: const InputDecoration(
+                        labelText: 'Judul Tugas',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 15),
 
-                const SizedBox(height: 15),
+                    TextField(
+                      controller: deskripsiController,
+                      maxLines: 3,
+                      decoration: const InputDecoration(
+                        labelText: 'Deskripsi Detail',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 15),
 
-                TextField(
-                  controller: deskripsiController,
-                  maxLines: 3,
-                  decoration: const InputDecoration(
-                    labelText: 'Deskripsi Detail',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-
-                const SizedBox(height: 15),
-
-                StatefulBuilder(
-                  builder: (BuildContext context, StateSetter setModalState) {
-                    return DropdownButtonFormField(
+                    DropdownButtonFormField(
                       initialValue: kategoriDipilih,
                       decoration: const InputDecoration(
                         labelText: 'Kategori Layanan',
@@ -1104,216 +1137,317 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                           kategoriDipilih = value;
                         });
                       },
-                    );
-                  },
-                ),
-
-                const SizedBox(height: 15),
-
-                TextField(
-                  controller: lokasiController,
-                  maxLines: 2,
-                  keyboardType: TextInputType.multiline,
-                  decoration: const InputDecoration(
-                    labelText: 'Lokasi (atau tempel link Gmaps)',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-
-                const SizedBox(height: 15),
-
-                TextField(
-                  controller: nominalController,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Nominal Pembayaran (Rp)',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-
-                const SizedBox(height: 25),
-
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      if (judulController.text.isEmpty ||
-                          deskripsiController.text.isEmpty ||
-                          kategoriDipilih == null ||
-                          nominalController.text.isEmpty) {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: const Text("Form Belum Lengkap"),
-                              content: const Text(
-                                "Semua kolom harus diisi sebelum memposting bantuan!",
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: const Text("Oke"),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                        return;
-                      }
-
-                      final int nominalInput =
-                          int.tryParse(nominalController.text.trim()) ?? 0;
-                      int minimalUpah = 0;
-                      String deskripsiKategori = "";
-
-                      switch (kategoriDipilih) {
-                        case 'BantuFix':
-                          minimalUpah = 35000;
-                          deskripsiKategori = "BantuFix (Keahlian/Perbaikan)";
-                          break;
-                        case 'BantuClean':
-                          minimalUpah = 25000;
-                          deskripsiKategori =
-                              "BantuClean (Tenaga/Bersih-bersih)";
-                          break;
-                        case 'BantuShop':
-                          minimalUpah = 10000;
-                          deskripsiKategori = "BantuShop (Jasa Titip/Beli)";
-                          break;
-                        case 'BantuStudy':
-                          minimalUpah = 30000;
-                          deskripsiKategori = "BantuStudy (Edukasi/Pendidikan)";
-                          break;
-                      }
-
-                      if (nominalInput < minimalUpah) {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              title: Row(
-                                children: const [
-                                  Icon(
-                                    Icons.warning_amber_rounded,
-                                    color: Colors.orange,
-                                  ),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    "Upah Terlalu Rendah",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              content: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Nominal pembayaran untuk layanan $deskripsiKategori belum memenuhi batas minimum.",
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    "Minimal: ${minimalUpah.toString().toRupiah()}",
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                      color: Colors.red,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  const Text(
-                                    "Silakan sesuaikan nominal komisi Anda demi menghargai tenaga helper.",
-                                  ),
-                                ],
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: const Text(
-                                    "Ubah Nominal",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                        return;
-                      }
-
-                      showDialog(
-                        context: context,
-                        barrierDismissible: false,
-                        builder: (context) =>
-                            const Center(child: CircularProgressIndicator()),
-                      );
-
-                      final result = await _taskService.createTask(
-                        judulTugas: judulController.text.trim(),
-                        deskripsi: deskripsiController.text.trim(),
-                        kategoriLayanan: kategoriDipilih!,
-                        lokasi: lokasiController.text.trim(),
-                        nominalPembayaran: nominalController.text.trim(),
-                        idRequester: idUserLogin,
-                      );
-
-                      if (context.mounted) {
-                        Navigator.pop(context);
-                      }
-
-                      if (result != null && result['success'] == true) {
-                        if (context.mounted) {
-                          Navigator.pop(context);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                result['message'] ??
-                                    "Berhasil memposting bantuan!",
-                              ),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
-
-                          fetchTasksByRequester();
-                        }
-                      } else {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                result?['message'] ??
-                                    "Gagal memposting bantuan",
-                              ),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
-                        }
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                    ),
+                    const SizedBox(height: 15),
+                    const Text(
+                      "Titik Koordinat Lokasi:",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey,
                       ),
                     ),
-                    child: const Text(
-                      "Posting Bantuan",
-                      style: TextStyle(fontSize: 16),
+                    const SizedBox(height: 5),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 15,
+                            ),
+                            decoration: BoxDecoration(
+                              color: latitudeTugas != null
+                                  ? Colors.green.shade50
+                                  : Colors.grey.shade100,
+                              border: Border.all(
+                                color: latitudeTugas != null
+                                    ? Colors.green.shade400
+                                    : Colors.grey.shade400,
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: latitudeTugas != null
+                                ? Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.check_circle,
+                                        color: Colors.green,
+                                        size: 20,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          "Titik Peta Terkunci!",
+                                          style: TextStyle(
+                                            color: Colors.green.shade800,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                : Row(
+                                    children: [
+                                      Icon(
+                                        Icons.location_off,
+                                        color: Colors.grey.shade500,
+                                        size: 20,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          "Peta belum dipilih",
+                                          style: TextStyle(
+                                            color: Colors.grey.shade600,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        SizedBox(
+                          height: 50,
+                          child: ElevatedButton.icon(
+                            onPressed:
+                                bukaPetaPemilih, // Fungsi buka peta yang tadi dibuat
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: latitudeTugas != null
+                                  ? Colors.orange.shade700
+                                  : const Color(0xFF1E3A8A),
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            icon: const Icon(Icons.map_outlined),
+                            label: Text(
+                              latitudeTugas != null ? "Ubah Peta" : "Buka Peta",
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
+                    const SizedBox(height: 10),
+
+                    // --- AKHIR BAGIAN LOKASI ---
+                    TextField(
+                      controller: detailLokasiController,
+                      maxLines: 2,
+                      decoration: const InputDecoration(
+                        labelText: 'Patokan Alamat (Opsional)',
+                        hintText: 'Cth: Rumah cat hijau, depan warung',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 15),
+
+                    // --- AKHIR BAGIAN LOKASI ---
+                    TextField(
+                      controller: nominalController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Nominal Pembayaran (Rp)',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 25),
+
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          // Validasi jika ada yang kosong, termasuk titik GPS
+                          if (judulController.text.isEmpty ||
+                              deskripsiController.text.isEmpty ||
+                              kategoriDipilih == null ||
+                              nominalController.text.isEmpty ||
+                              latitudeTugas == null) {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text("Form Belum Lengkap"),
+                                  content: const Text(
+                                    "Pastikan semua kolom diisi dan TITIK LOKASI GPS sudah ditekan!",
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: const Text("Oke"),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                            return;
+                          }
+
+                          // LOGIKA VALIDASI HARGA MINIMAL (Tetap sama seperti aslinya)
+                          final int nominalInput =
+                              int.tryParse(nominalController.text.trim()) ?? 0;
+                          int minimalUpah = 0;
+                          String deskripsiKategori = "";
+
+                          switch (kategoriDipilih) {
+                            case 'BantuFix':
+                              minimalUpah = 35000;
+                              break;
+                            case 'BantuClean':
+                              minimalUpah = 25000;
+                              break;
+                            case 'BantuShop':
+                              minimalUpah = 10000;
+                              break;
+                            case 'BantuStudy':
+                              minimalUpah = 30000;
+                              break;
+                          }
+
+                          if (nominalInput < minimalUpah) {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  title: const Row(
+                                    children: [
+                                      Icon(
+                                        Icons.warning_amber_rounded,
+                                        color: Colors.orange,
+                                      ),
+                                      SizedBox(width: 10),
+                                      Text(
+                                        "Upah Terlalu Rendah",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  content: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "Nominal pembayaran untuk layanan $deskripsiKategori belum memenuhi batas minimum.",
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Text(
+                                        "Minimal: ${minimalUpah.toString().toRupiah()}", // Pastikan toRupiah() jalan
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                          color: Colors.red,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      const Text(
+                                        "Silakan sesuaikan nominal komisi Anda demi menghargai tenaga helper.",
+                                      ),
+                                    ],
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: const Text(
+                                        "Ubah Nominal",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                            return;
+                          }
+
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (context) => const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          );
+
+                          String patokanDikirim = detailLokasiController.text
+                              .trim();
+                          if (patokanDikirim.isEmpty) {
+                            patokanDikirim =
+                                "Sesuai titik peta";
+                          }
+
+                          // UPDATE PAYLOAD KE SERVICE
+                          final result = await _taskService.createTask(
+                            judulTugas: judulController.text.trim(),
+                            deskripsi: deskripsiController.text.trim(),
+                            kategoriLayanan: kategoriDipilih!,
+                            lokasi: patokanDikirim,
+                            latitude: latitudeTugas.toString(),
+                            longitude: longitudeTugas.toString(),
+                            nominalPembayaran: nominalController.text.trim(),
+                            idRequester: idUserLogin,
+                          );
+
+                          if (context.mounted) {
+                            Navigator.pop(context); // Tutup loading
+                          }
+
+                          if (result != null && result['success'] == true) {
+                            if (context.mounted) {
+                              Navigator.pop(context); // Tutup modal sheet
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    result['message'] ??
+                                        "Berhasil memposting bantuan!",
+                                  ),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+                              fetchTasksByRequester();
+                            }
+                          } else {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    result?['message'] ??
+                                        "Gagal memposting bantuan",
+                                  ),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(
+                            context,
+                          ).colorScheme.primary,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          "Posting Bantuan",
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );
