@@ -1,9 +1,12 @@
 import 'package:bantuin/ida/screen/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:bantuin/ida/auth/auth_service.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'helper_documents_screen.dart';
 
 class Register extends StatefulWidget {
-  const Register({super.key});
+  final String selectedRole;
+  const Register({super.key, required this.selectedRole});
 
   @override
   State<Register> createState() => _RegisterState();
@@ -29,8 +32,9 @@ class _RegisterState extends State<Register> {
   String _jenisKelaminDipilih = 'Pilih Jenis Kelamin';
 
   void _prosesDaftar() async {
+    final isHelper = widget.selectedRole == 'helper';
     if (_namaController.text.isEmpty ||
-        _usernameController.text.isEmpty ||
+        (!isHelper && _usernameController.text.isEmpty) ||
         _emailController.text.isEmpty ||
         _noHpController.text.isEmpty ||
         _passwordController.text.isEmpty) {
@@ -62,11 +66,12 @@ class _RegisterState extends State<Register> {
 
     final hasil = await _authService.register(
       _namaController.text,
-      _usernameController.text,
+      isHelper ? _namaController.text : _usernameController.text,
       _emailController.text,
       _passwordController.text,
       _noHpController.text,
       _jenisKelaminDipilih,
+      widget.selectedRole,
     );
 
     setState(() {
@@ -74,12 +79,45 @@ class _RegisterState extends State<Register> {
     });
 
     if (hasil != null && hasil['success'] == true) {
-      _tampilkanSnackbar("Registrasi Berhasil! Silakan Masuk.");
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginScreen()),
+      if (isHelper) {
+        final email = _emailController.text.trim();
+        // Simpan role override untuk helper secara lokal
+        final localSecureStorage = const FlutterSecureStorage();
+        await localSecureStorage.write(key: 'role_override_$email', value: 'helper');
+
+        // Auto-login helper to obtain token and userData
+        final loginResult = await _authService.login(
+          email,
+          _passwordController.text,
         );
+        if (loginResult != null && loginResult['success'] == true) {
+          final Map<String, dynamic> userData = loginResult['user'] ?? {};
+          if (mounted) {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (context) => HelperDocumentsScreen(userData: userData),
+              ),
+              (route) => false,
+            );
+          }
+        } else {
+          _tampilkanSnackbar("Registrasi Berhasil! Silakan Masuk untuk melengkapi dokumen.");
+          if (mounted) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const LoginScreen()),
+            );
+          }
+        }
+      } else {
+        _tampilkanSnackbar("Registrasi Berhasil! Silakan Masuk.");
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginScreen()),
+          );
+        }
       }
     } else {
       debugPrint("Respon Gagal dari API: $hasil");
@@ -143,7 +181,7 @@ class _RegisterState extends State<Register> {
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 25),
                                 child: Text(
-                                  "Buat Akun Baru",
+                                  "Isi Data Diri",
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontSize: 30,
@@ -161,16 +199,18 @@ class _RegisterState extends State<Register> {
                                 ),
                               ),
                               SizedBox(height: 20),
-                              TextField(
-                                controller: _usernameController,
-                                decoration: InputDecoration(
-                                  label: Text("Username"),
-                                  border: OutlineInputBorder(
-                                    borderSide: BorderSide(color: Colors.black),
+                              if (widget.selectedRole != 'helper') ...[
+                                TextField(
+                                  controller: _usernameController,
+                                  decoration: InputDecoration(
+                                    label: Text("Username"),
+                                    border: OutlineInputBorder(
+                                      borderSide: BorderSide(color: Colors.black),
+                                    ),
                                   ),
                                 ),
-                              ),
-                              SizedBox(height: 20),
+                                SizedBox(height: 20),
+                              ],
                               DropdownButtonFormField<String>(
                                 initialValue: _jenisKelaminDipilih,
                                 decoration: const InputDecoration(
@@ -337,7 +377,7 @@ class _RegisterState extends State<Register> {
                                           strokeWidth: 2,
                                         ),
                                       )
-                                    : Text("Daftar"),
+                                    : Text(widget.selectedRole == 'helper' ? "Lanjutkan" : "Daftar"),
                               ),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,

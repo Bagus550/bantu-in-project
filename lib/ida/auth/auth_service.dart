@@ -84,6 +84,7 @@ class AuthService {
     String password,
     String noHp,
     String jenisKelamin,
+    String role,
   ) async {
     try {
       final response = await http.post(
@@ -96,7 +97,7 @@ class AuthService {
           'password': password,
           'no_hp': noHp,
           'jenis_kelamin': jenisKelamin,
-          'role': 'requester',
+          'role': role,
         }),
       );
 

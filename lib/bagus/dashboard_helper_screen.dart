@@ -158,8 +158,8 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
   @override
   Widget build(BuildContext context) {
     final String namaHelper =
-        widget.userData?['username'] ??
         widget.userData?['nama'] ??
+        widget.userData?['username'] ??
         'Mitra Helper';
     final String emailHelper = widget.userData?['email'] ?? '';
 
