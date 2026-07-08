@@ -48,7 +48,7 @@ class _RegistPageState extends State<RegistPage> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
                   image: DecorationImage(
-                    image: NetworkImage("https://picsum.photos/200"),
+                    image: AssetImage("assets/logo/logo.png"),
                     fit: BoxFit.cover,
                   ),
                 ),

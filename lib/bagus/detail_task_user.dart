@@ -7,6 +7,8 @@ import 'package:bantuin/utils/task_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../utils/date_time_utils.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
 class DetailTugas extends StatefulWidget {
   final Map<String, dynamic> taskData;
@@ -259,9 +261,7 @@ class _DetailTugasState extends State<DetailTugas> {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: const Color(
-                                0xFF4D49E9,
-                              ),
+                              color: const Color(0xFF4D49E9),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
@@ -326,6 +326,7 @@ class _DetailTugasState extends State<DetailTugas> {
                     horizontal: 10,
                   ),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
@@ -377,10 +378,75 @@ class _DetailTugasState extends State<DetailTugas> {
                         ],
                       ),
                       Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        padding: const EdgeInsets.only(top: 15, bottom: 5),
                         child: Text(
-                          data['lokasi_tugas'] ?? "Lokasi tidak ditentukan",
+                          data['lokasi_tugas'] != null &&
+                                  data['lokasi_tugas'].toString().isNotEmpty
+                              ? data['lokasi_tugas']
+                              : "Lokasi detail tidak disebutkan",
+                          style: const TextStyle(fontSize: 14),
                         ),
+                      ),
+                      Builder(
+                        builder: (context) {
+                          double? lat;
+                          double? lng;
+
+                          if (data['latitude_tugas'] != null &&
+                              data['longitude_tugas'] != null) {
+                            lat = double.tryParse(
+                              data['latitude_tugas'].toString(),
+                            );
+                            lng = double.tryParse(
+                              data['longitude_tugas'].toString(),
+                            );
+                          }
+                          if (lat != null && lng != null) {
+                            return Container(
+                              height: 180, // Tinggi peta
+                              width: double.infinity,
+                              margin: const EdgeInsets.only(top: 10),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.grey.shade400),
+                              ),
+                              clipBehavior: Clip.antiAlias,
+                              child: FlutterMap(
+                                options: MapOptions(
+                                  initialCenter: LatLng(lat, lng),
+                                  initialZoom: 16.0,
+                                  interactionOptions: const InteractionOptions(
+                                    // Matikan gestur biar peta nggak kegeser gak sengaja pas scroll halaman
+                                    flags: InteractiveFlag.none,
+                                  ),
+                                ),
+                                children: [
+                                  TileLayer(
+                                    urlTemplate:
+                                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                                    userAgentPackageName: 'com.bantu.in',
+                                  ),
+                                  MarkerLayer(
+                                    markers: [
+                                      Marker(
+                                        point: LatLng(lat, lng),
+                                        width: 40,
+                                        height: 40,
+                                        child: const Icon(
+                                          Icons.location_pin,
+                                          color: Color(0xFFCD2528),
+                                          size: 40,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            );
+                          } else {
+                            return const SizedBox.shrink();
+                          }
+                        },
                       ),
                     ],
                   ),
