@@ -563,7 +563,6 @@ class _MyAdminState extends State<MyAdmin> {
   }
 
   Widget _buildHelperItem(Map<String, dynamic> data) {
-    var statusAktif = data['status_aktif'] ?? 1;
     int jumlahTugasDiambil = int.tryParse(data['total_tasks'].toString()) ?? 0;
 
     return InkWell(
@@ -600,7 +599,7 @@ class _MyAdminState extends State<MyAdmin> {
                     ],
                   ),
                 ),
-                _buildStatusBadge(statusAktif),
+                _buildStatusBadge(data),
               ],
             ),
 
@@ -613,7 +612,7 @@ class _MyAdminState extends State<MyAdmin> {
             SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
-              children: _buildActionButtons(statusAktif, data['id_helper']),
+              children: _buildActionButtons(data),
             ),
           ],
         ),
@@ -621,7 +620,16 @@ class _MyAdminState extends State<MyAdmin> {
     );
   }
 
-  Widget _buildStatusBadge(dynamic statusAktif) {
+  Widget _buildStatusBadge(Map<String, dynamic> data) {
+    var statusAktif = data['status_aktif'];
+
+    // Cek kelengkapan dokumen dari database
+    final String ktp = data['ktp']?.toString() ?? '';
+    final String sim = data['sim']?.toString() ?? '';
+    final String skck = data['skck']?.toString() ?? '';
+    final bool isDocsComplete =
+        ktp.isNotEmpty && sim.isNotEmpty && skck.isNotEmpty;
+
     Color bgColor;
     String textStatus;
 
@@ -631,7 +639,12 @@ class _MyAdminState extends State<MyAdmin> {
         statusAktif == "ACTIVE") {
       bgColor = Colors.green;
       textStatus = "ACTIVE";
+    } else if (statusAktif == 0 && isDocsComplete) {
+      // JIKA STATUS 0 TAPI DOKUMEN LENGKAP = BELUM DI-ACC
+      bgColor = Colors.amber.shade800;
+      textStatus = "PENDING ACC";
     } else {
+      // JIKA STATUS 0 DAN DOKUMEN BELUM LENGKAP ATAU MEMANG DI-SUSPEND
       bgColor = Colors.red;
       textStatus = "SUSPEND";
     }
@@ -653,8 +666,16 @@ class _MyAdminState extends State<MyAdmin> {
     );
   }
 
-  List<Widget> _buildActionButtons(dynamic statusAktif, dynamic idHelper) {
+  List<Widget> _buildActionButtons(Map<String, dynamic> data) {
+    dynamic idHelper = data['id_helper'];
+    var statusAktif = data['status_aktif'];
     int safeId = int.tryParse(idHelper.toString()) ?? 0;
+
+    final String ktp = data['ktp']?.toString() ?? '';
+    final String sim = data['sim']?.toString() ?? '';
+    final String skck = data['skck']?.toString() ?? '';
+    final bool isDocsComplete =
+        ktp.isNotEmpty && sim.isNotEmpty && skck.isNotEmpty;
 
     if (statusAktif == 1 ||
         statusAktif == '1' ||
@@ -671,6 +692,35 @@ class _MyAdminState extends State<MyAdmin> {
                   "Helper ini tidak akan bisa menerima tugas baru. Anda yakin?",
               confirmColor: Colors.red,
               onConfirm: () => _updateHelperStatus(safeId, 'suspend'),
+            );
+          },
+        ),
+      ];
+    } else if (statusAktif == 0 && isDocsComplete) {
+      return [
+        _buildElevatedButton(
+          label: "Setujui & Aktifkan (ACC)",
+          color: Colors.green,
+          onPressed: () {
+            _showConfirmationDialog(
+              title: "Setujui Pendaftaran?",
+              content: "Verifikasi dokumen berhasil, aktifkan akun helper ini?",
+              confirmColor: Colors.green,
+              onConfirm: () => _updateHelperStatus(safeId, 'activate'),
+            );
+          },
+        ),
+        const SizedBox(width: 8),
+        _buildElevatedButton(
+          label: "Tolak & Hapus",
+          color: Colors.red,
+          onPressed: () {
+            _showConfirmationDialog(
+              title: "Tolak & Hapus Permanen?",
+              content:
+                  "Akun ini akan dihapus permanen karena dokumen tidak valid. Yakin?",
+              confirmColor: Colors.red.shade900,
+              onConfirm: () => _updateHelperStatus(safeId, 'delete'),
             );
           },
         ),

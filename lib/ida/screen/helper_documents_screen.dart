@@ -8,7 +8,14 @@ import 'waiting_approval_screen.dart';
 class HelperDocumentsScreen extends StatefulWidget {
   final Map<String, dynamic> userData;
   final VoidCallback? onNext;
-  const HelperDocumentsScreen({super.key, required this.userData, this.onNext});
+  final bool showAppBar;
+  
+  const HelperDocumentsScreen({
+    super.key, 
+    required this.userData, 
+    this.onNext,
+    this.showAppBar = true,
+  });
 
   @override
   State<HelperDocumentsScreen> createState() => _HelperDocumentsScreenState();
@@ -29,7 +36,8 @@ class _HelperDocumentsScreenState extends State<HelperDocumentsScreen> {
   // Rekening Bank
   String _selectedBank = 'Pilih Bank';
   final TextEditingController _noRekeningController = TextEditingController();
-  final TextEditingController _pemilikRekeningController = TextEditingController();
+  final TextEditingController _pemilikRekeningController =
+      TextEditingController();
 
   final List<String> _bankList = [
     'Pilih Bank',
@@ -44,7 +52,8 @@ class _HelperDocumentsScreenState extends State<HelperDocumentsScreen> {
   void initState() {
     super.initState();
     // Default nama pemilik rekening dengan nama lengkap helper
-    _pemilikRekeningController.text = widget.userData['username'] ?? widget.userData['nama'] ?? '';
+    _pemilikRekeningController.text =
+        widget.userData['username'] ?? widget.userData['nama'] ?? '';
   }
 
   @override
@@ -65,8 +74,12 @@ class _HelperDocumentsScreenState extends State<HelperDocumentsScreen> {
         _pemilikRekeningController.text.trim().isNotEmpty;
   }
 
-  void _simulasikanUpload(String tipeDokumen) async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+  void _ambilFotoDokumenLewatKamera(String tipeDokumen) async {
+    final XFile? image = await _picker.pickImage(
+      source: ImageSource.camera, // Dipaksa menggunakan kamera asli perangkat
+      imageQuality: 80, // Optimasi kompresi ukuran file gambar berkas
+    );
+
     if (image != null) {
       setState(() {
         if (tipeDokumen == 'KTP') _ktpFileName = image.path;
@@ -76,7 +89,7 @@ class _HelperDocumentsScreenState extends State<HelperDocumentsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Dokumen $tipeDokumen Berhasil Dipilih'),
+            content: Text('Foto Dokumen $tipeDokumen Berhasil Diambil'),
             backgroundColor: Colors.green,
           ),
         );
@@ -94,7 +107,10 @@ class _HelperDocumentsScreenState extends State<HelperDocumentsScreen> {
   }
 
   void _ambilSelfieKameraDepan() async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.camera, preferredCameraDevice: CameraDevice.front);
+    final XFile? image = await _picker.pickImage(
+      source: ImageSource.camera,
+      preferredCameraDevice: CameraDevice.front,
+    );
     if (image != null) {
       setState(() {
         _selfieFileName = image.path;
@@ -112,6 +128,25 @@ class _HelperDocumentsScreenState extends State<HelperDocumentsScreen> {
 
   void _kirimDokumen() async {
     if (!_areDocumentsComplete()) return;
+
+    final String userId =
+        widget.userData['id']?.toString() ??
+        widget.userData['id_helper']?.toString() ??
+        widget.userData['id_users']?.toString() ??
+        widget.userData['user']?['id']?.toString() ??
+        '';
+
+    if (userId.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Error: ID User tidak ditemukan dalam sesi!"),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return; // Jangan lanjutkan jika ID kosong agar tidak silent-error
+    }
 
     showDialog(
       context: context,
@@ -135,34 +170,60 @@ class _HelperDocumentsScreenState extends State<HelperDocumentsScreen> {
     );
 
     final String email = widget.userData['email'] ?? 'helper';
-    final String userId = widget.userData['id']?.toString() ?? widget.userData['id_helper']?.toString() ?? '';
     final AuthService authService = AuthService();
 
-    if (userId.isNotEmpty) {
-      // 1. Update Profil (Bank)
-      await authService.updateProfilHelper(userId, _selectedBank, _noRekeningController.text);
-      
-      // 2. Upload Dokumen
-      if (_ktpFileName != null) await authService.uploadDokumenHelper(userId, 'ktp', _ktpFileName!);
-      if (_simFileName != null) await authService.uploadDokumenHelper(userId, 'sim', _simFileName!);
-      if (_skckFileName != null) await authService.uploadDokumenHelper(userId, 'skck', _skckFileName!);
-      if (_selfieFileName != null) await authService.uploadFotoProfilHelper(userId, _selfieFileName!);
-    }
+    try {
+      // Jalankan proses upload menggunakan userId yang sudah terverifikasi ada angkanya
+      await authService.updateProfilHelper(
+        userId,
+        _selectedBank,
+        _noRekeningController.text,
+      );
 
-    await _secureStorage.write(key: 'helper_docs_submitted_$email', value: 'true');
-    await _secureStorage.write(key: 'helper_admin_validated_$email', value: 'false');
+      if (_ktpFileName != null) {
+        await authService.uploadDokumenHelper(userId, 'ktp', _ktpFileName!);
+      }
+      if (_simFileName != null) {
+        await authService.uploadDokumenHelper(userId, 'sim', _simFileName!);
+      }
+      if (_skckFileName != null) {
+        await authService.uploadDokumenHelper(userId, 'skck', _skckFileName!);
+      }
+      if (_selfieFileName != null) {
+        await authService.uploadFotoProfilHelper(userId, _selfieFileName!);
+      }
 
-    if (mounted) {
-      Navigator.pop(context); // Tutup loading
-      if (widget.onNext != null) {
-        widget.onNext!();
-      } else {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const WaitingApprovalScreen(),
+      await _secureStorage.write(
+        key: 'helper_docs_submitted_$email',
+        value: 'true',
+      );
+      await _secureStorage.write(
+        key: 'helper_admin_validated_$email',
+        value: 'false',
+      );
+
+      if (mounted) {
+        Navigator.pop(context); // Tutup loading
+        if (widget.onNext != null) {
+          widget.onNext!();
+        } else {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const WaitingApprovalScreen(),
+            ),
+            (route) => false,
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Gagal mengunggah dokumen: $e"),
+            backgroundColor: Colors.red,
           ),
-          (route) => false,
         );
       }
     }
@@ -174,212 +235,309 @@ class _HelperDocumentsScreenState extends State<HelperDocumentsScreen> {
     final primaryColor = theme.colorScheme.primary;
     final secondaryColor = theme.colorScheme.secondary;
 
-    return Material(
-      color: const Color(0xFFF8FAFC),
-      child: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
-          child: Form(
-            key: _formKey,
-            onChanged: () => setState(() {}),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Info Banner
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: primaryColor.withValues(alpha: 0.05),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: primaryColor.withValues(alpha: 0.15)),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.info_outline_rounded, color: primaryColor, size: 24),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          "Lengkapi berkas pendaftaran Anda di bawah ini untuk diverifikasi oleh admin Bantu.in.",
-                          style: GoogleFonts.openSans(
-                            fontSize: 13,
-                            color: Colors.black87,
-                            height: 1.4,
-                          ),
+    return Scaffold(
+      appBar: widget.showAppBar
+          ? AppBar(
+              title: Text(
+                'Dokumen Pendaftaran',
+                style: GoogleFonts.openSans(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+              backgroundColor: primaryColor,
+              foregroundColor: Colors.white,
+              actions: [
+                TextButton.icon(
+                  onPressed: () async {
+                    final konfirmasi = await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text('Keluar'),
+                        content: const Text(
+                          'Apakah kamu yakin ingin keluar? Sesi akan dihapus dan kamu akan kembali ke halaman login.',
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 24),
-
-                // Section 1: Dokumen Identitas
-                _buildSectionHeader("Dokumen Identitas"),
-                const SizedBox(height: 12),
-
-                // Upload KTP
-                _buildUploadCard(
-                  title: "Kartu Tanda Penduduk (KTP)",
-                  description: "Unggah foto KTP Anda yang masih berlaku dengan jelas.",
-                  fileName: _ktpFileName,
-                  icon: Icons.credit_card_rounded,
-                  onUpload: () => _simulasikanUpload('KTP'),
-                  onDelete: () => _hapusDokumen('KTP'),
-                  secondaryColor: secondaryColor,
-                ),
-                const SizedBox(height: 16),
-
-                // Upload SIM
-                _buildUploadCard(
-                  title: "Surat Izin Mengemudi (SIM)",
-                  description: "Unggah foto SIM A/C aktif untuk penunjang transportasi.",
-                  fileName: _simFileName,
-                  icon: Icons.badge_rounded,
-                  onUpload: () => _simulasikanUpload('SIM'),
-                  onDelete: () => _hapusDokumen('SIM'),
-                  secondaryColor: secondaryColor,
-                ),
-                const SizedBox(height: 16),
-
-                // Upload SKCK
-                _buildUploadCard(
-                  title: "Surat Keterangan Catatan Kepolisian (SKCK)",
-                  description: "Unggah bukti SKCK resmi terbaru Anda.",
-                  fileName: _skckFileName,
-                  icon: Icons.assignment_rounded,
-                  onUpload: () => _simulasikanUpload('SKCK'),
-                  onDelete: () => _hapusDokumen('SKCK'),
-                  secondaryColor: secondaryColor,
-                ),
-                const SizedBox(height: 28),
-
-                // Section 2: Foto Profil (Selfie)
-                _buildSectionHeader("Foto Selfie (Foto Profil)"),
-                const SizedBox(height: 4),
-                Text(
-                  "Diharuskan menggunakan Kamera Depan langsung demi memverifikasi wajah asli Anda.",
-                  style: GoogleFonts.openSans(fontSize: 12, color: Colors.red[700]),
-                ),
-                const SizedBox(height: 12),
-
-                // Selfie Camera Card
-                _buildSelfieCard(
-                  fileName: _selfieFileName,
-                  onTake: _ambilSelfieKameraDepan,
-                  onDelete: () => _hapusDokumen('Selfie'),
-                  secondaryColor: secondaryColor,
-                ),
-                const SizedBox(height: 28),
-
-                // Section 3: Informasi Rekening
-                _buildSectionHeader("Detail Rekening Bank"),
-                const SizedBox(height: 12),
-
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey[200]!),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.02),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Dropdown Nama Bank
-                      DropdownButtonFormField<String>(
-                        initialValue: _selectedBank,
-                        decoration: InputDecoration(
-                          labelText: "Nama Bank",
-                          labelStyle: GoogleFonts.openSans(fontSize: 14),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(ctx, false),
+                            child: const Text('Batal'),
                           ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                        ),
-                        items: _bankList.map((bank) {
-                          return DropdownMenuItem<String>(
-                            value: bank,
-                            child: Text(bank, style: GoogleFonts.openSans(fontSize: 14)),
-                          );
-                        }).toList(),
-                        onChanged: (val) {
-                          setState(() {
-                            _selectedBank = val ?? 'Pilih Bank';
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Nomor Rekening
-                      TextFormField(
-                        controller: _noRekeningController,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          labelText: "Nomor Rekening",
-                          labelStyle: GoogleFonts.openSans(fontSize: 14),
-                          hintText: "Masukkan nomor rekening bank Anda",
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
+                          TextButton(
+                            onPressed: () => Navigator.pop(ctx, true),
+                            child: const Text(
+                              'Ya, Keluar',
+                              style: TextStyle(color: Colors.red),
+                            ),
                           ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                        ),
+                        ],
                       ),
-                      const SizedBox(height: 16),
+                    );
 
-                      // Pemilik Rekening
-                      TextFormField(
-                        controller: _pemilikRekeningController,
-                        decoration: InputDecoration(
-                          labelText: "Nama Pemilik Rekening",
-                          labelStyle: GoogleFonts.openSans(fontSize: 14),
-                          hintText: "Sesuai dengan nama lengkap di buku tabungan",
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                    if (konfirmasi == true) {
+                      final currentContext = context;
+                      final auth = AuthService();
+                      await auth.logout();
 
-                const SizedBox(height: 40),
-
-                // Button Kirim
-                ElevatedButton(
-                  onPressed: _areDocumentsComplete() ? _kirimDokumen : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryColor,
-                    foregroundColor: Colors.white,
-                    disabledBackgroundColor: Colors.grey[300],
-                    disabledForegroundColor: Colors.grey[600],
-                    minimumSize: const Size(double.infinity, 54),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    elevation: _areDocumentsComplete() ? 3 : 0,
-                    shadowColor: primaryColor.withValues(alpha: 0.3),
-                  ),
-                  child: Text(
-                    "Kirim Dokumen",
-                    style: GoogleFonts.openSans(
-                      fontSize: 16,
+                      if (currentContext.mounted) {
+                        Navigator.pushNamedAndRemoveUntil(
+                          currentContext,
+                          '/login',
+                          (route) => false,
+                        );
+                      }
+                    }
+                  },
+                  icon: const Icon(Icons.logout, color: Colors.white, size: 18),
+                  label: const Text(
+                    "Keluar",
+                    style: TextStyle(
+                      color: Colors.white,
                       fontWeight: FontWeight.bold,
-                      letterSpacing: 0.5,
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(width: 8),
               ],
-            ),
+            )
+          : null,
+      body: SafeArea(
+        child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+        child: Form(
+          key: _formKey,
+          onChanged: () => setState(() {}),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Info Banner
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: primaryColor.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: primaryColor.withValues(alpha: 0.15),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline_rounded,
+                      color: primaryColor,
+                      size: 24,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        "Lengkapi berkas pendaftaran Anda di bawah ini untuk diverifikasi oleh admin Bantu.in.",
+                        style: GoogleFonts.openSans(
+                          fontSize: 13,
+                          color: Colors.black87,
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+          
+              // Section 1: Dokumen Identitas
+              _buildSectionHeader("Foto Berkas Dokumen"),
+              const SizedBox(height: 4),
+              Text(
+                "Wajib difoto langsung lewat kamera untuk mencegah bentuk manipulasi digital.",
+                style: GoogleFonts.openSans(
+                  fontSize: 12,
+                  color: Colors.orange[800],
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 12),
+          
+              // Upload KTP
+              _buildUploadCard(
+                title: "Kartu Tanda Penduduk (KTP)",
+                description:
+                    "Ambil foto kartu fisik KTP asli dengan posisi tegak lurus.",
+                fileName: _ktpFileName,
+                icon: Icons.camera_alt_rounded,
+                onUpload: () => _ambilFotoDokumenLewatKamera('KTP'),
+                onDelete: () => _hapusDokumen('KTP'),
+                secondaryColor: secondaryColor,
+              ),
+              const SizedBox(height: 16),
+          
+              // Upload SIM
+              _buildUploadCard(
+                title: "Surat Izin Mengemudi (SIM)",
+                description:
+                    "Ambil foto kartu fisik SIM A/C aktif dengan cahaya yang terang.",
+                fileName: _simFileName,
+                icon: Icons.camera_alt_rounded,
+                onUpload: () => _ambilFotoDokumenLewatKamera('SIM'),
+                onDelete: () => _hapusDokumen('SIM'),
+                secondaryColor: secondaryColor,
+              ),
+              const SizedBox(height: 16),
+          
+              // Upload SKCK
+              _buildUploadCard(
+                title: "Surat Keterangan Catatan Kepolisian (SKCK)",
+                description:
+                    "Foto lembar dokumen SKCK resmi terbaru milik Anda.",
+                fileName: _skckFileName,
+                icon: Icons.camera_alt_rounded,
+                onUpload: () => _ambilFotoDokumenLewatKamera('SKCK'),
+                onDelete: () => _hapusDokumen('SKCK'),
+                secondaryColor: secondaryColor,
+              ),
+              const SizedBox(height: 28),
+          
+              // Section 2: Foto Profil (Selfie)
+              _buildSectionHeader("Foto Selfie (Foto Profil)"),
+              const SizedBox(height: 4),
+              Text(
+                "Diharuskan menggunakan Kamera Depan langsung demi memverifikasi wajah asli Anda.",
+                style: GoogleFonts.openSans(
+                  fontSize: 12,
+                  color: Colors.red[700],
+                ),
+              ),
+              const SizedBox(height: 12),
+          
+              // Selfie Camera Card
+              _buildSelfieCard(
+                fileName: _selfieFileName,
+                onTake: _ambilSelfieKameraDepan,
+                onDelete: () => _hapusDokumen('Selfie'),
+                secondaryColor: secondaryColor,
+              ),
+              const SizedBox(height: 28),
+          
+              // Section 3: Informasi Rekening
+              _buildSectionHeader("Detail Rekening Bank"),
+              const SizedBox(height: 12),
+          
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.grey[200]!),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.02),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Dropdown Nama Bank
+                    DropdownButtonFormField<String>(
+                      initialValue: _selectedBank,
+                      decoration: InputDecoration(
+                        labelText: "Nama Bank",
+                        labelStyle: GoogleFonts.openSans(fontSize: 14),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                      ),
+                      items: _bankList.map((bank) {
+                        return DropdownMenuItem<String>(
+                          value: bank,
+                          child: Text(
+                            bank,
+                            style: GoogleFonts.openSans(fontSize: 14),
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (val) {
+                        setState(() {
+                          _selectedBank = val ?? 'Pilih Bank';
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 16),
+          
+                    // Nomor Rekening
+                    TextFormField(
+                      controller: _noRekeningController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: "Nomor Rekening",
+                        labelStyle: GoogleFonts.openSans(fontSize: 14),
+                        hintText: "Masukkan nomor rekening bank Anda",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+          
+                    // Pemilik Rekening
+                    TextFormField(
+                      controller: _pemilikRekeningController,
+                      decoration: InputDecoration(
+                        labelText: "Nama Pemilik Rekening",
+                        labelStyle: GoogleFonts.openSans(fontSize: 14),
+                        hintText:
+                            "Sesuai dengan nama lengkap di buku tabungan",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          
+              const SizedBox(height: 40),
+          
+              // Button Kirim
+              ElevatedButton(
+                onPressed: _areDocumentsComplete() ? _kirimDokumen : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryColor,
+                  foregroundColor: Colors.white,
+                  disabledBackgroundColor: Colors.grey[300],
+                  disabledForegroundColor: Colors.grey[600],
+                  minimumSize: const Size(double.infinity, 54),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  elevation: _areDocumentsComplete() ? 3 : 0,
+                  shadowColor: primaryColor.withValues(alpha: 0.3),
+                ),
+                child: Text(
+                  "Kirim Dokumen",
+                  style: GoogleFonts.openSans(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+            ],
           ),
         ),
+      ),
       ),
     );
   }
@@ -431,7 +589,9 @@ class _HelperDocumentsScreenState extends State<HelperDocumentsScreen> {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: isUploaded ? Colors.green.shade50 : const Color(0xFFF1F5F9),
+                color: isUploaded
+                    ? Colors.green.shade50
+                    : const Color(0xFFF1F5F9),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -480,12 +640,22 @@ class _HelperDocumentsScreenState extends State<HelperDocumentsScreen> {
               OutlinedButton.icon(
                 onPressed: onUpload,
                 icon: const Icon(Icons.upload_file_rounded, size: 16),
-                label: Text("Unggah", style: GoogleFonts.openSans(fontSize: 12)),
+                label: Text(
+                  "Unggah",
+                  style: GoogleFonts.openSans(fontSize: 12),
+                ),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: secondaryColor,
-                  side: BorderSide(color: secondaryColor.withValues(alpha: 0.5)),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  side: BorderSide(
+                    color: secondaryColor.withValues(alpha: 0.5),
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                 ),
               )
             else
@@ -533,14 +703,20 @@ class _HelperDocumentsScreenState extends State<HelperDocumentsScreen> {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: isUploaded ? Colors.green.shade50 : const Color(0xFFF8FAFC),
+                color: isUploaded
+                    ? Colors.green.shade50
+                    : const Color(0xFFF8FAFC),
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isUploaded ? Colors.green.shade200 : Colors.grey.shade300,
+                  color: isUploaded
+                      ? Colors.green.shade200
+                      : Colors.grey.shade300,
                 ),
               ),
               child: Icon(
-                isUploaded ? Icons.face_retouching_natural : Icons.camera_front_rounded,
+                isUploaded
+                    ? Icons.face_retouching_natural
+                    : Icons.camera_front_rounded,
                 color: isUploaded ? Colors.green : Colors.black54,
                 size: 24,
               ),
@@ -585,12 +761,20 @@ class _HelperDocumentsScreenState extends State<HelperDocumentsScreen> {
               ElevatedButton.icon(
                 onPressed: onTake,
                 icon: const Icon(Icons.camera_alt_rounded, size: 16),
-                label: Text("Selfie", style: GoogleFonts.openSans(fontSize: 12)),
+                label: Text(
+                  "Selfie",
+                  style: GoogleFonts.openSans(fontSize: 12),
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: secondaryColor,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 8,
+                  ),
                   elevation: 1,
                 ),
               )
@@ -606,4 +790,3 @@ class _HelperDocumentsScreenState extends State<HelperDocumentsScreen> {
     );
   }
 }
-

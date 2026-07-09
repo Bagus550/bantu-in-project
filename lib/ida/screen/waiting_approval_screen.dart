@@ -21,34 +21,11 @@ class _WaitingApprovalScreenState extends State<WaitingApprovalScreen> {
   }
 
   void _loadEmail() async {
+    // Membaca email user yang sedang aktif dari storage
     final email = await _secureStorage.read(key: 'email_user') ?? 'helper';
     setState(() {
       _userEmail = email;
     });
-  }
-
-  void _simulasikanPersetujuanAdmin() async {
-    // Menyetujui dokumen secara lokal untuk testing
-    await _secureStorage.write(key: 'helper_docs_submitted_$_userEmail', value: 'true');
-    await _secureStorage.write(key: 'helper_admin_validated_$_userEmail', value: 'true');
-
-    // Hapus sesi aktif agar pengguna dapat melakukan login ulang dengan status terverifikasi baru
-    await _secureStorage.delete(key: 'auth_token');
-    await _secureStorage.delete(key: 'jwt_token');
-
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Akun Berhasil Disetujui Admin (Simulasi)! Silakan login kembali.'),
-        backgroundColor: Colors.green,
-        duration: Duration(seconds: 4),
-      ),
-    );
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => const LoginScreen()),
-      (route) => false,
-    );
   }
 
   @override
@@ -56,9 +33,10 @@ class _WaitingApprovalScreenState extends State<WaitingApprovalScreen> {
     final theme = Theme.of(context);
     final primaryColor = theme.colorScheme.primary;
 
-    return Container(
-      color: const Color(0xFFF8FAFC),
-      child: SafeArea(
+    // Diubah menggunakan Scaffold utuh agar merender background dan layout secara sempurna
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFC),
+      body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 24.0),
           child: Column(
@@ -67,7 +45,7 @@ class _WaitingApprovalScreenState extends State<WaitingApprovalScreen> {
             children: [
               const Spacer(),
 
-              // Jam pasir / Ikon verifikasi berdenyut
+              // Indikator Status: Ikon Jam Pasir Menunggu Validasi
               Center(
                 child: Container(
                   padding: const EdgeInsets.all(30),
@@ -85,7 +63,7 @@ class _WaitingApprovalScreenState extends State<WaitingApprovalScreen> {
               ),
               const SizedBox(height: 36),
 
-              // Status Utama
+              // Judul Status Utama
               Text(
                 "Menunggu Validasi Admin",
                 style: GoogleFonts.openSans(
@@ -97,7 +75,7 @@ class _WaitingApprovalScreenState extends State<WaitingApprovalScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Deskripsi
+              // Deskripsi Status Verifikasi Berkas
               Text(
                 "Terima kasih telah mengunggah dokumen Anda. Tim admin Bantu.in sedang memeriksa berkas pendaftaran Anda.\n\nProses verifikasi ini biasanya memakan waktu maksimal 1x24 jam. Kami akan mengaktifkan akun Anda segera setelah pemeriksaan selesai.",
                 style: GoogleFonts.openSans(
@@ -110,7 +88,7 @@ class _WaitingApprovalScreenState extends State<WaitingApprovalScreen> {
 
               const Spacer(),
 
-              // Info Email & Penutup
+              // Informasi Akun Terdaftar
               Text(
                 "Akun: $_userEmail",
                 style: GoogleFonts.openSans(
@@ -122,22 +100,27 @@ class _WaitingApprovalScreenState extends State<WaitingApprovalScreen> {
               ),
               const SizedBox(height: 24),
 
-              // Tombol Keluar Sesi
+              // Tombol untuk Kembali dan Keluar dari Sesi
               OutlinedButton(
                 onPressed: () async {
-                  // Hapus sesi login
+                  // Bersihkan token lokal agar user bisa kembali ke screen login dengan aman
                   await _secureStorage.delete(key: 'auth_token');
                   await _secureStorage.delete(key: 'jwt_token');
+
                   if (!mounted) return;
                   Navigator.pushAndRemoveUntil(
-                    this.context,
-                    MaterialPageRoute(builder: (context) => const LoginScreen()),
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const LoginScreen(),
+                    ),
                     (route) => false,
                   );
                 },
                 style: OutlinedButton.styleFrom(
                   side: BorderSide(color: primaryColor),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   minimumSize: const Size(double.infinity, 50),
                 ),
                 child: Text(
@@ -149,27 +132,7 @@ class _WaitingApprovalScreenState extends State<WaitingApprovalScreen> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 16),
-
-              // Tombol Testing Simulasi Admin Approval (Bypass)
-              ElevatedButton.icon(
-                onPressed: _simulasikanPersetujuanAdmin,
-                icon: const Icon(Icons.verified_user_rounded, size: 18),
-                label: Text(
-                  "Simulasikan Validasi Admin (Bypass)",
-                  style: GoogleFonts.openSans(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green[600],
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  minimumSize: const Size(double.infinity, 44),
-                ),
-              ),
             ],
           ),
         ),

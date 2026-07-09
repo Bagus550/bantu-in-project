@@ -5,10 +5,6 @@ import 'package:bantuin/ida/auth/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'admin.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:bantuin/config/app_config.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class RegistPage extends StatefulWidget {
   const RegistPage({super.key});
@@ -366,7 +362,7 @@ class _RegistPageState extends State<RegistPage> {
                     ),
                   ),
                 );
-            }
+              }
             : null,
       ),
     );
@@ -451,7 +447,6 @@ class _RegistPageState extends State<RegistPage> {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => const RegistPage()),
-              MaterialPageRoute(builder: (context) => const RegistPage()),
             );
           } else if (index == 2) {
             Navigator.pushReplacement(
@@ -462,18 +457,18 @@ class _RegistPageState extends State<RegistPage> {
         },
         backgroundColor: Colors.white,
         indicatorColor: Colors.deepPurpleAccent,
-        destinations: const [
-        destinations: const [
-          NavigationDestination(
+        destinations: [
+          const NavigationDestination(
             icon: Icon(Icons.people_outline, color: Colors.black),
             selectedIcon: Icon(Icons.people, color: Colors.black),
             label: "Helpers",
           ),
-          NavigationDestination(
-            icon: Icon(Icons.how_to_reg, color: Colors.black),
-            label: "Verifikasi",
+          const NavigationDestination(
+            icon: Icon(Icons.verified_user_outlined, color: Colors.black),
+            selectedIcon: Icon(Icons.verified_user, color: Colors.black),
+            label: "Validation",
           ),
-          NavigationDestination(
+          const NavigationDestination(
             icon: Icon(Icons.payment_outlined, color: Colors.black),
             label: "Payments",
           ),

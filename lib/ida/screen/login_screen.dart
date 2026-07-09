@@ -3,7 +3,6 @@ import 'package:bantuin/ida/auth/auth_service.dart';
 import 'package:bantuin/ida/screen/lupa_katasandi.dart';
 import 'package:bantuin/ida/screen/role_selection_screen.dart';
 import 'package:flutter/material.dart';
-import 'helper_documents_screen.dart';
 import 'waiting_approval_screen.dart';
 import 'package:bantuin/ida/screen/register.dart';
 import 'package:bantuin/ida/screen/faq_screen.dart';
@@ -59,7 +58,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
         // Cek jika ada role override lokal untuk akun ini
         String role = result['role']?.toString() ?? 'requester';
-        final localRole = await _secureStorage.read(key: 'role_override_$emailUser');
+        final localRole = await _secureStorage.read(
+          key: 'role_override_$emailUser',
+        );
         if (localRole != null) {
           role = localRole;
         }
@@ -81,10 +82,7 @@ class _LoginScreenState extends State<LoginScreen> {
           key: 'no_hp',
           value: result['user']['no_hp'].toString(),
         );
-        await _secureStorage.write(
-          key: 'role',
-          value: role,
-        );
+        await _secureStorage.write(key: 'role', value: role);
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -96,15 +94,30 @@ class _LoginScreenState extends State<LoginScreen> {
           _navigateBasedOnRole(role, userData);
         }
       } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                'Email atau Kata Sandi Salah / Gagal Terhubung Server',
+        if (result != null &&
+            result['message'] != null &&
+            result['message'].toString().contains('menunggu verifikasi')) {
+          if (mounted) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const WaitingApprovalScreen(),
               ),
-              backgroundColor: Colors.red,
-            ),
-          );
+            );
+          }
+        } else {
+          // Gagal login biasa
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  result?['message'] ??
+                      'Email atau Kata Sandi Salah / Gagal Terhubung Server',
+                ),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
         }
       }
     }
@@ -115,43 +128,24 @@ class _LoginScreenState extends State<LoginScreen> {
 
     switch (role) {
       case 'helper':
-        final String email = userData['email'] ?? '';
-        
-        // Cek dari backend payload
-        final String? ktp = userData['ktp'];
-        final dynamic statusAktif = userData['status_aktif'];
+        final bool isDocsComplete = userData['is_docs_complete'] ?? false;
 
-        // Jika data dari database tidak null, gunakan database. Jika null/baru registrasi pertama kali (auto-login), fallback ke secureStorage.
-        final bool hasKtp = (ktp != null && ktp.isNotEmpty);
-        final bool isActive = (statusAktif == 1 || statusAktif == '1');
-
-        final docsSubmittedLocally = await _secureStorage.read(key: 'helper_docs_submitted_$email') ?? 'false';
-        final adminValidatedLocally = await _secureStorage.read(key: 'helper_admin_validated_$email') ?? 'false';
-
-        final bool isDocsSubmitted = hasKtp || (docsSubmittedLocally == 'true');
-        final bool isAdminValidated = isActive || (adminValidatedLocally == 'true');
-
-        if (!isDocsSubmitted) {
+        if (!isDocsComplete) {
           if (mounted) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => Register(
-                  selectedRole: 'helper',
-                  initialPage: 1,
-                  userData: userData,
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  "Silakan lengkapi berkas pendaftaran Anda yang tertunda.",
                 ),
               ),
             );
-          }
-        } else if (!isAdminValidated) {
-          if (mounted) {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
                 builder: (context) => Register(
                   selectedRole: 'helper',
-                  initialPage: 2,
+                  initialPage:
+                      1, // Melempar langsung ke Step 2 (HelperDocumentsScreen)
                   userData: userData,
                 ),
               ),
@@ -364,7 +358,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const RoleSelectionScreen(),
+                                  builder: (context) =>
+                                      const RoleSelectionScreen(),
                                 ),
                               );
                             },
