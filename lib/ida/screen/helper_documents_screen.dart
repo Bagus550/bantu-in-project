@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:bantuin/ida/auth/auth_service.dart';
 import 'waiting_approval_screen.dart';
 
 class HelperDocumentsScreen extends StatefulWidget {
@@ -16,11 +18,13 @@ class _HelperDocumentsScreenState extends State<HelperDocumentsScreen> {
   final _secureStorage = const FlutterSecureStorage();
   final _formKey = GlobalKey<FormState>();
 
-  // Dokumen Status (simulasi nama file terunggah)
+  // File Paths
   String? _ktpFileName;
   String? _simFileName;
   String? _skckFileName;
   String? _selfieFileName;
+
+  final ImagePicker _picker = ImagePicker();
 
   // Rekening Bank
   String _selectedBank = 'Pilih Bank';
@@ -61,20 +65,23 @@ class _HelperDocumentsScreenState extends State<HelperDocumentsScreen> {
         _pemilikRekeningController.text.trim().isNotEmpty;
   }
 
-  void _simulasikanUpload(String tipeDokumen) {
-    setState(() {
-      final String mockName = "${tipeDokumen.toLowerCase()}_${widget.userData['id'] ?? 'user'}_scanned.jpg";
-      if (tipeDokumen == 'KTP') _ktpFileName = mockName;
-      if (tipeDokumen == 'SIM') _simFileName = mockName;
-      if (tipeDokumen == 'SKCK') _skckFileName = mockName;
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Dokumen $tipeDokumen Berhasil Dipilih (Simulasi)'),
-        backgroundColor: Colors.green,
-      ),
-    );
+  void _simulasikanUpload(String tipeDokumen) async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      setState(() {
+        if (tipeDokumen == 'KTP') _ktpFileName = image.path;
+        if (tipeDokumen == 'SIM') _simFileName = image.path;
+        if (tipeDokumen == 'SKCK') _skckFileName = image.path;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Dokumen $tipeDokumen Berhasil Dipilih'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    }
   }
 
   void _hapusDokumen(String tipeDokumen) {
@@ -86,20 +93,23 @@ class _HelperDocumentsScreenState extends State<HelperDocumentsScreen> {
     });
   }
 
-  // Fungsi untuk mensimulasikan pengambilan selfie dengan kamera depan
-  void _ambilSelfieKameraDepan() {
-    setState(() {
-      _selfieFileName = "selfie_kamera_depan_${widget.userData['id'] ?? 'user'}_terverifikasi.jpg";
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Foto Selfie Kamera Depan Berhasil Dipilih (Simulasi)'),
-        backgroundColor: Colors.green,
-      ),
-    );
+  void _ambilSelfieKameraDepan() async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.camera, preferredCameraDevice: CameraDevice.front);
+    if (image != null) {
+      setState(() {
+        _selfieFileName = image.path;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Foto Selfie Berhasil Diambil'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    }
   }
 
-  // Fungsi kirim semua dokumen ke server (simulasi & local state save)
   void _kirimDokumen() async {
     if (!_areDocumentsComplete()) return;
 
@@ -114,7 +124,7 @@ class _HelperDocumentsScreenState extends State<HelperDocumentsScreen> {
               const CircularProgressIndicator(),
               const SizedBox(height: 20),
               Text(
-                "Sedang mengunggah dokumen pendaftaran...",
+                "Sedang mengunggah dokumen...",
                 style: GoogleFonts.openSans(),
                 textAlign: TextAlign.center,
               ),
@@ -124,16 +134,26 @@ class _HelperDocumentsScreenState extends State<HelperDocumentsScreen> {
       },
     );
 
-    // Simulasi loading pengiriman 2.5 detik
-    await Future.delayed(const Duration(milliseconds: 2500));
-
     final String email = widget.userData['email'] ?? 'helper';
+    final String userId = widget.userData['id']?.toString() ?? widget.userData['id_helper']?.toString() ?? '';
+    final AuthService authService = AuthService();
+
+    if (userId.isNotEmpty) {
+      // 1. Update Profil (Bank)
+      await authService.updateProfilHelper(userId, _selectedBank, _noRekeningController.text);
+      
+      // 2. Upload Dokumen
+      if (_ktpFileName != null) await authService.uploadDokumenHelper(userId, 'ktp', _ktpFileName!);
+      if (_simFileName != null) await authService.uploadDokumenHelper(userId, 'sim', _simFileName!);
+      if (_skckFileName != null) await authService.uploadDokumenHelper(userId, 'skck', _skckFileName!);
+      if (_selfieFileName != null) await authService.uploadFotoProfilHelper(userId, _selfieFileName!);
+    }
+
     await _secureStorage.write(key: 'helper_docs_submitted_$email', value: 'true');
-    // Akun terdaftar baru harus menunggu validasi admin terlebih dahulu
     await _secureStorage.write(key: 'helper_admin_validated_$email', value: 'false');
 
     if (mounted) {
-      Navigator.pop(context); // Tutup loading dialog
+      Navigator.pop(context); // Tutup loading
       if (widget.onNext != null) {
         widget.onNext!();
       } else {
@@ -154,7 +174,7 @@ class _HelperDocumentsScreenState extends State<HelperDocumentsScreen> {
     final primaryColor = theme.colorScheme.primary;
     final secondaryColor = theme.colorScheme.secondary;
 
-    return Container(
+    return Material(
       color: const Color(0xFFF8FAFC),
       child: SafeArea(
         child: SingleChildScrollView(

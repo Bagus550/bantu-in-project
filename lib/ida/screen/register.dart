@@ -145,7 +145,10 @@ class _RegisterState extends State<Register> {
       }
     } else {
       debugPrint("Respon Gagal dari API: $hasil");
-      _tampilkanSnackbar("Registrasi Gagal! Periksa kembali data Anda.");
+      final String pesanError = (hasil != null && hasil['message'] != null)
+          ? hasil['message']
+          : "Registrasi Gagal! Periksa kembali data Anda.";
+      _tampilkanSnackbar(pesanError);
     }
   }
 

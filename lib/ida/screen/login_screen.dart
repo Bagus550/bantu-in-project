@@ -116,10 +116,22 @@ class _LoginScreenState extends State<LoginScreen> {
     switch (role) {
       case 'helper':
         final String email = userData['email'] ?? '';
-        final docsSubmitted = await _secureStorage.read(key: 'helper_docs_submitted_$email') ?? 'false';
-        final adminValidated = await _secureStorage.read(key: 'helper_admin_validated_$email') ?? 'false';
+        
+        // Cek dari backend payload
+        final String? ktp = userData['ktp'];
+        final dynamic statusAktif = userData['status_aktif'];
 
-        if (docsSubmitted != 'true') {
+        // Jika data dari database tidak null, gunakan database. Jika null/baru registrasi pertama kali (auto-login), fallback ke secureStorage.
+        final bool hasKtp = (ktp != null && ktp.isNotEmpty);
+        final bool isActive = (statusAktif == 1 || statusAktif == '1');
+
+        final docsSubmittedLocally = await _secureStorage.read(key: 'helper_docs_submitted_$email') ?? 'false';
+        final adminValidatedLocally = await _secureStorage.read(key: 'helper_admin_validated_$email') ?? 'false';
+
+        final bool isDocsSubmitted = hasKtp || (docsSubmittedLocally == 'true');
+        final bool isAdminValidated = isActive || (adminValidatedLocally == 'true');
+
+        if (!isDocsSubmitted) {
           if (mounted) {
             Navigator.pushReplacement(
               context,
@@ -132,7 +144,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             );
           }
-        } else if (adminValidated != 'true') {
+        } else if (!isAdminValidated) {
           if (mounted) {
             Navigator.pushReplacement(
               context,
