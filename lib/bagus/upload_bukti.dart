@@ -206,7 +206,7 @@ class _UploadBuktiTabState extends State<UploadBuktiTab> {
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
                   width: double.infinity,
-                  height: 300,
+                  constraints: const BoxConstraints(minHeight: 300),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
@@ -225,8 +225,7 @@ class _UploadBuktiTabState extends State<UploadBuktiTab> {
                               child: Image.file(
                                 _gambarBukti!,
                                 width: double.infinity,
-                                height: 300,
-                                fit: BoxFit.cover,
+                                fit: BoxFit.contain,
                               ),
                             ),
                             Positioned(

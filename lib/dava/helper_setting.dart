@@ -93,11 +93,26 @@ class _HelperSettingState extends State<HelperSetting> {
                       context,
                       MaterialPageRoute(builder: (context) => const Profile()),
                     ),
-                    child: CircleAvatar(
-                      radius: 28,
-                      backgroundColor: Colors.grey,
-                      backgroundImage: _fotoProfilUrl != null ? NetworkImage(_fotoProfilUrl!) : null,
-                      child: _fotoProfilUrl == null ? const Icon(Icons.person, size: 36, color: Colors.white) : null,
+                    child: Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        color: Colors.grey,
+                        shape: BoxShape.circle,
+                        image: (_fotoProfilUrl != null &&
+                                _fotoProfilUrl!.isNotEmpty &&
+                                _fotoProfilUrl!.startsWith('http'))
+                            ? DecorationImage(
+                                image: NetworkImage(_fotoProfilUrl!),
+                                fit: BoxFit.cover,
+                              )
+                            : null,
+                      ),
+                      child: (_fotoProfilUrl == null ||
+                              _fotoProfilUrl!.isEmpty ||
+                              !_fotoProfilUrl!.startsWith('http'))
+                          ? const Icon(Icons.person, size: 36, color: Colors.white)
+                          : null,
                     ),
                   ),
                   const SizedBox(width: 16),

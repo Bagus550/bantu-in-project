@@ -10,9 +10,9 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
 
 class PetaRuteHelper extends StatefulWidget {
-  final Map<String, dynamic> tugasAktif;
+  final Map<String, dynamic>? tugasAktif;
 
-  const PetaRuteHelper({super.key, required this.tugasAktif});
+  const PetaRuteHelper({super.key, this.tugasAktif});
 
   @override
   State<PetaRuteHelper> createState() => _PetaRuteHelperState();
@@ -31,6 +31,7 @@ class _PetaRuteHelperState extends State<PetaRuteHelper>
   bool get wantKeepAlive => true;
 
   final MapController _mapController = MapController();
+  final TextEditingController _searchController = TextEditingController();
   bool _isFollowing = true;
 
   @override
@@ -67,19 +68,26 @@ class _PetaRuteHelperState extends State<PetaRuteHelper>
   void dispose() {
     _positionStream?.cancel();
     _mapController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
   Future<void> _inisialisasiRute() async {
     // 1. Validasi Koordinat Tugas
-    final lat = widget.tugasAktif['latitude_tugas'];
-    final lng = widget.tugasAktif['longitude_tugas'];
+    if (widget.tugasAktif != null && widget.tugasAktif!.isNotEmpty) {
+      final lat =
+          widget.tugasAktif!['latitude_tugas'] ??
+          widget.tugasAktif!['latitude'];
+      final lng =
+          widget.tugasAktif!['longitude_tugas'] ??
+          widget.tugasAktif!['longitude'];
 
-    if (lat != null && lng != null) {
-      _lokasiTugas = LatLng(
-        double.parse(lat.toString()),
-        double.parse(lng.toString()),
-      );
+      if (lat != null && lng != null) {
+        _lokasiTugas = LatLng(
+          double.parse(lat.toString()),
+          double.parse(lng.toString()),
+        );
+      }
     }
 
     try {
@@ -147,6 +155,76 @@ class _PetaRuteHelperState extends State<PetaRuteHelper>
     }
   }
 
+  void _searchKoordinat() {
+    final input = _searchController.text.trim();
+    if (input.isEmpty) return;
+
+    final parts = input.split(',');
+    if (parts.length == 2) {
+      final lat = double.tryParse(parts[0].trim());
+      final lng = double.tryParse(parts[1].trim());
+
+      if (lat != null && lng != null) {
+        setState(() {
+          _lokasiTugas = LatLng(lat, lng);
+        });
+        _tarikGarisRute();
+
+        if (_isMapReady) {
+          _mapController.move(_lokasiTugas!, 16.0);
+        }
+      } else {
+        _tampilkanPesanSalah();
+      }
+    } else {
+      _tampilkanPesanSalah();
+    }
+  }
+
+  void _clearSearch() {
+    _searchController.clear();
+    FocusScope.of(context).unfocus();
+
+    _lokasiTugas = null;
+    _ruteKoordinat = [];
+
+    if (widget.tugasAktif != null && widget.tugasAktif!.isNotEmpty) {
+      final lat = widget.tugasAktif!['latitude_tugas'] ??
+          widget.tugasAktif!['latitude'];
+      final lng = widget.tugasAktif!['longitude_tugas'] ??
+          widget.tugasAktif!['longitude'];
+
+      if (lat != null && lng != null) {
+        _lokasiTugas = LatLng(
+          double.parse(lat.toString()),
+          double.parse(lng.toString()),
+        );
+      }
+    }
+
+    setState(() {});
+
+    if (_lokasiTugas != null) {
+      _tarikGarisRute();
+      if (_isMapReady) {
+        _mapController.move(_lokasiTugas!, 16.0);
+      }
+    } else if (_lokasiHelper != null && _isMapReady) {
+      _mapController.move(_lokasiHelper!, 16.0);
+    }
+  }
+
+  void _tampilkanPesanSalah() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          "Format koordinat salah! Gunakan format: latitude, longitude",
+        ),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -154,64 +232,119 @@ class _PetaRuteHelperState extends State<PetaRuteHelper>
     return Scaffold(
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : widget.tugasAktif.isEmpty
-          ? const Center(child: Text("Tidak ada tugas aktif."))
-          : FlutterMap(
-              mapController: _mapController,
-              options: MapOptions(
-                initialCenter:
-                    _lokasiHelper ?? _lokasiTugas ?? const LatLng(-6.2, 106.8),
-                initialZoom: 16.0,
-                onMapReady: () {
-                  setState(() => _isMapReady = true);
-                  debugPrint("Peta siap digunakan!");
-                },
-              ),
+          : Stack(
               children: [
-                TileLayer(
-                  urlTemplate:
-                      'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-                  subdomains: ['a', 'b', 'c', 'd'],
-                  userAgentPackageName: 'com.example.bantuin',
-                  tileProvider: CancellableNetworkTileProvider(),
-                ),
-                PolylineLayer(
-                  polylines: [
-                    Polyline(
-                      points: _ruteKoordinat,
-                      color: Colors.green.shade300,
-                      strokeWidth: 5.0,
+                FlutterMap(
+                  mapController: _mapController,
+                  options: MapOptions(
+                    initialCenter:
+                        _lokasiHelper ??
+                        _lokasiTugas ??
+                        const LatLng(-6.2, 106.8),
+                    initialZoom: 16.0,
+                    onMapReady: () {
+                      setState(() => _isMapReady = true);
+                      debugPrint("Peta siap digunakan!");
+                    },
+                  ),
+                  children: [
+                    TileLayer(
+                      urlTemplate:
+                          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                      userAgentPackageName: 'com.bantu.in',
+                      tileProvider: CancellableNetworkTileProvider(),
+                    ),
+                    PolylineLayer(
+                      polylines: [
+                        Polyline(
+                          points: _ruteKoordinat,
+                          color: Theme.of(context).colorScheme.primary,
+                          strokeWidth: 5.0,
+                        ),
+                      ],
+                    ),
+                    MarkerLayer(
+                      markers: [
+                        if (_lokasiHelper != null)
+                          Marker(
+                            point: _lokasiHelper!,
+                            child: const Icon(
+                              Icons.my_location,
+                              color: Colors.blue,
+                              size: 30,
+                            ),
+                          ),
+                        if (_lokasiTugas != null)
+                          Marker(
+                            point: _lokasiTugas!,
+                            child: const Icon(
+                              Icons.location_pin,
+                              color: Colors.red,
+                              size: 40,
+                            ),
+                          ),
+                      ],
                     ),
                   ],
                 ),
-                MarkerLayer(
-                  markers: [
-                    if (_lokasiHelper != null)
-                      Marker(
-                        point: _lokasiHelper!,
-                        child: const Icon(
-                          Icons.my_location,
-                          color: Colors.blue,
-                          size: 30,
+                Positioned(
+                  top: 40,
+                  left: 15,
+                  right: 15,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 4,
+                          offset: Offset(0, 2),
                         ),
-                      ),
-                    if (_lokasiTugas != null)
-                      Marker(
-                        point: _lokasiTugas!,
-                        child: const Icon(
-                          Icons.location_pin,
-                          color: Colors.red,
-                          size: 40,
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _searchController,
+                            decoration: const InputDecoration(
+                              hintText: "Cari koordinat (lat, lng)",
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 15,
+                              ),
+                            ),
+                            onSubmitted: (_) => _searchKoordinat(),
+                          ),
                         ),
-                      ),
-                  ],
+                        ValueListenableBuilder<TextEditingValue>(
+                          valueListenable: _searchController,
+                          builder: (context, value, child) {
+                            if (value.text.isNotEmpty) {
+                              return IconButton(
+                                icon: const Icon(Icons.clear, color: Colors.grey),
+                                onPressed: _clearSearch,
+                              );
+                            }
+                            return const SizedBox.shrink();
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.search, color: Colors.blue),
+                          onPressed: _searchKoordinat,
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(top: 20),
+        padding: const EdgeInsets.only(bottom: 20),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
           children: [
             FloatingActionButton(
               mini: true,

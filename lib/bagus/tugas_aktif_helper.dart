@@ -9,8 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:bantuin/utils/task_extension.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:flutter/services.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
 class TugasAktifHelper extends StatefulWidget {
   final Map<String, dynamic> detailTugas;
@@ -41,7 +41,9 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
     if (tanggalRaw == null || tanggalRaw.toString().isEmpty) return '-';
 
     try {
-      DateTime waktuTugas = DateTimeUtils.toLocalDateTime(tanggalRaw.toString());
+      DateTime waktuTugas = DateTimeUtils.toLocalDateTime(
+        tanggalRaw.toString(),
+      );
       DateTime sekarang = DateTime.now();
 
       String jamMenit = DateFormat('HH.mm').format(waktuTugas);
@@ -72,66 +74,6 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
       }
     } catch (e) {
       return '-';
-    }
-  }
-
-  Future<void> _salinLokasi(String lokasi) async {
-    if (lokasi.isEmpty) return;
-
-    await Clipboard.setData(ClipboardData(text: lokasi));
-
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Lokasi berhasil disalin!"),
-          backgroundColor: Colors.green,
-          duration: Duration(seconds: 2),
-        ),
-      );
-    }
-  }
-
-  Future<void> _bukaGoogleMaps(String lokasi) async {
-    final String lokasiTrim = lokasi.trim();
-    if (lokasiTrim.isEmpty) return;
-
-    try {
-      final Uri? lokasiUri = Uri.tryParse(lokasiTrim);
-      if (lokasiUri != null && lokasiUri.hasScheme) {
-        if (await canLaunchUrl(lokasiUri)) {
-          await launchUrl(lokasiUri, mode: LaunchMode.externalApplication);
-          return;
-        }
-      }
-
-      final Uri? urlTanpaSkema = Uri.tryParse('https://$lokasiTrim');
-      if (urlTanpaSkema != null && urlTanpaSkema.hasAuthority) {
-        if (await canLaunchUrl(urlTanpaSkema)) {
-          await launchUrl(urlTanpaSkema, mode: LaunchMode.externalApplication);
-          return;
-        }
-      }
-
-      final Uri url = Uri.parse(
-        "https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(lokasiTrim)}",
-      );
-
-      if (await canLaunchUrl(url)) {
-        await launchUrl(url, mode: LaunchMode.externalApplication);
-      } else {
-        throw 'Tidak dapat membuka lokasi';
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              "Gagal membuka link. Salin lokasi saja untuk navigasi.",
-            ),
-            backgroundColor: Colors.orange.shade800,
-          ),
-        );
-      }
     }
   }
 
@@ -333,11 +275,11 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
         widget.detailTugas['waktu'] ??
         widget.detailTugas['tanggal'] ??
         '';
-    final String alamatLokasi = ((widget.detailTugas['lokasi_tugas'] ??
-                widget.detailTugas['lokasi']) ??
-            '')
-        .toString()
-        .trim();
+    final String alamatLokasi =
+        ((widget.detailTugas['lokasi_tugas'] ?? widget.detailTugas['lokasi']) ??
+                '')
+            .toString()
+            .trim();
 
     String statusValidasiPembayaran =
         (widget.detailTugas['status_validasi'] ?? '')
@@ -669,47 +611,88 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
                         ],
                       ),
                       const SizedBox(height: 10),
-                      GestureDetector(
-                        onTap: () => _bukaGoogleMaps(alamatLokasi),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.location_on,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                alamatLokasi,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.blue.shade700,
-                                  decoration: TextDecoration.underline,
-                                ),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.location_on,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              alamatLokasi,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Colors.black,
                               ),
                             ),
-                            if (alamatLokasi.isNotEmpty) ...[
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.copy,
-                                  color: Colors.grey,
-                                  size: 20,
-                                ),
-                                tooltip: "Salin Lokasi",
-                                onPressed: () => _salinLokasi(alamatLokasi),
+                          ),
+
+                        ],
+                      ),
+                      Builder(
+                        builder: (context) {
+                          double? lat;
+                          double? lng;
+
+                          final rawLat =
+                              widget.detailTugas['latitude_tugas'] ??
+                              widget.detailTugas['latitude'];
+                          final rawLng =
+                              widget.detailTugas['longitude_tugas'] ??
+                              widget.detailTugas['longitude'];
+
+                          if (rawLat != null && rawLng != null) {
+                            lat = double.tryParse(rawLat.toString());
+                            lng = double.tryParse(rawLng.toString());
+                          }
+
+                          if (lat != null && lng != null) {
+                            return Container(
+                              height: 180, // Tinggi peta
+                              width: double.infinity,
+                              margin: const EdgeInsets.only(top: 15),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.grey.shade400),
                               ),
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.map,
-                                  color: Colors.green,
-                                  size: 20,
+                              clipBehavior: Clip.antiAlias,
+                              child: FlutterMap(
+                                options: MapOptions(
+                                  initialCenter: LatLng(lat, lng),
+                                  initialZoom: 16.0,
+                                  interactionOptions: const InteractionOptions(
+                                    // Matikan gestur biar peta nggak kegeser gak sengaja pas scroll halaman
+                                    flags: InteractiveFlag.none,
+                                  ),
                                 ),
-                                tooltip: "Buka di Maps",
-                                onPressed: () => _bukaGoogleMaps(alamatLokasi),
+                                children: [
+                                  TileLayer(
+                                    urlTemplate:
+                                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                                    userAgentPackageName: 'com.bantu.in',
+                                  ),
+                                  MarkerLayer(
+                                    markers: [
+                                      Marker(
+                                        point: LatLng(lat, lng),
+                                        width: 40,
+                                        height: 40,
+                                        child: const Icon(
+                                          Icons.location_pin,
+                                          color: Color(0xFFCD2528),
+                                          size: 40,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ),
-                            ],
-                          ],
-                        ),
+                            );
+                          } else {
+                            return const SizedBox.shrink();
+                          }
+                        },
                       ),
                     ],
                   ),

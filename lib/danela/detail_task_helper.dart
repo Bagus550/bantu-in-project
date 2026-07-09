@@ -5,6 +5,9 @@ import 'package:bantuin/utils/currency_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../utils/date_time_utils.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:flutter/services.dart';
 
 class DetailTugasHelper extends StatefulWidget {
   final Map<String, dynamic> taskData;
@@ -26,6 +29,22 @@ class DetailTugasHelper extends StatefulWidget {
 
 class _DetailTugasState extends State<DetailTugasHelper> {
   bool _sedangMemproses = false;
+
+  Future<void> _salinLokasi(String lokasi) async {
+    if (lokasi.isEmpty) return;
+
+    await Clipboard.setData(ClipboardData(text: lokasi));
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Lokasi berhasil disalin!"),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
 
   String formatJam(String? tanggalRaw) {
     return DateTimeUtils.formatToWIB(tanggalRaw);
@@ -137,6 +156,18 @@ class _DetailTugasState extends State<DetailTugasHelper> {
         widget.taskData['deskripsi'] ?? 'Tidak ada deskripsi';
     final String namaPelanggan = widget.taskData['nama_requester'] ?? 'Anonim';
     final String waktu = widget.taskData['created_at'] ?? '';
+    
+    double? lat;
+    double? lng;
+
+    final rawLat = widget.taskData['latitude_tugas'] ?? widget.taskData['latitude'];
+    final rawLng = widget.taskData['longitude_tugas'] ?? widget.taskData['longitude'];
+
+    if (rawLat != null && rawLng != null) {
+      lat = double.tryParse(rawLat.toString());
+      lng = double.tryParse(rawLng.toString());
+    }
+
 
     return Scaffold(
       appBar: AppBar(
@@ -163,8 +194,9 @@ class _DetailTugasState extends State<DetailTugasHelper> {
       ),
       body: Column(
         children: [
-          SingleChildScrollView(
-            padding: EdgeInsets.all(15.0),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.all(15.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -181,7 +213,6 @@ class _DetailTugasState extends State<DetailTugasHelper> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          
                         ],
                       ),
                     ),
@@ -206,37 +237,88 @@ class _DetailTugasState extends State<DetailTugasHelper> {
                   ],
                 ),
                 SizedBox(height: 16),
-                Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.black),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  padding: EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(height: 1),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.location_on_outlined,
-                            color: Colors.black,
-                            size: 18,
-                          ),
-                          SizedBox(width: 6),
-                          Expanded(
-                            child: Text(
-                              lokasi,
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ],
+                Row(
+                  children: [
+                    Icon(
+                      Icons.location_on,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        lokasi,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                    if (lokasi.isNotEmpty) ...[
+                      IconButton(
+                        icon: const Icon(
+                          Icons.copy,
+                          color: Colors.grey,
+                          size: 20,
+                        ),
+                        tooltip: "Salin Lokasi",
+                        onPressed: () {
+                          final String copyText = (lat != null && lng != null)
+                              ? "$lat, $lng"
+                              : lokasi;
+                          _salinLokasi(copyText);
+                        },
                       ),
                     ],
-                  ),
+                  ],
+                ),
+                Builder(
+                  builder: (context) {
+                    if (lat != null && lng != null) {
+                      return Container(
+                        height: 180, // Tinggi peta
+                        width: double.infinity,
+                        margin: const EdgeInsets.only(top: 15),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.grey.shade400),
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: FlutterMap(
+                          options: MapOptions(
+                            initialCenter: LatLng(lat, lng),
+                            initialZoom: 16.0,
+                            interactionOptions: const InteractionOptions(
+                              // Matikan gestur biar peta nggak kegeser gak sengaja pas scroll halaman
+                              flags: InteractiveFlag.none,
+                            ),
+                          ),
+                          children: [
+                            TileLayer(
+                              urlTemplate:
+                                  'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                              userAgentPackageName: 'com.bantu.in',
+                            ),
+                            MarkerLayer(
+                              markers: [
+                                Marker(
+                                  point: LatLng(lat, lng),
+                                  width: 40,
+                                  height: 40,
+                                  child: const Icon(
+                                    Icons.location_pin,
+                                    color: Color(0xFFCD2528),
+                                    size: 40,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    } else {
+                      return const SizedBox.shrink();
+                    }
+                  },
                 ),
                 SizedBox(height: 24),
                 Text(
@@ -282,12 +364,13 @@ class _DetailTugasState extends State<DetailTugasHelper> {
                         ),
                       ),
 
-                      Icon(Icons.verified, color: Colors.green,)
+                      Icon(Icons.verified, color: Colors.green),
                     ],
                   ),
                 ),
                 SizedBox(height: 10),
               ],
+            ),
             ),
           ),
           Padding(

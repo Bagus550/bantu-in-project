@@ -62,11 +62,34 @@ class _ProfileTabState extends State<ProfileTab> {
                     ),
                     child: Row(
                       children: [
-                        CircleAvatar(
-                          radius: 30,
-                          backgroundColor: Colors.white,
-                          backgroundImage: _fotoProfilUrl != null ? NetworkImage(_fotoProfilUrl!) : null,
-                          child: _fotoProfilUrl == null ? const Icon(Icons.person, size: 40, color: Colors.grey) : null,
+                        Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Container(
+                            width: 60,
+                            height: 60,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              image: (_fotoProfilUrl != null &&
+                                      _fotoProfilUrl!.isNotEmpty &&
+                                      _fotoProfilUrl!.startsWith('http'))
+                                  ? DecorationImage(
+                                      image: NetworkImage(_fotoProfilUrl!),
+                                      fit: BoxFit.cover,
+                                    )
+                                  : null,
+                            ),
+                            child: (_fotoProfilUrl == null ||
+                                    _fotoProfilUrl!.isEmpty ||
+                                    !_fotoProfilUrl!.startsWith('http'))
+                                ? const Icon(Icons.person, size: 40, color: Colors.grey)
+                                : null,
+                          ),
                         ),
                         const SizedBox(width: 15),
                         Column(

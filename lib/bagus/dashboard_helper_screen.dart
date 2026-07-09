@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:bantuin/config/app_config.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:geolocator/geolocator.dart';
 
 class DashboardHelperScreen extends StatefulWidget {
   final Map<String, dynamic>? userData;
@@ -36,6 +37,8 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
 
   Map<String, dynamic> _tugasAktifSaya = {};
   String? _fotoProfilUrl;
+  Position? _posisiHelper;
+  bool _gagalDapatLokasi = false;
   final _secureStorage = const FlutterSecureStorage();
 
   Future<void> _fetchProfile() async {
@@ -94,8 +97,90 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
   void initState() {
     super.initState();
     _fetchProfile();
+    _fetchLokasiHelper();
     _futureTasks = fetchTasksForHelper();
   }
+
+  Future<void> _fetchLokasiHelper() async {
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        if (mounted) setState(() => _gagalDapatLokasi = true);
+        return;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+      
+      if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
+        if (mounted) setState(() => _gagalDapatLokasi = true);
+        return;
+      }
+
+      if (permission == LocationPermission.whileInUse ||
+          permission == LocationPermission.always) {
+            
+        // Pakai lokasi terakhir agar tampil lebih cepat
+        Position? lastPosition = await Geolocator.getLastKnownPosition();
+        if (lastPosition != null && mounted) {
+          setState(() {
+            _posisiHelper = lastPosition;
+          });
+        }
+
+        // Ambil lokasi terbaru
+        Position position = await Geolocator.getCurrentPosition(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.medium,
+          ),
+        ).timeout(const Duration(seconds: 10));
+        
+        if (mounted) {
+          setState(() {
+            _posisiHelper = position;
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint("Gagal mendapat lokasi: $e");
+      if (mounted) setState(() => _gagalDapatLokasi = true);
+    }
+  }
+
+  String _hitungJarak(Map<String, dynamic> tugas) {
+    if (_gagalDapatLokasi) return tugas['lokasi_tugas']?.toString() ?? "Lokasi tidak diketahui";
+    if (_posisiHelper == null) return "Menghitung jarak...";
+
+    final latRaw = tugas['latitude_tugas'] ?? tugas['latitude'];
+    final lngRaw = tugas['longitude_tugas'] ?? tugas['longitude'];
+
+    if (latRaw == null || lngRaw == null) {
+      return tugas['lokasi_tugas']?.toString() ?? "Lokasi tidak diketahui";
+    }
+
+    final latTugas = double.tryParse(latRaw.toString());
+    final lngTugas = double.tryParse(lngRaw.toString());
+
+    if (latTugas == null || lngTugas == null) {
+      return tugas['lokasi_tugas']?.toString() ?? "Lokasi tidak diketahui";
+    }
+
+    final jarakMeter = Geolocator.distanceBetween(
+      _posisiHelper!.latitude,
+      _posisiHelper!.longitude,
+      latTugas,
+      lngTugas,
+    );
+
+    if (jarakMeter < 1000) {
+      return "${jarakMeter.toStringAsFixed(0)} m dari lokasi Anda";
+    } else {
+      return "${(jarakMeter / 1000).toStringAsFixed(1)} km dari lokasi Anda";
+    }
+  }
+
 
   Future<List<dynamic>> fetchTasksForHelper() async {
     final String idHelperLogin = widget.userData?['id']?.toString() ?? '2';
@@ -143,9 +228,7 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
           detailTugas: _tugasAktifSaya.isEmpty ? {} : _tugasAktifSaya,
         );
       case 2:
-        return _tugasAktifSaya.isEmpty
-            ? const Center(child: Text("Belum ada tugas aktif untuk dipetakan"))
-            : PetaRuteHelper(tugasAktif: _tugasAktifSaya);
+        return PetaRuteHelper(tugasAktif: _tugasAktifSaya.isEmpty ? null : _tugasAktifSaya);
       case 3:
         return MessageList();
       case 4:
@@ -198,19 +281,35 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                     color: Theme.of(context).colorScheme.secondary,
                     borderRadius: BorderRadius.circular(50),
                   ),
-                  child: IconButton(
-                    onPressed: () {
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(50),
+                    onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => Profile()),
                       ).then((_) => _fetchProfile());
                     },
-                    icon: _fotoProfilUrl == null
-                        ? Icon(Icons.person, color: Colors.white)
-                        : CircleAvatar(
-                            backgroundColor: Colors.transparent,
-                            backgroundImage: NetworkImage(_fotoProfilUrl!),
-                          ),
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.secondary,
+                        shape: BoxShape.circle,
+                        image: (_fotoProfilUrl != null &&
+                                _fotoProfilUrl!.isNotEmpty &&
+                                _fotoProfilUrl!.startsWith('http'))
+                            ? DecorationImage(
+                                image: NetworkImage(_fotoProfilUrl!),
+                                fit: BoxFit.cover,
+                              )
+                            : null,
+                      ),
+                      child: (_fotoProfilUrl == null ||
+                              _fotoProfilUrl!.isEmpty ||
+                              !_fotoProfilUrl!.startsWith('http'))
+                          ? const Icon(Icons.person, color: Colors.white, size: 24)
+                          : null,
+                    ),
                   ),
                 ),
               ),
@@ -228,15 +327,34 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      CircleAvatar(
-                        radius: 30,
-                        backgroundColor: Colors.white,
-                        backgroundImage: _fotoProfilUrl != null
-                            ? NetworkImage(_fotoProfilUrl!)
-                            : null,
-                        child: _fotoProfilUrl == null
-                            ? Icon(Icons.person, size: 35, color: Colors.grey)
-                            : null,
+                      Container(
+                        width: 60,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            image: (_fotoProfilUrl != null &&
+                                    _fotoProfilUrl!.isNotEmpty &&
+                                    _fotoProfilUrl!.startsWith('http'))
+                                ? DecorationImage(
+                                    image: NetworkImage(_fotoProfilUrl!),
+                                    fit: BoxFit.cover,
+                                  )
+                                : null,
+                          ),
+                          child: (_fotoProfilUrl == null ||
+                                  _fotoProfilUrl!.isEmpty ||
+                                  !_fotoProfilUrl!.startsWith('http'))
+                              ? const Icon(Icons.person, size: 35, color: Colors.grey)
+                              : null,
+                        ),
                       ),
                       SizedBox(height: 10),
                       Text(
@@ -572,9 +690,13 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                                           CrossAxisAlignment.center,
                                       children: [
                                         Icon(Icons.location_on, size: 12),
-                                        Text(
-                                          tugas['lokasi_tugas'],
-                                          style: TextStyle(fontSize: 12),
+                                        SizedBox(width: 4),
+                                        Expanded(
+                                          child: Text(
+                                            _hitungJarak(tugas),
+                                            style: TextStyle(fontSize: 12),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
                                         ),
                                       ],
                                     ),
