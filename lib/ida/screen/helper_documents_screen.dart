@@ -5,7 +5,8 @@ import 'waiting_approval_screen.dart';
 
 class HelperDocumentsScreen extends StatefulWidget {
   final Map<String, dynamic> userData;
-  const HelperDocumentsScreen({super.key, required this.userData});
+  final VoidCallback? onNext;
+  const HelperDocumentsScreen({super.key, required this.userData, this.onNext});
 
   @override
   State<HelperDocumentsScreen> createState() => _HelperDocumentsScreenState();
@@ -133,13 +134,17 @@ class _HelperDocumentsScreenState extends State<HelperDocumentsScreen> {
 
     if (mounted) {
       Navigator.pop(context); // Tutup loading dialog
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const WaitingApprovalScreen(),
-        ),
-        (route) => false,
-      );
+      if (widget.onNext != null) {
+        widget.onNext!();
+      } else {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const WaitingApprovalScreen(),
+          ),
+          (route) => false,
+        );
+      }
     }
   }
 
@@ -149,23 +154,9 @@ class _HelperDocumentsScreenState extends State<HelperDocumentsScreen> {
     final primaryColor = theme.colorScheme.primary;
     final secondaryColor = theme.colorScheme.secondary;
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        title: Text(
-          "Dokumen Pendaftaran",
-          style: GoogleFonts.openSans(
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          ),
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
-        elevation: 1,
-        scrolledUnderElevation: 1,
-      ),
-      body: SafeArea(
+    return Container(
+      color: const Color(0xFFF8FAFC),
+      child: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
           child: Form(

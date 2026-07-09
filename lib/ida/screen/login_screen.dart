@@ -5,6 +5,8 @@ import 'package:bantuin/ida/screen/role_selection_screen.dart';
 import 'package:flutter/material.dart';
 import 'helper_documents_screen.dart';
 import 'waiting_approval_screen.dart';
+import 'package:bantuin/ida/screen/register.dart';
+import 'package:bantuin/ida/screen/faq_screen.dart';
 import 'package:bantuin/bagus/dashboard_helper_screen.dart';
 import 'package:bantuin/bagus/dashboard_user_screen.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -122,7 +124,11 @@ class _LoginScreenState extends State<LoginScreen> {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (context) => HelperDocumentsScreen(userData: userData),
+                builder: (context) => Register(
+                  selectedRole: 'helper',
+                  initialPage: 1,
+                  userData: userData,
+                ),
               ),
             );
           }
@@ -131,7 +137,11 @@ class _LoginScreenState extends State<LoginScreen> {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (context) => const WaitingApprovalScreen(),
+                builder: (context) => Register(
+                  selectedRole: 'helper',
+                  initialPage: 2,
+                  userData: userData,
+                ),
               ),
             );
           }
@@ -173,6 +183,22 @@ class _LoginScreenState extends State<LoginScreen> {
     final theme = Theme.of(context).colorScheme;
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const FaqScreen()),
+              );
+            },
+            icon: const Icon(Icons.help_outline, color: Colors.black87),
+            tooltip: 'Pusat Bantuan',
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
