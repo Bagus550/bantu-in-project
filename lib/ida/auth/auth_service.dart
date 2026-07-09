@@ -84,6 +84,7 @@ class AuthService {
     String password,
     String noHp,
     String jenisKelamin,
+    String role,
   ) async {
     try {
       final response = await http.post(
@@ -96,21 +97,30 @@ class AuthService {
           'password': password,
           'no_hp': noHp,
           'jenis_kelamin': jenisKelamin,
-          'role': 'requester',
+          'role': role,
         }),
       );
 
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        // response body tidak dipakai di production
-      }
+      final Map<String, dynamic> data = jsonDecode(response.body);
 
       if (response.statusCode == 201 || response.statusCode == 200) {
         return {'success': true};
       } else {
-        return {'success': false};
+        // Gabungkan pesan error jika berupa Map/Array
+        String errorMsg = 'Registrasi gagal';
+        if (data['messages'] != null) {
+          if (data['messages'] is Map) {
+            errorMsg = (data['messages'] as Map).values.join(', ');
+          } else {
+            errorMsg = data['messages'].toString();
+          }
+        } else if (data['message'] != null) {
+          errorMsg = data['message'].toString();
+        }
+        return {'success': false, 'message': errorMsg};
       }
     } catch (e) {
-      return {'success': false};
+      return {'success': false, 'message': 'Terjadi kesalahan: $e'};
     }
   }
 
@@ -143,5 +153,71 @@ class AuthService {
     await _storage.delete(key: 'email_user');
     await _storage.delete(key: 'role');
     await _storage.delete(key: 'no_hp');
+  }
+
+  Future<Map<String, dynamic>> updateProfilHelper(String id, String namaBank, String nomorRekening) async {
+    String? token = await _storage.read(key: 'jwt_token');
+    
+    try {
+      final response = await http.put(
+        Uri.parse('$baseUrl/helpers/$id/profil'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'nama_bank': namaBank,
+          'nomor_rekening': nomorRekening,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        return {'success': true, 'message': 'Profil berhasil diperbarui'};
+      }
+      return {'success': false, 'message': 'Gagal memperbarui profil'};
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> uploadDokumenHelper(String id, String jenis, String filePath) async {
+    String? token = await _storage.read(key: 'jwt_token');
+    
+    try {
+      var request = http.MultipartRequest('POST', Uri.parse('$baseUrl/helpers/$id/dokumen'));
+      request.headers['Authorization'] = 'Bearer $token';
+      request.fields['jenis'] = jenis;
+      request.files.add(await http.MultipartFile.fromPath('dokumen', filePath));
+
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200) {
+        return {'success': true, 'message': 'Dokumen $jenis berhasil diunggah'};
+      }
+      return {'success': false, 'message': 'Gagal mengunggah dokumen $jenis'};
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> uploadFotoProfilHelper(String id, String filePath) async {
+    String? token = await _storage.read(key: 'jwt_token');
+    
+    try {
+      var request = http.MultipartRequest('POST', Uri.parse('$baseUrl/helpers/$id/foto-profil'));
+      request.headers['Authorization'] = 'Bearer $token';
+      request.files.add(await http.MultipartFile.fromPath('foto_profil', filePath));
+
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200) {
+        return {'success': true, 'message': 'Foto profil berhasil diunggah'};
+      }
+      return {'success': false, 'message': 'Gagal mengunggah foto profil'};
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
   }
 }

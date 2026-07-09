@@ -500,17 +500,18 @@ class _MyAdminState extends State<MyAdmin> {
         },
         backgroundColor: Colors.white,
         indicatorColor: Colors.deepPurpleAccent,
-        destinations: const [
-          NavigationDestination(
+        destinations: [
+          const NavigationDestination(
             icon: Icon(Icons.people_outline, color: Colors.black),
             selectedIcon: Icon(Icons.people, color: Colors.black),
             label: "Helpers",
           ),
-          NavigationDestination(
-            icon: Icon(Icons.how_to_reg, color: Colors.black),
-            label: "Registration",
+          const NavigationDestination(
+            icon: Icon(Icons.verified_user_outlined, color: Colors.black),
+            selectedIcon: Icon(Icons.verified_user, color: Colors.black),
+            label: "Validation",
           ),
-          NavigationDestination(
+          const NavigationDestination(
             icon: Icon(Icons.payment_outlined, color: Colors.black),
             label: "Payments",
           ),

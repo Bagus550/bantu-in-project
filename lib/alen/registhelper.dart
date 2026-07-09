@@ -5,6 +5,10 @@ import 'package:bantuin/ida/auth/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'admin.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:bantuin/config/app_config.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class RegistPage extends StatefulWidget {
   const RegistPage({super.key});
@@ -441,11 +445,12 @@ class _RegistPageState extends State<RegistPage> {
           if (index == 0) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => MyAdmin()),
+              MaterialPageRoute(builder: (context) => const MyAdmin()),
             );
           } else if (index == 1) {
             Navigator.pushReplacement(
               context,
+              MaterialPageRoute(builder: (context) => const RegistPage()),
               MaterialPageRoute(builder: (context) => const RegistPage()),
             );
           } else if (index == 2) {
@@ -457,6 +462,7 @@ class _RegistPageState extends State<RegistPage> {
         },
         backgroundColor: Colors.white,
         indicatorColor: Colors.deepPurpleAccent,
+        destinations: const [
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.people_outline, color: Colors.black),

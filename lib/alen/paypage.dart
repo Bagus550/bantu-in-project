@@ -346,8 +346,9 @@ class _PayPageState extends State<PayPage> {
             label: "Helpers",
           ),
           NavigationDestination(
-            icon: Icon(Icons.how_to_reg, color: Colors.black),
-            label: "Registration",
+            icon: Icon(Icons.verified_user_outlined, color: Colors.black),
+            selectedIcon: Icon(Icons.verified_user, color: Colors.black),
+            label: "Validation",
           ),
           NavigationDestination(
             icon: Icon(Icons.payment_outlined, color: Colors.black),

@@ -3,6 +3,8 @@ import 'package:bantuin/alen/admin.dart';
 import 'package:bantuin/bagus/dashboard_helper_screen.dart';
 import 'package:bantuin/bagus/dashboard_user_screen.dart';
 import 'package:flutter/material.dart';
+import 'helper_documents_screen.dart';
+import 'waiting_approval_screen.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class IdaSplashScreen extends StatefulWidget {
@@ -19,13 +21,17 @@ class _IdaSplashScreenState extends State<IdaSplashScreen> {
     final token =
         await _secureStorage.read(key: 'auth_token') ??
         await _secureStorage.read(key: 'jwt_token');
-    final role =
-        await _secureStorage.read(key: 'role') ??
-        await _secureStorage.read(key: 'user_role');
     final userId = await _secureStorage.read(key: 'id_users') ?? await _secureStorage.read(key: 'user_id');
     final namaUser = await _secureStorage.read(key: 'nama_user') ?? '';
     final emailUser = await _secureStorage.read(key: 'email_user') ?? '';
     final noHp = await _secureStorage.read(key: 'no_hp') ?? '';
+
+    // Cek jika ada role override lokal untuk akun ini
+    String? role = await _secureStorage.read(key: 'role') ?? await _secureStorage.read(key: 'user_role');
+    final localRole = await _secureStorage.read(key: 'role_override_$emailUser');
+    if (localRole != null) {
+      role = localRole;
+    }
 
     if (!mounted) return;
 
@@ -39,15 +45,36 @@ class _IdaSplashScreenState extends State<IdaSplashScreen> {
 
       switch (role?.toLowerCase()) {
         case 'helper':
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => DashboardHelperScreen(
-                userData: userData,
-                token: token,
+          final docsSubmitted = await _secureStorage.read(key: 'helper_docs_submitted_$emailUser') ?? 'false';
+          final adminValidated = await _secureStorage.read(key: 'helper_admin_validated_$emailUser') ?? 'false';
+
+          if (!mounted) return;
+
+          if (docsSubmitted != 'true') {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => HelperDocumentsScreen(userData: userData),
               ),
-            ),
-          );
+            );
+          } else if (adminValidated != 'true') {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const WaitingApprovalScreen(),
+              ),
+            );
+          } else {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => DashboardHelperScreen(
+                  userData: userData,
+                  token: token,
+                ),
+              ),
+            );
+          }
           break;
         case 'requester':
           Navigator.pushReplacement(

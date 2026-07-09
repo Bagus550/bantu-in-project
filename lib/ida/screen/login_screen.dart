@@ -1,8 +1,12 @@
 import 'package:bantuin/alen/admin.dart';
 import 'package:bantuin/ida/auth/auth_service.dart';
 import 'package:bantuin/ida/screen/lupa_katasandi.dart';
-import 'package:bantuin/ida/screen/register.dart';
+import 'package:bantuin/ida/screen/role_selection_screen.dart';
 import 'package:flutter/material.dart';
+import 'helper_documents_screen.dart';
+import 'waiting_approval_screen.dart';
+import 'package:bantuin/ida/screen/register.dart';
+import 'package:bantuin/ida/screen/faq_screen.dart';
 import 'package:bantuin/bagus/dashboard_helper_screen.dart';
 import 'package:bantuin/bagus/dashboard_user_screen.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -50,13 +54,20 @@ class _LoginScreenState extends State<LoginScreen> {
       });
 
       if (result != null && result['success'] == true) {
-        final String? role = result['role'];
         final Map<String, dynamic> userData = result['user'] ?? {};
+        final String? emailUser = userData['email'] ?? '';
+
+        // Cek jika ada role override lokal untuk akun ini
+        String role = result['role']?.toString() ?? 'requester';
+        final localRole = await _secureStorage.read(key: 'role_override_$emailUser');
+        if (localRole != null) {
+          role = localRole;
+        }
+
         final String? token = result['token'] ?? userData['token'];
         final String? userId = userData['id']?.toString();
         final String? namaUser =
             userData['username'] ?? userData['nama'] ?? 'User';
-        final String? emailUser = userData['email'] ?? '';
 
         if (token != null) {
           await _secureStorage.write(key: 'auth_token', value: token);
@@ -72,7 +83,7 @@ class _LoginScreenState extends State<LoginScreen> {
         );
         await _secureStorage.write(
           key: 'role',
-          value: result['role'].toString(),
+          value: role,
         );
 
         if (mounted) {
@@ -99,32 +110,83 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void _navigateBasedOnRole(String? role, Map<String, dynamic> userData) {
+  void _navigateBasedOnRole(String? role, Map<String, dynamic> userData) async {
     final String? token = userData['token'] ?? '';
 
     switch (role) {
       case 'helper':
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) =>
-                DashboardHelperScreen(userData: userData, token: token),
-          ),
-        );
+        final String email = userData['email'] ?? '';
+        
+        // Cek dari backend payload
+        final String? ktp = userData['ktp'];
+        final dynamic statusAktif = userData['status_aktif'];
+
+        // Jika data dari database tidak null, gunakan database. Jika null/baru registrasi pertama kali (auto-login), fallback ke secureStorage.
+        final bool hasKtp = (ktp != null && ktp.isNotEmpty);
+        final bool isActive = (statusAktif == 1 || statusAktif == '1');
+
+        final docsSubmittedLocally = await _secureStorage.read(key: 'helper_docs_submitted_$email') ?? 'false';
+        final adminValidatedLocally = await _secureStorage.read(key: 'helper_admin_validated_$email') ?? 'false';
+
+        final bool isDocsSubmitted = hasKtp || (docsSubmittedLocally == 'true');
+        final bool isAdminValidated = isActive || (adminValidatedLocally == 'true');
+
+        if (!isDocsSubmitted) {
+          if (mounted) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => Register(
+                  selectedRole: 'helper',
+                  initialPage: 1,
+                  userData: userData,
+                ),
+              ),
+            );
+          }
+        } else if (!isAdminValidated) {
+          if (mounted) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => Register(
+                  selectedRole: 'helper',
+                  initialPage: 2,
+                  userData: userData,
+                ),
+              ),
+            );
+          }
+        } else {
+          if (mounted) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    DashboardHelperScreen(userData: userData, token: token),
+              ),
+            );
+          }
+        }
         break;
       case 'requester':
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => DashboardUserScreen(userData: userData),
-          ),
-        );
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DashboardUserScreen(userData: userData),
+            ),
+          );
+        }
         break;
       case 'admin':
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => MyAdmin()),
-        );
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => MyAdmin()),
+          );
+        }
+        break;
     }
   }
 
@@ -133,6 +195,22 @@ class _LoginScreenState extends State<LoginScreen> {
     final theme = Theme.of(context).colorScheme;
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const FaqScreen()),
+              );
+            },
+            icon: const Icon(Icons.help_outline, color: Colors.black87),
+            tooltip: 'Pusat Bantuan',
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -286,7 +364,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => Register(),
+                                  builder: (context) => const RoleSelectionScreen(),
                                 ),
                               );
                             },
