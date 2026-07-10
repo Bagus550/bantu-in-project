@@ -799,7 +799,14 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text("Kategori", style: TextStyle(fontWeight: FontWeight.bold)),
-              TextButton(onPressed: () {}, child: Text("View All")),
+              TextButton(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Menampilkan semua kategori... (Sedang dikembangkan)")),
+                  );
+                },
+                child: const Text("View All"),
+              ),
             ],
           ),
           SizedBox(

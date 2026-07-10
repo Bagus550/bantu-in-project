@@ -141,7 +141,25 @@ class _UploadBuktiTabState extends State<UploadBuktiTab> {
         ),
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text("Petunjuk Upload"),
+                    content: const Text(
+                      "Silakan unggah foto struk bukti pembayaran/transfer (QRIS atau Bank) yang memuat nomor referensi dengan jelas.\n\nPastikan foto tidak buram agar mempercepat proses verifikasi oleh Admin.",
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text("Mengerti"),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
             icon: const Icon(Icons.help_outline, size: 30),
           ),
         ],

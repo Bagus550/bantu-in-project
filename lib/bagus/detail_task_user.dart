@@ -534,7 +534,68 @@ class _DetailTugasState extends State<DetailTugas> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton.icon(
-                  onPressed: () {},
+                  onPressed: () {
+                    showModalBottomSheet(
+                      context: context,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                      ),
+                      builder: (context) {
+                        return Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 40,
+                                height: 5,
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade300,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              const Text(
+                                "Hubungi Bantuan",
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              const Text(
+                                "Silakan hubungi admin kami melalui WhatsApp untuk bantuan lebih lanjut mengenai tugas ini.",
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 20),
+                              SizedBox(
+                                width: double.infinity,
+                                height: 50,
+                                child: ElevatedButton.icon(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text("Fitur dial/buka WhatsApp akan diproses... (URL Launcher belum tersedia)")),
+                                    );
+                                  },
+                                  icon: const Icon(Icons.chat),
+                                  label: const Text("Chat Admin di WhatsApp"),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.green,
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  },
                   icon: Icon(Icons.contact_support),
                   label: Text("Hubungi Bantuan"),
                   style: ElevatedButton.styleFrom(

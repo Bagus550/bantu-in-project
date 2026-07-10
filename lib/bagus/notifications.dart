@@ -46,7 +46,11 @@ class _NotificationsHelperState extends State<NotificationsHelper> {
                 style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
               ),
               GestureDetector(
-                onTap: () {},
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Semua notifikasi telah ditandai dibaca.")),
+                  );
+                },
                 child: Text(
                   "Tandai semua dibaca",
                   style: TextStyle(
@@ -127,7 +131,11 @@ class _NotificationsHelperState extends State<NotificationsHelper> {
                                 SizedBox(height: 8),
                                 Text(notif['deskripsi']),
                                 GestureDetector(
-                                  onTap: () {},
+                                  onTap: () {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text("Notifikasi ini ditandai sudah dibaca.")),
+                                    );
+                                  },
                                   child: Text(
                                     "Tandai sudah dibaca",
                                     style: TextStyle(
