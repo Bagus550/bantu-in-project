@@ -20,6 +20,9 @@ class AppConfig {
   static const String uploadBukti = "$baseUrl/api/payment";
   static const String ambilTugas = "$baseUrl/api/tasks/take";
 
+  static const String getPendingHelpers = "$baseUrl/api/admin/get-pending-helpers";
+  static const String verifikasiHelper  = "$baseUrl/api/admin/verifikasi-helper";
+
   static const String chat = "$baseUrl/api/chat";
 
   static const String notif = "$baseUrl/api/notifikasi";

@@ -241,8 +241,8 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
   @override
   Widget build(BuildContext context) {
     final String namaHelper =
-        widget.userData?['username'] ??
         widget.userData?['nama'] ??
+        widget.userData?['username'] ??
         'Mitra Helper';
     final String emailHelper = widget.userData?['email'] ?? '';
 
@@ -921,7 +921,14 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text("Kategori", style: TextStyle(fontWeight: FontWeight.bold)),
-              TextButton(onPressed: () {}, child: Text("View All")),
+              TextButton(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Menampilkan semua kategori... (Sedang dikembangkan)")),
+                  );
+                },
+                child: const Text("View All"),
+              ),
             ],
           ),
           SizedBox(

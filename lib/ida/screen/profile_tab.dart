@@ -16,6 +16,7 @@ class _ProfileTabState extends State<ProfileTab> {
   String _email = "Memuat...";
   String _noHp = "Memuat...";
   String? _fotoProfilUrl;
+  String? _role;
 
   @override
   void initState() {
@@ -27,8 +28,8 @@ class _ProfileTabState extends State<ProfileTab> {
     String? savedNama = await _secureStorage.read(key: 'nama_user');
     String? savedEmail = await _secureStorage.read(key: 'email_user');
     String? savedNoHp = await _secureStorage.read(key: 'no_hp');
-
     String? savedFoto = await _secureStorage.read(key: 'foto_profil_url');
+    String? role = await _secureStorage.read(key: 'role') ?? await _secureStorage.read(key: 'user_role');
 
     if (mounted) {
       setState(() {
@@ -38,6 +39,7 @@ class _ProfileTabState extends State<ProfileTab> {
             ? savedNoHp
             : "Tidak tersedia";
         _fotoProfilUrl = savedFoto;
+        _role = role;
       });
     }
   }
@@ -124,9 +126,9 @@ class _ProfileTabState extends State<ProfileTab> {
                     children: [
                       const Icon(Icons.person_2_outlined, size: 30),
                       const SizedBox(width: 10),
-                      const Text(
-                        "Username: ",
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                      Text(
+                        _role == 'helper' ? "Nama Lengkap: " : "Username: ",
+                        style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       Text(_nama),
                     ],
