@@ -140,12 +140,10 @@ class _RegistPageState extends State<RegistPage> {
                   leading: CircleAvatar(
                     radius: 25,
                     backgroundColor: Colors.deepPurple[100],
-                    backgroundImage: helper['foto_profil'] != null
-                        ? NetworkImage(
-                            "${AppConfig.baseUrl}/uploads/profiles/${helper['foto_profil']}",
-                          )
+                    backgroundImage: AppConfig.getProfileUrl(helper['foto_profil']) != null
+                        ? NetworkImage(AppConfig.getProfileUrl(helper['foto_profil'])!)
                         : null,
-                    child: helper['foto_profil'] == null
+                    child: AppConfig.getProfileUrl(helper['foto_profil']) == null
                         ? const Icon(Icons.person)
                         : null,
                   ),
@@ -408,12 +406,10 @@ class _RegistPageState extends State<RegistPage> {
                       contentPadding: const EdgeInsets.all(12),
                       leading: CircleAvatar(
                         backgroundColor: Colors.grey[200],
-                        backgroundImage: helper['foto_profil'] != null
-                            ? NetworkImage(
-                                "${AppConfig.baseUrl}/uploads/profil/${helper['foto_profil']}",
-                              )
+                        backgroundImage: AppConfig.getProfileUrl(helper['foto_profil']) != null
+                            ? NetworkImage(AppConfig.getProfileUrl(helper['foto_profil'])!)
                             : null,
-                        child: helper['foto_profil'] == null
+                        child: AppConfig.getProfileUrl(helper['foto_profil']) == null
                             ? const Icon(Icons.person)
                             : null,
                       ),

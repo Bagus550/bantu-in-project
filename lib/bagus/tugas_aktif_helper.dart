@@ -266,6 +266,7 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
 
     final String namaRequester =
         widget.detailTugas['nama_requester'] ?? 'Tanpa Nama';
+    final String fotoRequester = widget.detailTugas['foto_requester'] ?? '';
     final String harga = widget.detailTugas['nominal_pembayaran'] ?? 0;
     final String judulTugas =
         widget.detailTugas['judul_tugas'] ?? 'Detail Tugas';
@@ -499,9 +500,15 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
                       const SizedBox(height: 10),
                       Row(
                         children: [
-                          const CircleAvatar(
+                          CircleAvatar(
                             radius: 25,
-                            child: Icon(Icons.person, size: 30),
+                            backgroundColor: Colors.grey[200],
+                            backgroundImage: AppConfig.getProfileUrl(fotoRequester) != null
+                                ? NetworkImage(AppConfig.getProfileUrl(fotoRequester)!)
+                                : null,
+                            child: AppConfig.getProfileUrl(fotoRequester) == null
+                                ? const Icon(Icons.person, size: 30, color: Colors.grey)
+                                : null,
                           ),
                           const SizedBox(width: 15),
                           Text(

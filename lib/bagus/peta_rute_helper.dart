@@ -189,9 +189,11 @@ class _PetaRuteHelperState extends State<PetaRuteHelper>
     _ruteKoordinat = [];
 
     if (widget.tugasAktif != null && widget.tugasAktif!.isNotEmpty) {
-      final lat = widget.tugasAktif!['latitude_tugas'] ??
+      final lat =
+          widget.tugasAktif!['latitude_tugas'] ??
           widget.tugasAktif!['latitude'];
-      final lng = widget.tugasAktif!['longitude_tugas'] ??
+      final lng =
+          widget.tugasAktif!['longitude_tugas'] ??
           widget.tugasAktif!['longitude'];
 
       if (lat != null && lng != null) {
@@ -323,7 +325,10 @@ class _PetaRuteHelperState extends State<PetaRuteHelper>
                           builder: (context, value, child) {
                             if (value.text.isNotEmpty) {
                               return IconButton(
-                                icon: const Icon(Icons.clear, color: Colors.grey),
+                                icon: const Icon(
+                                  Icons.clear,
+                                  color: Colors.grey,
+                                ),
                                 onPressed: _clearSearch,
                               );
                             }

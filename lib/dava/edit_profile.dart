@@ -28,12 +28,24 @@ class _EditProfileState extends State<EditProfile> {
   File? _imageFile;
   final ImagePicker _picker = ImagePicker();
 
+  String? _fotoProfilUrl;
+
   @override
   void initState() {
     super.initState();
+    _loadProfileData();
     _namaController.addListener(_onFormChanged);
     _usernameController.addListener(_onFormChanged);
     _phoneController.addListener(_onFormChanged);
+  }
+
+  Future<void> _loadProfileData() async {
+    String? savedFoto = await _secureStorage.read(key: 'foto_profil_url');
+    if (mounted) {
+      setState(() {
+        _fotoProfilUrl = savedFoto;
+      });
+    }
   }
 
   void _onFormChanged() {
@@ -301,9 +313,14 @@ class _EditProfileState extends State<EditProfile> {
                                 image: FileImage(_imageFile!),
                                 fit: BoxFit.cover,
                               )
-                            : null,
+                            : (_fotoProfilUrl != null && _fotoProfilUrl!.isNotEmpty && _fotoProfilUrl!.startsWith('http')
+                                ? DecorationImage(
+                                    image: NetworkImage(_fotoProfilUrl!),
+                                    fit: BoxFit.cover,
+                                  )
+                                : null),
                       ),
-                      child: _imageFile == null
+                      child: (_imageFile == null && (_fotoProfilUrl == null || _fotoProfilUrl!.isEmpty || !_fotoProfilUrl!.startsWith('http')))
                           ? const Icon(
                               Icons.person,
                               size: 50,

@@ -51,7 +51,7 @@ class _RoomChatPageState extends State<RoomChatPage> {
       "DEBUG: Status Task saat ini: ${widget.namaData['status_task']}",
     );
 
-    _fotoLawan = widget.namaData['foto_lawan'] ?? "";
+    _fotoLawan = AppConfig.getProfileUrl(widget.namaData['foto_lawan']) ?? "";
 
     _initChatUser();
   }

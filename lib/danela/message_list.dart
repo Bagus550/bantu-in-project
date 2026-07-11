@@ -103,20 +103,7 @@ class _MessageState extends State<MessageList> {
                   fotoLawanBicara = room.fotoRequester ?? '';
                 }
 
-                String avatarUrl = "";
-                if (fotoLawanBicara.isNotEmpty) {
-                  if (fotoLawanBicara.startsWith('http')) {
-                    avatarUrl = fotoLawanBicara;
-                  } else {
-                    if (fotoLawanBicara.startsWith('/')) {
-                      fotoLawanBicara = fotoLawanBicara.substring(1);
-                    }
-                    if (!fotoLawanBicara.contains('uploads/profiles')) {
-                      fotoLawanBicara = 'uploads/profiles/$fotoLawanBicara';
-                    }
-                    avatarUrl = '${AppConfig.baseUrl}/$fotoLawanBicara';
-                  }
-                }
+                String avatarUrl = AppConfig.getProfileUrl(fotoLawanBicara) ?? "";
 
                 return ListTile(
                   leading: CircleAvatar(

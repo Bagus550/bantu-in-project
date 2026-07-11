@@ -26,4 +26,11 @@ class AppConfig {
   static const String chat = "$baseUrl/api/chat";
 
   static const String notif = "$baseUrl/api/notifikasi";
+
+  /// Mengonversi nama file foto profil dari database menjadi URL absolut
+  static String? getProfileUrl(String? fileName) {
+    if (fileName == null || fileName.isEmpty) return null;
+    if (fileName.startsWith('http')) return fileName;
+    return "$baseUrl/uploads/profiles/$fileName";
+  }
 }

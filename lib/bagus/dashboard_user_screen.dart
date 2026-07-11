@@ -67,15 +67,7 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
         }
 
         if (path.isNotEmpty) {
-          if (!path.startsWith('http')) {
-            if (path.startsWith('/')) {
-              path = path.substring(1);
-            }
-            if (!path.contains('uploads/profiles')) {
-              path = 'uploads/profiles/$path';
-            }
-            path = '${AppConfig.baseUrl}/$path';
-          }
+          path = AppConfig.getProfileUrl(path) ?? path;
           await _secureStorage.write(key: 'foto_profil_url', value: path);
           if (mounted) {
             setState(() {
