@@ -5,6 +5,7 @@ import 'package:bantuin/bagus/dashboard_user_screen.dart';
 import 'package:flutter/material.dart';
 import 'helper_documents_screen.dart';
 import 'waiting_approval_screen.dart';
+import 'denied_approval_screen.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class IdaSplashScreen extends StatefulWidget {
@@ -46,18 +47,30 @@ class _IdaSplashScreenState extends State<IdaSplashScreen> {
       switch (role?.toLowerCase()) {
         case 'helper':
           final docsSubmitted = await _secureStorage.read(key: 'helper_docs_submitted_$emailUser') ?? 'false';
-          final adminValidated = await _secureStorage.read(key: 'helper_admin_validated_$emailUser') ?? 'false';
           final statusAktif = await _secureStorage.read(key: 'status_aktif') ?? '0';
+          final statusVerifikasi = await _secureStorage.read(key: 'status_verifikasi') ?? 'pending';
+          final catatanPenolakan = await _secureStorage.read(key: 'catatan_penolakan') ?? 'Ditolak oleh admin tanpa catatan.';
 
           if (!mounted) return;
 
-          if (statusAktif == '1' || statusAktif == '2' || adminValidated == 'true') {
+          if (statusVerifikasi == 'diterima' && (statusAktif == '1' || statusAktif == '2')) {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
                 builder: (context) => DashboardHelperScreen(
                   userData: userData,
                   token: token,
+                ),
+              ),
+            );
+          } else if (statusVerifikasi == 'ditolak') {
+            // Jika status ditolak, arahkan langsung ke DeniedApprovalScreen dengan membawa data
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => DeniedApprovalScreen(
+                  catatanPenolakan: catatanPenolakan,
+                  userData: userData,
                 ),
               ),
             );

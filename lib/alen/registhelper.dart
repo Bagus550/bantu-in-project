@@ -57,7 +57,11 @@ class _RegistPageState extends State<RegistPage> {
     }
   }
 
-  Future<void> _verifyHelperAction(int idHelper, int status) async {
+  Future<void> _verifyHelperAction(
+    int idHelper,
+    int status, {
+    String? catatanPenolakan,
+  }) async {
     if (_currentAdminId == null) {
       _showSnackBar(
         "Sesi admin tidak valid. Silakan login kembali.",
@@ -67,17 +71,24 @@ class _RegistPageState extends State<RegistPage> {
     }
 
     try {
+      final Map<String, String> bodyData = {
+        'id_helper': idHelper.toString(),
+        'id_admin_pendaftar':
+            _currentAdminId!, // Dinamis menggunakan ID admin aktif[cite: 5]
+        'status_aktif': status.toString(),
+      };
+
+      if (catatanPenolakan != null && catatanPenolakan.isNotEmpty) {
+        bodyData['catatan_penolakan'] = catatanPenolakan;
+      }
+
       final response = await http.post(
         Uri.parse(AppConfig.verifikasiHelper),
-        body: {
-          'id_helper': idHelper.toString(),
-          'id_admin_pendaftar':
-              _currentAdminId, // Dinamis menggunakan ID admin aktif[cite: 5]
-          'status_aktif': status.toString(),
-        },
+        body: bodyData,
       );
 
       final resData = json.decode(response.body);
+
       if (response.statusCode == 200) {
         _showSnackBar(
           resData['message'] ?? "Status helper berhasil diperbarui",
@@ -93,6 +104,76 @@ class _RegistPageState extends State<RegistPage> {
     } catch (e) {
       _showSnackBar("Gagal menghubungi server: $e", Colors.red);
     }
+  }
+
+  void _showRejectDialog(int idHelper) {
+    final TextEditingController reasonController = TextEditingController();
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Row(
+            children: [
+              Icon(Icons.report_problem_rounded, color: Colors.red),
+              SizedBox(width: 8),
+              Text(
+                "Alasan Penolakan",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+            ],
+          ),
+          content: Form(
+            key: formKey,
+            child: TextFormField(
+              controller: reasonController,
+              maxLines: 3,
+              decoration: const InputDecoration(
+                hintText:
+                    "Contoh: Foto KTP buram atau berkas SIM kadaluwarsa...",
+                border: OutlineInputBorder(),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.red),
+                ),
+              ),
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return "Alasan penolakan wajib diisi";
+                }
+                return null;
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Batal", style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (formKey.currentState!.validate()) {
+                  Navigator.pop(context); // Tutup dialog
+                  _verifyHelperAction(
+                    idHelper,
+                    0, // 0 bertanda ditolak
+                    catatanPenolakan: reasonController.text.trim(),
+                  );
+                }
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              child: const Text(
+                "Kirim Penolakan",
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _showSnackBar(String message, Color color) {
@@ -224,9 +305,8 @@ class _RegistPageState extends State<RegistPage> {
                       child: OutlinedButton(
                         onPressed: () {
                           Navigator.pop(context);
-                          _verifyHelperAction(
+                          _showRejectDialog(
                             int.parse(helper['id_helper'].toString()),
-                            0,
                           );
                         },
                         style: OutlinedButton.styleFrom(

@@ -4,6 +4,7 @@ import 'package:bantuin/ida/screen/lupa_katasandi.dart';
 import 'package:bantuin/ida/screen/role_selection_screen.dart';
 import 'package:flutter/material.dart';
 import 'waiting_approval_screen.dart';
+import 'denied_approval_screen.dart';
 import 'package:bantuin/ida/screen/register.dart';
 import 'package:bantuin/ida/screen/faq_screen.dart';
 import 'package:bantuin/bagus/dashboard_helper_screen.dart';
@@ -129,6 +130,11 @@ class _LoginScreenState extends State<LoginScreen> {
     switch (role) {
       case 'helper':
         final bool isDocsComplete = userData['is_docs_complete'] ?? false;
+        final String statusVerifikasi =
+            userData['status_verifikasi'] ?? 'pending';
+        final String catatanPenolakan =
+            userData['catatan_penolakan'] ??
+            'Ditolak oleh admin tanpa catatan.';
 
         if (!isDocsComplete) {
           if (mounted) {
@@ -153,13 +159,39 @@ class _LoginScreenState extends State<LoginScreen> {
           }
         } else {
           if (mounted) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) =>
-                    DashboardHelperScreen(userData: userData, token: token),
-              ),
-            );
+            if (statusVerifikasi == 'diterima') {
+              // Jika sukses diterima admin
+              Navigator.pushReplacement(
+                //[cite: 9]
+                context, //[cite: 9]
+                MaterialPageRoute(
+                  //[cite: 9]
+                  builder: (context) => DashboardHelperScreen(
+                    userData: userData,
+                    token: token,
+                  ), //[cite: 9]
+                ),
+              );
+            } else if (statusVerifikasi == 'ditolak') {
+              // Jika berkas lengkap tapi ditolak oleh admin, arahkan ke screen penolakan
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => DeniedApprovalScreen(
+                    catatanPenolakan: catatanPenolakan,
+                    userData: userData,
+                  ),
+                ),
+              );
+            } else {
+              // Jika berkas lengkap tapi masih berstatus pending (belum ditinjau)
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const WaitingApprovalScreen(),
+                ),
+              );
+            }
           }
         }
         break;

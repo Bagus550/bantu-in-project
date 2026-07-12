@@ -9,10 +9,10 @@ class HelperDocumentsScreen extends StatefulWidget {
   final Map<String, dynamic> userData;
   final VoidCallback? onNext;
   final bool showAppBar;
-  
+
   const HelperDocumentsScreen({
-    super.key, 
-    required this.userData, 
+    super.key,
+    required this.userData,
     this.onNext,
     this.showAppBar = true,
   });
@@ -32,6 +32,8 @@ class _HelperDocumentsScreenState extends State<HelperDocumentsScreen> {
   String? _selfieFileName;
 
   final ImagePicker _picker = ImagePicker();
+
+  bool _isPickingImage = false;
 
   // Rekening Bank
   String _selectedBank = 'Pilih Bank';
@@ -75,25 +77,39 @@ class _HelperDocumentsScreenState extends State<HelperDocumentsScreen> {
   }
 
   void _ambilFotoDokumenLewatKamera(String tipeDokumen) async {
-    final XFile? image = await _picker.pickImage(
-      source: ImageSource.camera, // Dipaksa menggunakan kamera asli perangkat
-      imageQuality: 80, // Optimasi kompresi ukuran file gambar berkas
-    );
+    if (_isPickingImage) return;
 
-    if (image != null) {
-      setState(() {
-        if (tipeDokumen == 'KTP') _ktpFileName = image.path;
-        if (tipeDokumen == 'SIM') _simFileName = image.path;
-        if (tipeDokumen == 'SKCK') _skckFileName = image.path;
-      });
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Foto Dokumen $tipeDokumen Berhasil Diambil'),
-            backgroundColor: Colors.green,
-          ),
-        );
+    setState(() {
+      _isPickingImage = true;
+    });
+
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.camera, // Dipaksa menggunakan kamera asli perangkat
+        imageQuality: 80, // Optimasi kompresi ukuran file gambar berkas
+      );
+
+      if (image != null) {
+        setState(() {
+          if (tipeDokumen == 'KTP') _ktpFileName = image.path;
+          if (tipeDokumen == 'SIM') _simFileName = image.path;
+          if (tipeDokumen == 'SKCK') _skckFileName = image.path;
+        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Foto Dokumen $tipeDokumen Berhasil Diambil'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
       }
+    } catch (e) {
+      debugPrint("Error picking document image: $e");
+    } finally {
+      setState(() {
+        _isPickingImage = false;
+      });
     }
   }
 
@@ -107,22 +123,36 @@ class _HelperDocumentsScreenState extends State<HelperDocumentsScreen> {
   }
 
   void _ambilSelfieKameraDepan() async {
-    final XFile? image = await _picker.pickImage(
-      source: ImageSource.camera,
-      preferredCameraDevice: CameraDevice.front,
-    );
-    if (image != null) {
-      setState(() {
-        _selfieFileName = image.path;
-      });
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Foto Selfie Berhasil Diambil'),
-            backgroundColor: Colors.green,
-          ),
-        );
+    if (_isPickingImage) return;
+
+    setState(() {
+      _isPickingImage = true;
+    });
+
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.camera,
+        preferredCameraDevice: CameraDevice.front,
+      );
+      if (image != null) {
+        setState(() {
+          _selfieFileName = image.path;
+        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Foto Selfie Berhasil Diambil'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
       }
+    } catch (e) {
+      debugPrint("Error picking selfie image: $e");
+    } finally {
+      setState(() {
+        _isPickingImage = false;
+      });
     }
   }
 
@@ -193,6 +223,8 @@ class _HelperDocumentsScreenState extends State<HelperDocumentsScreen> {
         await authService.uploadFotoProfilHelper(userId, _selfieFileName!);
       }
 
+      await _secureStorage.write(key: 'status_verifikasi', value: 'pending');
+      await _secureStorage.write(key: 'status_aktif', value: '0');
       await _secureStorage.write(
         key: 'helper_docs_submitted_$email',
         value: 'true',
@@ -302,242 +334,242 @@ class _HelperDocumentsScreenState extends State<HelperDocumentsScreen> {
           : null,
       body: SafeArea(
         child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
-        child: Form(
-          key: _formKey,
-          onChanged: () => setState(() {}),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Info Banner
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: primaryColor.withValues(alpha: 0.05),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: primaryColor.withValues(alpha: 0.15),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.info_outline_rounded,
-                      color: primaryColor,
-                      size: 24,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        "Lengkapi berkas pendaftaran Anda di bawah ini untuk diverifikasi oleh admin Bantu.in.",
-                        style: GoogleFonts.openSans(
-                          fontSize: 13,
-                          color: Colors.black87,
-                          height: 1.4,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-          
-              // Section 1: Dokumen Identitas
-              _buildSectionHeader("Foto Berkas Dokumen"),
-              const SizedBox(height: 4),
-              Text(
-                "Wajib difoto langsung lewat kamera untuk mencegah bentuk manipulasi digital.",
-                style: GoogleFonts.openSans(
-                  fontSize: 12,
-                  color: Colors.orange[800],
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(height: 12),
-          
-              // Upload KTP
-              _buildUploadCard(
-                title: "Kartu Tanda Penduduk (KTP)",
-                description:
-                    "Ambil foto kartu fisik KTP asli dengan posisi tegak lurus.",
-                fileName: _ktpFileName,
-                icon: Icons.camera_alt_rounded,
-                onUpload: () => _ambilFotoDokumenLewatKamera('KTP'),
-                onDelete: () => _hapusDokumen('KTP'),
-                secondaryColor: secondaryColor,
-              ),
-              const SizedBox(height: 16),
-          
-              // Upload SIM
-              _buildUploadCard(
-                title: "Surat Izin Mengemudi (SIM)",
-                description:
-                    "Ambil foto kartu fisik SIM A/C aktif dengan cahaya yang terang.",
-                fileName: _simFileName,
-                icon: Icons.camera_alt_rounded,
-                onUpload: () => _ambilFotoDokumenLewatKamera('SIM'),
-                onDelete: () => _hapusDokumen('SIM'),
-                secondaryColor: secondaryColor,
-              ),
-              const SizedBox(height: 16),
-          
-              // Upload SKCK
-              _buildUploadCard(
-                title: "Surat Keterangan Catatan Kepolisian (SKCK)",
-                description:
-                    "Foto lembar dokumen SKCK resmi terbaru milik Anda.",
-                fileName: _skckFileName,
-                icon: Icons.camera_alt_rounded,
-                onUpload: () => _ambilFotoDokumenLewatKamera('SKCK'),
-                onDelete: () => _hapusDokumen('SKCK'),
-                secondaryColor: secondaryColor,
-              ),
-              const SizedBox(height: 28),
-          
-              // Section 2: Foto Profil (Selfie)
-              _buildSectionHeader("Foto Selfie (Foto Profil)"),
-              const SizedBox(height: 4),
-              Text(
-                "Diharuskan menggunakan Kamera Depan langsung demi memverifikasi wajah asli Anda.",
-                style: GoogleFonts.openSans(
-                  fontSize: 12,
-                  color: Colors.red[700],
-                ),
-              ),
-              const SizedBox(height: 12),
-          
-              // Selfie Camera Card
-              _buildSelfieCard(
-                fileName: _selfieFileName,
-                onTake: _ambilSelfieKameraDepan,
-                onDelete: () => _hapusDokumen('Selfie'),
-                secondaryColor: secondaryColor,
-              ),
-              const SizedBox(height: 28),
-          
-              // Section 3: Informasi Rekening
-              _buildSectionHeader("Detail Rekening Bank"),
-              const SizedBox(height: 12),
-          
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.grey[200]!),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.02),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Dropdown Nama Bank
-                    DropdownButtonFormField<String>(
-                      initialValue: _selectedBank,
-                      decoration: InputDecoration(
-                        labelText: "Nama Bank",
-                        labelStyle: GoogleFonts.openSans(fontSize: 14),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 14,
-                        ),
-                      ),
-                      items: _bankList.map((bank) {
-                        return DropdownMenuItem<String>(
-                          value: bank,
-                          child: Text(
-                            bank,
-                            style: GoogleFonts.openSans(fontSize: 14),
-                          ),
-                        );
-                      }).toList(),
-                      onChanged: (val) {
-                        setState(() {
-                          _selectedBank = val ?? 'Pilih Bank';
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 16),
-          
-                    // Nomor Rekening
-                    TextFormField(
-                      controller: _noRekeningController,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: "Nomor Rekening",
-                        labelStyle: GoogleFonts.openSans(fontSize: 14),
-                        hintText: "Masukkan nomor rekening bank Anda",
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 14,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-          
-                    // Pemilik Rekening
-                    TextFormField(
-                      controller: _pemilikRekeningController,
-                      decoration: InputDecoration(
-                        labelText: "Nama Pemilik Rekening",
-                        labelStyle: GoogleFonts.openSans(fontSize: 14),
-                        hintText:
-                            "Sesuai dengan nama lengkap di buku tabungan",
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 14,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-          
-              const SizedBox(height: 40),
-          
-              // Button Kirim
-              ElevatedButton(
-                onPressed: _areDocumentsComplete() ? _kirimDokumen : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryColor,
-                  foregroundColor: Colors.white,
-                  disabledBackgroundColor: Colors.grey[300],
-                  disabledForegroundColor: Colors.grey[600],
-                  minimumSize: const Size(double.infinity, 54),
-                  shape: RoundedRectangleBorder(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+          child: Form(
+            key: _formKey,
+            onChanged: () => setState(() {}),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Info Banner
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: primaryColor.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: primaryColor.withValues(alpha: 0.15),
+                    ),
                   ),
-                  elevation: _areDocumentsComplete() ? 3 : 0,
-                  shadowColor: primaryColor.withValues(alpha: 0.3),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline_rounded,
+                        color: primaryColor,
+                        size: 24,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          "Lengkapi berkas pendaftaran Anda di bawah ini untuk diverifikasi oleh admin Bantu.in.",
+                          style: GoogleFonts.openSans(
+                            fontSize: 13,
+                            color: Colors.black87,
+                            height: 1.4,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                child: Text(
-                  "Kirim Dokumen",
+                const SizedBox(height: 24),
+
+                // Section 1: Dokumen Identitas
+                _buildSectionHeader("Foto Berkas Dokumen"),
+                const SizedBox(height: 4),
+                Text(
+                  "Wajib difoto langsung lewat kamera untuk mencegah bentuk manipulasi digital.",
                   style: GoogleFonts.openSans(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 0.5,
+                    fontSize: 12,
+                    color: Colors.orange[800],
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
-              ),
-              const SizedBox(height: 20),
-            ],
+                const SizedBox(height: 12),
+
+                // Upload KTP
+                _buildUploadCard(
+                  title: "Kartu Tanda Penduduk (KTP)",
+                  description:
+                      "Ambil foto kartu fisik KTP asli dengan posisi tegak lurus.",
+                  fileName: _ktpFileName,
+                  icon: Icons.camera_alt_rounded,
+                  onUpload: () => _ambilFotoDokumenLewatKamera('KTP'),
+                  onDelete: () => _hapusDokumen('KTP'),
+                  secondaryColor: secondaryColor,
+                ),
+                const SizedBox(height: 16),
+
+                // Upload SIM
+                _buildUploadCard(
+                  title: "Surat Izin Mengemudi (SIM)",
+                  description:
+                      "Ambil foto kartu fisik SIM A/C aktif dengan cahaya yang terang.",
+                  fileName: _simFileName,
+                  icon: Icons.camera_alt_rounded,
+                  onUpload: () => _ambilFotoDokumenLewatKamera('SIM'),
+                  onDelete: () => _hapusDokumen('SIM'),
+                  secondaryColor: secondaryColor,
+                ),
+                const SizedBox(height: 16),
+
+                // Upload SKCK
+                _buildUploadCard(
+                  title: "Surat Keterangan Catatan Kepolisian (SKCK)",
+                  description:
+                      "Foto lembar dokumen SKCK resmi terbaru milik Anda.",
+                  fileName: _skckFileName,
+                  icon: Icons.camera_alt_rounded,
+                  onUpload: () => _ambilFotoDokumenLewatKamera('SKCK'),
+                  onDelete: () => _hapusDokumen('SKCK'),
+                  secondaryColor: secondaryColor,
+                ),
+                const SizedBox(height: 28),
+
+                // Section 2: Foto Profil (Selfie)
+                _buildSectionHeader("Foto Selfie (Foto Profil)"),
+                const SizedBox(height: 4),
+                Text(
+                  "Diharuskan menggunakan Kamera Depan langsung demi memverifikasi wajah asli Anda.",
+                  style: GoogleFonts.openSans(
+                    fontSize: 12,
+                    color: Colors.red[700],
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // Selfie Camera Card
+                _buildSelfieCard(
+                  fileName: _selfieFileName,
+                  onTake: _ambilSelfieKameraDepan,
+                  onDelete: () => _hapusDokumen('Selfie'),
+                  secondaryColor: secondaryColor,
+                ),
+                const SizedBox(height: 28),
+
+                // Section 3: Informasi Rekening
+                _buildSectionHeader("Detail Rekening Bank"),
+                const SizedBox(height: 12),
+
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.grey[200]!),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.02),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Dropdown Nama Bank
+                      DropdownButtonFormField<String>(
+                        initialValue: _selectedBank,
+                        decoration: InputDecoration(
+                          labelText: "Nama Bank",
+                          labelStyle: GoogleFonts.openSans(fontSize: 14),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
+                        ),
+                        items: _bankList.map((bank) {
+                          return DropdownMenuItem<String>(
+                            value: bank,
+                            child: Text(
+                              bank,
+                              style: GoogleFonts.openSans(fontSize: 14),
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (val) {
+                          setState(() {
+                            _selectedBank = val ?? 'Pilih Bank';
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Nomor Rekening
+                      TextFormField(
+                        controller: _noRekeningController,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: "Nomor Rekening",
+                          labelStyle: GoogleFonts.openSans(fontSize: 14),
+                          hintText: "Masukkan nomor rekening bank Anda",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Pemilik Rekening
+                      TextFormField(
+                        controller: _pemilikRekeningController,
+                        decoration: InputDecoration(
+                          labelText: "Nama Pemilik Rekening",
+                          labelStyle: GoogleFonts.openSans(fontSize: 14),
+                          hintText:
+                              "Sesuai dengan nama lengkap di buku tabungan",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 40),
+
+                // Button Kirim
+                ElevatedButton(
+                  onPressed: _areDocumentsComplete() ? _kirimDokumen : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryColor,
+                    foregroundColor: Colors.white,
+                    disabledBackgroundColor: Colors.grey[300],
+                    disabledForegroundColor: Colors.grey[600],
+                    minimumSize: const Size(double.infinity, 54),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    elevation: _areDocumentsComplete() ? 3 : 0,
+                    shadowColor: primaryColor.withValues(alpha: 0.3),
+                  ),
+                  child: Text(
+                    "Kirim Dokumen",
+                    style: GoogleFonts.openSans(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+              ],
+            ),
           ),
         ),
-      ),
       ),
     );
   }

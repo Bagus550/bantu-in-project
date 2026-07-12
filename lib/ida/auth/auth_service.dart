@@ -41,8 +41,14 @@ class AuthService {
         final noHp = (user['no_hp'] ?? user['phone'] ?? data['no_hp'] ?? '')
             .toString();
 
-        final isDocsComplete = (user['is_docs_complete'] == true || user['is_docs_complete'] == 'true');
+        final isDocsComplete =
+            (user['is_docs_complete'] == true ||
+            user['is_docs_complete'] == 'true');
         final statusAktif = user['status_aktif']?.toString() ?? '0';
+
+        final statusVerifikasi = (user['status_verifikasi'] ?? 'pending')
+            .toString();
+        final catatanPenolakan = (user['catatan_penolakan'] ?? '').toString();
 
         if (token != null && token.isNotEmpty) {
           try {
@@ -57,13 +63,33 @@ class AuthService {
             await _storage.write(key: 'email_user', value: email);
             await _storage.write(key: 'no_hp', value: noHp);
             await _storage.write(key: 'status_aktif', value: statusAktif);
-            
+            await _storage.write(
+              key: 'status_verifikasi',
+              value: statusVerifikasi,
+            );
+            await _storage.write(
+              key: 'catatan_penolakan',
+              value: catatanPenolakan,
+            );
+
             if (role == 'helper') {
               if (isDocsComplete || statusAktif == '1' || statusAktif == '2') {
-                await _storage.write(key: 'helper_docs_submitted_$email', value: 'true');
+                await _storage.write(
+                  key: 'helper_docs_submitted_$email',
+                  value: 'true',
+                );
               }
-              if (statusAktif == '1' || statusAktif == '2') {
-                await _storage.write(key: 'helper_admin_validated_$email', value: 'true');
+              if (statusVerifikasi == 'diterima') {
+                await _storage.write(
+                  key: 'helper_admin_validated_$email',
+                  value: 'true',
+                );
+              } else {
+                // Pastikan dihapus / di-set false jika statusnya pending atau ditolak
+                await _storage.write(
+                  key: 'helper_admin_validated_$email',
+                  value: 'false',
+                );
               }
             }
           } catch (_) {}
@@ -176,6 +202,8 @@ class AuthService {
     await _storage.delete(key: 'email_user');
     await _storage.delete(key: 'role');
     await _storage.delete(key: 'no_hp');
+    await _storage.delete(key: 'status_verifikasi');
+    await _storage.delete(key: 'catatan_penolakan');
   }
 
   Future<Map<String, dynamic>> updateProfilHelper(
