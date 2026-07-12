@@ -47,24 +47,11 @@ class _IdaSplashScreenState extends State<IdaSplashScreen> {
         case 'helper':
           final docsSubmitted = await _secureStorage.read(key: 'helper_docs_submitted_$emailUser') ?? 'false';
           final adminValidated = await _secureStorage.read(key: 'helper_admin_validated_$emailUser') ?? 'false';
+          final statusAktif = await _secureStorage.read(key: 'status_aktif') ?? '0';
 
           if (!mounted) return;
 
-          if (docsSubmitted != 'true') {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => HelperDocumentsScreen(userData: userData),
-              ),
-            );
-          } else if (adminValidated != 'true') {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const WaitingApprovalScreen(),
-              ),
-            );
-          } else {
+          if (statusAktif == '1' || statusAktif == '2' || adminValidated == 'true') {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
@@ -72,6 +59,20 @@ class _IdaSplashScreenState extends State<IdaSplashScreen> {
                   userData: userData,
                   token: token,
                 ),
+              ),
+            );
+          } else if (docsSubmitted != 'true') {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => HelperDocumentsScreen(userData: userData),
+              ),
+            );
+          } else {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const WaitingApprovalScreen(),
               ),
             );
           }

@@ -106,7 +106,15 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
         setState(() {
-          listTugasDariApi = responseData['data'];
+          final rawData = responseData['data'] as List<dynamic>;
+          final uniqueTasks = <String, dynamic>{};
+          for (var item in rawData) {
+            final id = item['id_task'].toString();
+            if (!uniqueTasks.containsKey(id)) {
+              uniqueTasks[id] = item;
+            }
+          }
+          listTugasDariApi = uniqueTasks.values.toList();
           isLoading = false;
         });
       } else {
@@ -337,12 +345,12 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                 children: [
                   CircleAvatar(
                     radius: 30,
-                    backgroundColor: Colors.white,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
                     backgroundImage: _fotoProfilUrl != null
                         ? NetworkImage(_fotoProfilUrl!)
                         : null,
                     child: _fotoProfilUrl == null
-                        ? Icon(Icons.person, size: 35, color: Colors.grey)
+                        ? const Icon(Icons.person, size: 35, color: Colors.white)
                         : null,
                   ),
                   SizedBox(height: 10),
@@ -759,12 +767,13 @@ class _DashboardUserScreenState extends State<DashboardUserScreen> {
                                         children: [
                                           CircleAvatar(
                                             radius: 18,
-                                            backgroundColor:
-                                                Colors.grey.shade300,
-                                            child: Icon(
-                                              Icons.person,
-                                              color: Colors.grey,
-                                            ),
+                                            backgroundColor: Theme.of(context).colorScheme.primary,
+                                            backgroundImage: AppConfig.getProfileUrl(bantuan['foto_helper']) != null
+                                                ? NetworkImage(AppConfig.getProfileUrl(bantuan['foto_helper'])!)
+                                                : null,
+                                            child: AppConfig.getProfileUrl(bantuan['foto_helper']) == null
+                                                ? const Icon(Icons.person, color: Colors.white)
+                                                : null,
                                           ),
                                           SizedBox(width: 10),
                                           Text(

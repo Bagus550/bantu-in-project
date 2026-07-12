@@ -41,9 +41,16 @@ class _EditProfileState extends State<EditProfile> {
 
   Future<void> _loadProfileData() async {
     String? savedFoto = await _secureStorage.read(key: 'foto_profil_url');
+    String? savedName = await _secureStorage.read(key: 'user_nama');
+    String? savedUsername = await _secureStorage.read(key: 'username');
+    String? savedPhone = await _secureStorage.read(key: 'no_hp');
+
     if (mounted) {
       setState(() {
         _fotoProfilUrl = savedFoto;
+        _namaController.text = savedName ?? '';
+        _usernameController.text = savedUsername ?? savedName ?? '';
+        _phoneController.text = savedPhone ?? '';
       });
     }
   }

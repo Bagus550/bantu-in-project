@@ -41,6 +41,9 @@ class AuthService {
         final noHp = (user['no_hp'] ?? user['phone'] ?? data['no_hp'] ?? '')
             .toString();
 
+        final isDocsComplete = (user['is_docs_complete'] == true || user['is_docs_complete'] == 'true');
+        final statusAktif = user['status_aktif']?.toString() ?? '0';
+
         if (token != null && token.isNotEmpty) {
           try {
             await _storage.write(key: 'auth_token', value: token);
@@ -53,6 +56,16 @@ class AuthService {
             await _storage.write(key: 'user_nama', value: nama);
             await _storage.write(key: 'email_user', value: email);
             await _storage.write(key: 'no_hp', value: noHp);
+            await _storage.write(key: 'status_aktif', value: statusAktif);
+            
+            if (role == 'helper') {
+              if (isDocsComplete || statusAktif == '1' || statusAktif == '2') {
+                await _storage.write(key: 'helper_docs_submitted_$email', value: 'true');
+              }
+              if (statusAktif == '1' || statusAktif == '2') {
+                await _storage.write(key: 'helper_admin_validated_$email', value: 'true');
+              }
+            }
           } catch (_) {}
         }
 

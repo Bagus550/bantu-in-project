@@ -220,7 +220,12 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
           detailTugas: _tugasAktifSaya.isEmpty ? {} : _tugasAktifSaya,
         );
       case 2:
-        return PetaRuteHelper(tugasAktif: _tugasAktifSaya.isEmpty ? null : _tugasAktifSaya);
+        return PetaRuteHelper(
+          tugasAktif: _tugasAktifSaya.isEmpty ? null : _tugasAktifSaya,
+          semuaTugas: listFeedBeranda,
+          userData: widget.userData,
+          token: widget.token,
+        );
       case 3:
         return MessageList();
       case 4:
@@ -470,7 +475,7 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                 children: [
                   _buildNavItem(
                     index: 0,
-                    icon: Icons.home_filled,
+                    icon: Icons.home_outlined,
                     label: 'Home',
                   ),
                   _buildNavItem(
@@ -723,12 +728,13 @@ class _DashboardHelperScreenState extends State<DashboardHelperScreen> {
                                         children: [
                                           CircleAvatar(
                                             radius: 18,
-                                            backgroundColor:
-                                                Colors.grey.shade300,
-                                            child: Icon(
-                                              Icons.person,
-                                              color: Colors.grey,
-                                            ),
+                                            backgroundColor: Theme.of(context).colorScheme.primary,
+                                            backgroundImage: AppConfig.getProfileUrl(tugas['foto_requester']) != null
+                                                ? NetworkImage(AppConfig.getProfileUrl(tugas['foto_requester'])!)
+                                                : null,
+                                            child: AppConfig.getProfileUrl(tugas['foto_requester']) == null
+                                                ? const Icon(Icons.person, color: Colors.white)
+                                                : null,
                                           ),
                                           SizedBox(width: 8),
                                           Text(

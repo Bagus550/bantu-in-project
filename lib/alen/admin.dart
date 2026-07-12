@@ -95,7 +95,13 @@ class _MyAdminState extends State<MyAdmin> {
     Map<String, String> requestBody = {'id_helper': id.toString()};
 
     if (action != 'delete') {
-      requestBody['status_aktif'] = (action == 'activate') ? '1' : '0';
+      if (action == 'activate') {
+        requestBody['status_aktif'] = '1';
+      } else if (action == 'suspend') {
+        requestBody['status_aktif'] = '2';
+      } else {
+        requestBody['status_aktif'] = '0';
+      }
     }
 
     try {
@@ -564,6 +570,13 @@ class _MyAdminState extends State<MyAdmin> {
 
   Widget _buildHelperItem(Map<String, dynamic> data) {
     int jumlahTugasDiambil = int.tryParse(data['total_tasks'].toString()) ?? 0;
+    var statusAktif = data['status_aktif'];
+    bool isPending = (statusAktif == 0 || statusAktif == '0');
+    
+    String? fotoProfilUrl;
+    if (!isPending && data['foto_profil'] != null && data['foto_profil'].toString().isNotEmpty) {
+      fotoProfilUrl = AppConfig.getProfileUrl(data['foto_profil']);
+    }
 
     return InkWell(
       onTap: () => _showHelperDetail(data),
@@ -577,8 +590,9 @@ class _MyAdminState extends State<MyAdmin> {
               children: [
                 CircleAvatar(
                   radius: 24,
-                  backgroundColor: const Color.fromARGB(255, 205, 205, 205),
-                  child: Icon(Icons.person, size: 30),
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  backgroundImage: fotoProfilUrl != null ? NetworkImage(fotoProfilUrl) : null,
+                  child: fotoProfilUrl == null ? const Icon(Icons.person, size: 30, color: Colors.white) : null,
                 ),
                 SizedBox(width: 12),
                 Expanded(
@@ -639,12 +653,10 @@ class _MyAdminState extends State<MyAdmin> {
         statusAktif == "ACTIVE") {
       bgColor = Colors.green;
       textStatus = "ACTIVE";
-    } else if (statusAktif == 0 && isDocsComplete) {
-      // JIKA STATUS 0 TAPI DOKUMEN LENGKAP = BELUM DI-ACC
+    } else if (statusAktif == 0 || statusAktif == '0') {
       bgColor = Colors.amber.shade800;
       textStatus = "PENDING ACC";
     } else {
-      // JIKA STATUS 0 DAN DOKUMEN BELUM LENGKAP ATAU MEMANG DI-SUSPEND
       bgColor = Colors.red;
       textStatus = "SUSPEND";
     }
@@ -696,31 +708,15 @@ class _MyAdminState extends State<MyAdmin> {
           },
         ),
       ];
-    } else if (statusAktif == 0 && isDocsComplete) {
+    } else if (statusAktif == 0 || statusAktif == '0') {
       return [
         _buildElevatedButton(
-          label: "Setujui & Aktifkan (ACC)",
-          color: Colors.green,
+          label: "Validasi",
+          color: Colors.orange,
           onPressed: () {
-            _showConfirmationDialog(
-              title: "Setujui Pendaftaran?",
-              content: "Verifikasi dokumen berhasil, aktifkan akun helper ini?",
-              confirmColor: Colors.green,
-              onConfirm: () => _updateHelperStatus(safeId, 'activate'),
-            );
-          },
-        ),
-        const SizedBox(width: 8),
-        _buildElevatedButton(
-          label: "Tolak & Hapus",
-          color: Colors.red,
-          onPressed: () {
-            _showConfirmationDialog(
-              title: "Tolak & Hapus Permanen?",
-              content:
-                  "Akun ini akan dihapus permanen karena dokumen tidak valid. Yakin?",
-              confirmColor: Colors.red.shade900,
-              onConfirm: () => _updateHelperStatus(safeId, 'delete'),
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const RegistPage()),
             );
           },
         ),

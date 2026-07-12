@@ -468,12 +468,12 @@ class _DetailTugasState extends State<DetailTugas> {
                           padding: const EdgeInsets.only(top: 20, bottom: 8),
                           child: CircleAvatar(
                             radius: 45,
-                            backgroundColor: Colors.grey[200],
+                            backgroundColor: Theme.of(context).colorScheme.primary,
                             backgroundImage: AppConfig.getProfileUrl(data['foto_helper']) != null
                                 ? NetworkImage(AppConfig.getProfileUrl(data['foto_helper'])!)
                                 : null,
                             child: AppConfig.getProfileUrl(data['foto_helper']) == null
-                                ? Icon(Icons.person, size: 60, color: Colors.grey)
+                                ? const Icon(Icons.person, size: 60, color: Colors.white)
                                 : null,
                           ),
                         ),

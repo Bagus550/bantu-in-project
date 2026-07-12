@@ -502,12 +502,12 @@ class _TugasAktifHelperState extends State<TugasAktifHelper> {
                         children: [
                           CircleAvatar(
                             radius: 25,
-                            backgroundColor: Colors.grey[200],
+                            backgroundColor: Theme.of(context).colorScheme.primary,
                             backgroundImage: AppConfig.getProfileUrl(fotoRequester) != null
                                 ? NetworkImage(AppConfig.getProfileUrl(fotoRequester)!)
                                 : null,
                             child: AppConfig.getProfileUrl(fotoRequester) == null
-                                ? const Icon(Icons.person, size: 30, color: Colors.grey)
+                                ? const Icon(Icons.person, size: 30, color: Colors.white)
                                 : null,
                           ),
                           const SizedBox(width: 15),

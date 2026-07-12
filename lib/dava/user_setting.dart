@@ -97,7 +97,7 @@ class _UserSettingState extends State<UserSetting> {
                     ),
                     child: CircleAvatar(
                       radius: 28,
-                      backgroundColor: Colors.grey,
+                      backgroundColor: Theme.of(context).colorScheme.primary,
                       backgroundImage: _fotoProfilUrl != null ? NetworkImage(_fotoProfilUrl!) : null,
                       child: _fotoProfilUrl == null ? const Icon(Icons.person, size: 36, color: Colors.white) : null,
                     ),

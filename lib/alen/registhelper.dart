@@ -139,13 +139,8 @@ class _RegistPageState extends State<RegistPage> {
                   contentPadding: EdgeInsets.zero,
                   leading: CircleAvatar(
                     radius: 25,
-                    backgroundColor: Colors.deepPurple[100],
-                    backgroundImage: AppConfig.getProfileUrl(helper['foto_profil']) != null
-                        ? NetworkImage(AppConfig.getProfileUrl(helper['foto_profil'])!)
-                        : null,
-                    child: AppConfig.getProfileUrl(helper['foto_profil']) == null
-                        ? const Icon(Icons.person)
-                        : null,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    child: const Icon(Icons.person, color: Colors.white),
                   ),
                   title: Text(
                     helper['nama'] ?? '-',
@@ -201,6 +196,23 @@ class _RegistPageState extends State<RegistPage> {
                   "Surat Keterangan Catatan Kepolisian (SKCK)",
                   helper['skck'],
                   "skck",
+                ),
+
+                const SizedBox(height: 16),
+                const Text(
+                  "Foto Selfie Profil",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey,
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                _buildFileTile(
+                  Icons.camera_alt,
+                  "Foto Profil (Selfie)",
+                  helper['foto_profil'],
+                  "profiles",
                 ),
 
                 const SizedBox(height: 32),
@@ -405,13 +417,9 @@ class _RegistPageState extends State<RegistPage> {
                     child: ListTile(
                       contentPadding: const EdgeInsets.all(12),
                       leading: CircleAvatar(
-                        backgroundColor: Colors.grey[200],
-                        backgroundImage: AppConfig.getProfileUrl(helper['foto_profil']) != null
-                            ? NetworkImage(AppConfig.getProfileUrl(helper['foto_profil'])!)
-                            : null,
-                        child: AppConfig.getProfileUrl(helper['foto_profil']) == null
-                            ? const Icon(Icons.person)
-                            : null,
+                        radius: 24,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        child: const Icon(Icons.person, color: Colors.white),
                       ),
                       title: Text(
                         helper['nama'] ?? '-',

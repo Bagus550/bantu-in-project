@@ -3,7 +3,6 @@ import 'package:bantuin/ida/screen/login_screen.dart';
 import 'package:bantuin/ida/screen/ubah_katasandi.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Mencegah error Clipboard
-import 'package:bantuin/dava/edit_profile.dart';
 import 'package:bantuin/config/app_config.dart';
 import 'package:bantuin/ida/screen/profile.dart';
 import 'package:bantuin/yuliana/about_helper.dart';
@@ -36,7 +35,9 @@ class _HelperSettingState extends State<HelperSetting> {
   }
 
   Future<void> _loadUserData() async {
-    String? idString = await _secureStorage.read(key: 'id_helper') ?? await _secureStorage.read(key: 'id_users');
+    String? idString =
+        await _secureStorage.read(key: 'id_helper') ??
+        await _secureStorage.read(key: 'id_users');
     String? savedNama = await _secureStorage.read(key: 'nama_user');
     String? savedEmail = await _secureStorage.read(key: 'email_user');
     String? savedFoto = await _secureStorage.read(key: 'foto_profil_url');
@@ -99,7 +100,8 @@ class _HelperSettingState extends State<HelperSetting> {
                       decoration: BoxDecoration(
                         color: Colors.grey,
                         shape: BoxShape.circle,
-                        image: (_fotoProfilUrl != null &&
+                        image:
+                            (_fotoProfilUrl != null &&
                                 _fotoProfilUrl!.isNotEmpty &&
                                 _fotoProfilUrl!.startsWith('http'))
                             ? DecorationImage(
@@ -108,10 +110,15 @@ class _HelperSettingState extends State<HelperSetting> {
                               )
                             : null,
                       ),
-                      child: (_fotoProfilUrl == null ||
+                      child:
+                          (_fotoProfilUrl == null ||
                               _fotoProfilUrl!.isEmpty ||
                               !_fotoProfilUrl!.startsWith('http'))
-                          ? const Icon(Icons.person, size: 36, color: Colors.white)
+                          ? const Icon(
+                              Icons.person,
+                              size: 36,
+                              color: Colors.white,
+                            )
                           : null,
                     ),
                   ),
@@ -137,21 +144,20 @@ class _HelperSettingState extends State<HelperSetting> {
                         ),
                         const SizedBox(height: 4),
                         GestureDetector(
-                          onTap: () async {
-                            final isUpdated = await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const EditProfile(),
+                          onTap: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  "Perubahan data helper hanya dapat dilakukan dengan menghubungi CS/Admin.",
+                                ),
+                                backgroundColor: Colors.orange,
                               ),
                             );
-                            if (isUpdated == true) {
-                              _loadUserData();
-                            }
                           },
                           child: const Text(
-                            'Edit Profil',
+                            'Hubungi CS untuk Ubah Profil',
                             style: TextStyle(
-                              color: Colors.blueAccent,
+                              color: Colors.orange,
                               fontWeight: FontWeight.w600,
                               fontSize: 13,
                             ),
@@ -437,7 +443,7 @@ class _HelperSettingState extends State<HelperSetting> {
   Future<void> _hapusAkunBackend() async {
     // 🔥 PERBAIKAN: Hapus Akun Helper pake Endpoint Helper, Jangan User
     final url = Uri.parse(
-      '${AppConfig.baseUrl}/api/helpers/$currentUserId/hapus', 
+      '${AppConfig.baseUrl}/api/helpers/$currentUserId/hapus',
     );
     try {
       final response = await http.delete(url);

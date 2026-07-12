@@ -8,6 +8,7 @@ import '../utils/date_time_utils.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter/services.dart';
+import 'package:bantuin/bagus/peta_rute_helper.dart';
 
 class DetailTugasHelper extends StatefulWidget {
   final Map<String, dynamic> taskData;
@@ -30,21 +31,21 @@ class DetailTugasHelper extends StatefulWidget {
 class _DetailTugasState extends State<DetailTugasHelper> {
   bool _sedangMemproses = false;
 
-  Future<void> _salinLokasi(String lokasi) async {
-    if (lokasi.isEmpty) return;
+  // Future<void> _salinLokasi(String lokasi) async {
+  //   if (lokasi.isEmpty) return;
 
-    await Clipboard.setData(ClipboardData(text: lokasi));
+  //   await Clipboard.setData(ClipboardData(text: lokasi));
 
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Lokasi berhasil disalin!"),
-          backgroundColor: Colors.green,
-          duration: Duration(seconds: 2),
-        ),
-      );
-    }
-  }
+  //   if (mounted) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(
+  //         content: Text("Lokasi berhasil disalin!"),
+  //         backgroundColor: Colors.green,
+  //         duration: Duration(seconds: 2),
+  //       ),
+  //     );
+  //   }
+  // }
 
   String formatJam(String? tanggalRaw) {
     return DateTimeUtils.formatToWIB(tanggalRaw);
@@ -155,19 +156,22 @@ class _DetailTugasState extends State<DetailTugasHelper> {
     final String deskripsi =
         widget.taskData['deskripsi'] ?? 'Tidak ada deskripsi';
     final String namaPelanggan = widget.taskData['nama_requester'] ?? 'Anonim';
+    final String? fotoRequesterRaw = widget.taskData['foto_requester'];
+    final String? fotoProfilUrl = AppConfig.getProfileUrl(fotoRequesterRaw);
     final String waktu = widget.taskData['created_at'] ?? '';
-    
+
     double? lat;
     double? lng;
 
-    final rawLat = widget.taskData['latitude_tugas'] ?? widget.taskData['latitude'];
-    final rawLng = widget.taskData['longitude_tugas'] ?? widget.taskData['longitude'];
+    final rawLat =
+        widget.taskData['latitude_tugas'] ?? widget.taskData['latitude'];
+    final rawLng =
+        widget.taskData['longitude_tugas'] ?? widget.taskData['longitude'];
 
     if (rawLat != null && rawLng != null) {
       lat = double.tryParse(rawLat.toString());
       lng = double.tryParse(rawLng.toString());
     }
-
 
     return Scaffold(
       appBar: AppBar(
@@ -182,195 +186,204 @@ class _DetailTugasState extends State<DetailTugasHelper> {
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
         toolbarHeight: 80,
-        actions: [
-          Padding(
-            padding: EdgeInsets.only(right: 16),
-            child: CircleAvatar(
-              radius: 18,
-              backgroundImage: NetworkImage('https://picsum.photos/199'),
-            ),
-          ),
-        ],
       ),
       body: Column(
         children: [
           Expanded(
             child: SingleChildScrollView(
               padding: EdgeInsets.all(15.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Row(
-                        children: [
-                          Text(
-                            judul,
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(width: 10),
-                    Text(
-                      harga.toString().toRupiah(),
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blueAccent,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 6),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Icon(Icons.timer_sharp, size: 15, color: Colors.grey),
-                    SizedBox(width: 4),
-                    Text(formatJam(waktu), style: TextStyle(fontSize: 13)),
-                  ],
-                ),
-                SizedBox(height: 16),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.location_on,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        lokasi,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                    if (lokasi.isNotEmpty) ...[
-                      IconButton(
-                        icon: const Icon(
-                          Icons.copy,
-                          color: Colors.grey,
-                          size: 20,
-                        ),
-                        tooltip: "Salin Lokasi",
-                        onPressed: () {
-                          final String copyText = (lat != null && lng != null)
-                              ? "$lat, $lng"
-                              : lokasi;
-                          _salinLokasi(copyText);
-                        },
-                      ),
-                    ],
-                  ],
-                ),
-                Builder(
-                  builder: (context) {
-                    if (lat != null && lng != null) {
-                      return Container(
-                        height: 180, // Tinggi peta
-                        width: double.infinity,
-                        margin: const EdgeInsets.only(top: 15),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.grey.shade400),
-                        ),
-                        clipBehavior: Clip.antiAlias,
-                        child: FlutterMap(
-                          options: MapOptions(
-                            initialCenter: LatLng(lat, lng),
-                            initialZoom: 16.0,
-                            interactionOptions: const InteractionOptions(
-                              // Matikan gestur biar peta nggak kegeser gak sengaja pas scroll halaman
-                              flags: InteractiveFlag.none,
-                            ),
-                          ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Row(
                           children: [
-                            TileLayer(
-                              urlTemplate:
-                                  'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                              userAgentPackageName: 'com.bantu.in',
-                            ),
-                            MarkerLayer(
-                              markers: [
-                                Marker(
-                                  point: LatLng(lat, lng),
-                                  width: 40,
-                                  height: 40,
-                                  child: const Icon(
-                                    Icons.location_pin,
-                                    color: Color(0xFFCD2528),
-                                    size: 40,
-                                  ),
-                                ),
-                              ],
+                            Text(
+                              judul,
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ],
                         ),
-                      );
-                    } else {
-                      return const SizedBox.shrink();
-                    }
-                  },
-                ),
-                SizedBox(height: 24),
-                Text(
-                  "Deskripsi",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 8),
-                Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.black),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Text(
-                    deskripsi,
-                    style: TextStyle(fontSize: 14, color: Colors.black),
-                  ),
-                ),
-                SizedBox(height: 24),
-                Text(
-                  "Pelanggan",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 8),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.black),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.account_circle, size: 36, color: Colors.black),
+                      ),
                       SizedBox(width: 10),
+                      Text(
+                        harga.toString().toRupiah(),
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blueAccent,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 6),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Icon(Icons.timer_sharp, size: 15, color: Colors.grey),
+                      SizedBox(width: 4),
+                      Text(formatJam(waktu), style: TextStyle(fontSize: 13)),
+                    ],
+                  ),
+                  SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.location_on,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      const SizedBox(width: 10),
                       Expanded(
                         child: Text(
-                          namaPelanggan,
-                          style: TextStyle(
+                          lokasi,
+                          style: const TextStyle(
                             fontSize: 14,
-                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
                           ),
                         ),
                       ),
-
-                      Icon(Icons.verified, color: Colors.green),
+                      if (lat != null && lng != null) ...[
+                        TextButton.icon(
+                          icon: const Icon(
+                            Icons.map,
+                            color: Colors.blue,
+                            size: 18,
+                          ),
+                          label: const Text(
+                            "Buka Peta Navigasi",
+                            style: TextStyle(color: Colors.blue, fontSize: 13),
+                          ),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    PetaRuteHelper(tugasAktif: widget.taskData),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
                     ],
                   ),
-                ),
-                SizedBox(height: 10),
-              ],
-            ),
+                  Builder(
+                    builder: (context) {
+                      if (lat != null && lng != null) {
+                        return Container(
+                          height: 180, // Tinggi peta
+                          width: double.infinity,
+                          margin: const EdgeInsets.only(top: 15),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.grey.shade400),
+                          ),
+                          clipBehavior: Clip.antiAlias,
+                          child: FlutterMap(
+                            options: MapOptions(
+                              initialCenter: LatLng(lat, lng),
+                              initialZoom: 16.0,
+                              interactionOptions: const InteractionOptions(
+                                // Matikan gestur biar peta nggak kegeser gak sengaja pas scroll halaman
+                                flags: InteractiveFlag.none,
+                              ),
+                            ),
+                            children: [
+                              TileLayer(
+                                urlTemplate:
+                                    'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                                userAgentPackageName: 'com.bantu.in',
+                              ),
+                              MarkerLayer(
+                                markers: [
+                                  Marker(
+                                    point: LatLng(lat, lng),
+                                    width: 40,
+                                    height: 40,
+                                    child: const Icon(
+                                      Icons.location_pin,
+                                      color: Color(0xFFCD2528),
+                                      size: 40,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        );
+                      } else {
+                        return const SizedBox.shrink();
+                      }
+                    },
+                  ),
+                  SizedBox(height: 24),
+                  Text(
+                    "Deskripsi",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 8),
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Text(
+                      deskripsi,
+                      style: TextStyle(fontSize: 14, color: Colors.black),
+                    ),
+                  ),
+                  SizedBox(height: 24),
+                  Text(
+                    "Pelanggan",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 8),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 18,
+                          backgroundColor: Theme.of(context).colorScheme.primary,
+                          backgroundImage: fotoProfilUrl != null
+                              ? NetworkImage(fotoProfilUrl)
+                              : null,
+                          child: fotoProfilUrl == null
+                              ? const Icon(
+                                  Icons.person,
+                                  color: Colors.white,
+                                )
+                              : null,
+                        ),
+                        SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            namaPelanggan,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+
+                        Icon(Icons.verified, color: Colors.green),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                ],
+              ),
             ),
           ),
           Padding(

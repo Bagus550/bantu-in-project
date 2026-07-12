@@ -108,7 +108,7 @@ class _MessageState extends State<MessageList> {
                 return ListTile(
                   leading: CircleAvatar(
                     radius: 25,
-                    backgroundColor: Colors.blue.shade900,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
                     backgroundImage: avatarUrl.isNotEmpty ? NetworkImage(avatarUrl) : null,
                     child: avatarUrl.isEmpty ? const Icon(Icons.person, color: Colors.white) : null,
                   ),
